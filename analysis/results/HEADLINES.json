@@ -1,0 +1,519 @@
+{
+ "metadata": {
+  "experiment": "HEADLINES",
+  "produced_by": "analysis/summary.py",
+  "models": [
+   "opus",
+   "sonnet",
+   "gpt",
+   "glm",
+   "qwen"
+  ],
+  "n_mazes_total": 100,
+  "n_consistent": {
+   "opus": 97,
+   "sonnet": 74,
+   "gpt": 53,
+   "glm": 52,
+   "qwen": 90
+  },
+  "n_intersection": 19,
+  "scoring": {
+   "run_idx": 0,
+   "match": "exact per-step position vs the target's run-0 trajectory",
+   "unparsed": "skipped",
+   "branch": ">=2 unvisited legal moves at the pre-move cell",
+   "default_move": "alphabetically first legal direction (E < N < S < W)"
+  }
+ },
+ "self_vs_best_other": {
+  "opus": {
+   "gap": 2.6,
+   "ci": [
+    0.1,
+    5.2
+   ],
+   "p": 0.0544
+  },
+  "sonnet": {
+   "gap": -6.1,
+   "ci": [
+    -9.8,
+    -2.5
+   ],
+   "p": 0.0016
+  },
+  "gpt": {
+   "gap": -0.7,
+   "ci": [
+    -3.5,
+    2.4
+   ],
+   "p": 0.7552
+  },
+  "glm": {
+   "gap": -1.2,
+   "ci": [
+    -2.4,
+    -0.2
+   ],
+   "p": 0.0625
+  },
+  "qwen": {
+   "gap": -3.5,
+   "ci": [
+    -5.0,
+    -1.9
+   ],
+   "p": 0.0
+  }
+ },
+ "prior_alignment": {
+  "opus": {
+   "idiosyncratic_gap": 9.1,
+   "idiosyncratic_p": 0.0018,
+   "prior_aligned_gap": 1.4
+  },
+  "sonnet": {
+   "idiosyncratic_gap": -18.1,
+   "idiosyncratic_p": 0.0,
+   "prior_aligned_gap": 2.0
+  },
+  "gpt": {
+   "idiosyncratic_gap": -16.4,
+   "idiosyncratic_p": 0.0129,
+   "prior_aligned_gap": 3.7
+  },
+  "glm": {
+   "idiosyncratic_gap": -3.2,
+   "idiosyncratic_p": 0.25,
+   "prior_aligned_gap": -1.3
+  },
+  "qwen": {
+   "idiosyncratic_gap": 0.0,
+   "idiosyncratic_p": 1.0,
+   "prior_aligned_gap": -3.1
+  }
+ },
+ "opus_midhorizon_per_step": {
+  "best_other": "qwen",
+  "by_step": [
+   {
+    "step": 1,
+    "gap": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "sig": false
+   },
+   {
+    "step": 2,
+    "gap": -4.1,
+    "ci": [
+     -8.2,
+     -1.0
+    ],
+    "sig": true
+   },
+   {
+    "step": 3,
+    "gap": 1.0,
+    "ci": [
+     -4.1,
+     6.2
+    ],
+    "sig": false
+   },
+   {
+    "step": 4,
+    "gap": 8.2,
+    "ci": [
+     1.0,
+     15.5
+    ],
+    "sig": true
+   },
+   {
+    "step": 5,
+    "gap": 11.3,
+    "ci": [
+     2.1,
+     20.6
+    ],
+    "sig": true
+   },
+   {
+    "step": 6,
+    "gap": 1.0,
+    "ci": [
+     -7.2,
+     9.3
+    ],
+    "sig": false
+   },
+   {
+    "step": 7,
+    "gap": 4.1,
+    "ci": [
+     -4.1,
+     12.4
+    ],
+    "sig": false
+   },
+   {
+    "step": 8,
+    "gap": -1.0,
+    "ci": [
+     -8.2,
+     6.2
+    ],
+    "sig": false
+   }
+  ]
+ },
+ "only_self_correct_pct": {
+  "opus": 5.5,
+  "sonnet": 0.3,
+  "gpt": 0.2,
+  "glm": 0.0,
+  "qwen": 0.0
+ },
+ "mechanism_first_listed_vs_predictability": {
+  "pearson": 0.961,
+  "perm_p": 0.0454
+ },
+ "maze_branch_steps_vs_predictability_intersection": {
+  "pearson": -0.748,
+  "perm_p": 0.0002
+ },
+ "chronology_when_wrong": {
+  "opus": {
+   "truth_never_appears_pct": 60.5,
+   "n_wrong": 319
+  },
+  "sonnet": {
+   "truth_never_appears_pct": 76.5,
+   "n_wrong": 349
+  },
+  "gpt": {
+   "truth_never_appears_pct": 79.5,
+   "n_wrong": 44
+  },
+  "glm": {
+   "truth_never_appears_pct": 0.5,
+   "n_wrong": 183
+  },
+  "qwen": {
+   "truth_never_appears_pct": 0.0,
+   "n_wrong": 44
+  }
+ },
+ "nr_vs_reasoning_cross_model_agreement": {
+  "nr": 47.8,
+  "reasoning": 90.2
+ },
+ "reasoning_vs_nr_gap": {
+  "opus": 24.1,
+  "sonnet": 16.9,
+  "gpt": 58.5,
+  "glm": 29.3,
+  "qwen": 62.2
+ },
+ "self_matches_truth_vs_consensus": {
+  "opus": {
+   "truth": 58.9,
+   "consensus": 75.9
+  },
+  "sonnet": {
+   "truth": 37.0,
+   "consensus": 87.7
+  },
+  "gpt": {
+   "truth": 88.9,
+   "consensus": 91.3
+  },
+  "glm": {
+   "truth": 56.0,
+   "consensus": 95.0
+  },
+  "qwen": {
+   "truth": 93.9,
+   "consensus": 93.2
+  }
+ },
+ "validation_self_consistency": {
+  "opus": 0.712,
+  "sonnet": 0.931,
+  "gpt": 1.0,
+  "glm": 0.92,
+  "qwen": 0.955
+ },
+ "developer_affinity": {
+  "same_developer_pairs": {
+   "opus->sonnet": 12.5,
+   "sonnet->opus": -9.7
+  },
+  "mean_residual_same_developer": 1.4,
+  "mean_residual_different_developer": -0.16,
+  "open_weight_pair_glm_qwen": {
+   "glm->qwen": 1.3,
+   "qwen->glm": 5.2
+  }
+ },
+ "self_vs_other_prediction_dissociation": {
+  "opus": {
+   "self_acc": 58.9,
+   "skill_predicting_others": 54.7,
+   "predictability_by_others": 54.7,
+   "self_minus_other_skill": 4.2,
+   "mean_residual_as_predictor": -2.22
+  },
+  "sonnet": {
+   "self_acc": 37.0,
+   "skill_predicting_others": 72.3,
+   "predictability_by_others": 39.5,
+   "self_minus_other_skill": -35.3,
+   "mean_residual_as_predictor": -6.05
+  },
+  "gpt": {
+   "self_acc": 88.9,
+   "skill_predicting_others": 61.5,
+   "predictability_by_others": 81.5,
+   "self_minus_other_skill": 27.4,
+   "mean_residual_as_predictor": 4.47
+  },
+  "glm": {
+   "self_acc": 56.0,
+   "skill_predicting_others": 69.6,
+   "predictability_by_others": 53.1,
+   "self_minus_other_skill": -13.6,
+   "mean_residual_as_predictor": -2.65
+  },
+  "qwen": {
+   "self_acc": 93.9,
+   "skill_predicting_others": 60.2,
+   "predictability_by_others": 89.4,
+   "self_minus_other_skill": 33.7,
+   "mean_residual_as_predictor": 6.42
+  }
+ },
+ "target_predictability_per_step": {
+  "opus": [
+   100,
+   94,
+   81,
+   45,
+   39,
+   32,
+   27,
+   26
+  ],
+  "sonnet": [
+   66,
+   57,
+   45,
+   38,
+   32,
+   21,
+   22,
+   30
+  ],
+  "gpt": [
+   100,
+   95,
+   88,
+   86,
+   82,
+   71,
+   71,
+   71
+  ],
+  "glm": [
+   100,
+   74,
+   62,
+   53,
+   38,
+   32,
+   39,
+   30
+  ],
+  "qwen": [
+   100,
+   96,
+   94,
+   92,
+   88,
+   86,
+   83,
+   83
+  ]
+ },
+ "midhorizon_explanation": {
+  "opus": {
+   "corr_gap_vs_branch_rate": 0.38,
+   "corr_gap_vs_prior_nr": -0.598
+  },
+  "sonnet": {
+   "corr_gap_vs_branch_rate": -0.41,
+   "corr_gap_vs_prior_nr": 0.727
+  },
+  "gpt": {
+   "corr_gap_vs_branch_rate": -0.236,
+   "corr_gap_vs_prior_nr": 0.518
+  },
+  "glm": {
+   "corr_gap_vs_branch_rate": -0.355,
+   "corr_gap_vs_prior_nr": 0.249
+  },
+  "qwen": {
+   "corr_gap_vs_branch_rate": 0.347,
+   "corr_gap_vs_prior_nr": 0.602
+  }
+ },
+ "cross_model_agreement_by_step": {
+  "nr": {
+   "1": 100.0,
+   "2": 83.7,
+   "3": 54.7,
+   "4": 46.3,
+   "5": 28.4,
+   "6": 27.4,
+   "7": 22.6,
+   "8": 18.9
+  },
+  "reasoning": {
+   "1": 100.0,
+   "2": 97.9,
+   "3": 95.8,
+   "4": 93.7,
+   "5": 87.4,
+   "6": 90.5,
+   "7": 81.1,
+   "8": 75.3
+  }
+ },
+ "opus_step8_lift_vs_modal_baseline": -5.2,
+ "error_propagation": {
+  "opus": {
+   "p_correct_next_given_correct": 74.2,
+   "p_correct_next_given_wrong": 16.1,
+   "n_consecutive_pairs": 679
+  },
+  "sonnet": {
+   "p_correct_next_given_correct": 79.8,
+   "p_correct_next_given_wrong": 3.4,
+   "n_consecutive_pairs": 518
+  },
+  "gpt": {
+   "p_correct_next_given_correct": 95.2,
+   "p_correct_next_given_wrong": 11.4,
+   "n_consecutive_pairs": 371
+  },
+  "glm": {
+   "p_correct_next_given_correct": 77.2,
+   "p_correct_next_given_wrong": 8.3,
+   "n_consecutive_pairs": 364
+  },
+  "qwen": {
+   "p_correct_next_given_correct": 94.5,
+   "p_correct_next_given_wrong": 64.5,
+   "n_consecutive_pairs": 630
+  }
+ },
+ "predictability_horizon": {
+  "opus": 4,
+  "sonnet": 3,
+  "gpt": null,
+  "glm": 5,
+  "qwen": null
+ },
+ "hedging_calibration": {
+  "opus": {
+   "acc_when_hedging": 40.7,
+   "n_hedging": 204,
+   "acc_when_not_hedging": 57.7,
+   "n_plain": 468
+  },
+  "sonnet": {
+   "acc_when_hedging": 16.0,
+   "n_hedging": 94,
+   "acc_when_not_hedging": 36.3,
+   "n_plain": 424
+  },
+  "gpt": {
+   "acc_when_hedging": 87.8,
+   "n_hedging": 337,
+   "acc_when_not_hedging": 94.0,
+   "n_plain": 50
+  },
+  "glm": {
+   "acc_when_hedging": 43.5,
+   "n_hedging": 260,
+   "acc_when_not_hedging": 76.9,
+   "n_plain": 156
+  },
+  "qwen": {
+   "acc_when_hedging": 93.3,
+   "n_hedging": 659,
+   "acc_when_not_hedging": 100.0,
+   "n_plain": 61
+  }
+ },
+ "self_projection": {
+  "pearson_similarity_vs_cross_acc": 0.571,
+  "pearson_similarity_vs_residual": 0.544
+ },
+ "self_vs_cross_predictability_per_maze": 0.882,
+ "reasoned_consensus_vs_truth_vs_prior_opus": [
+  {
+   "step": 1,
+   "n": 97,
+   "consensus_matches_truth_pct": 100.0,
+   "consensus_matches_prior_pct": 100.0
+  },
+  {
+   "step": 2,
+   "n": 97,
+   "consensus_matches_truth_pct": 95.9,
+   "consensus_matches_prior_pct": 94.8
+  },
+  {
+   "step": 3,
+   "n": 97,
+   "consensus_matches_truth_pct": 81.4,
+   "consensus_matches_prior_pct": 59.8
+  },
+  {
+   "step": 4,
+   "n": 97,
+   "consensus_matches_truth_pct": 43.3,
+   "consensus_matches_prior_pct": 24.7
+  },
+  {
+   "step": 5,
+   "n": 97,
+   "consensus_matches_truth_pct": 37.1,
+   "consensus_matches_prior_pct": 1.0
+  },
+  {
+   "step": 6,
+   "n": 97,
+   "consensus_matches_truth_pct": 28.9,
+   "consensus_matches_prior_pct": 2.1
+  },
+  {
+   "step": 7,
+   "n": 97,
+   "consensus_matches_truth_pct": 24.7,
+   "consensus_matches_prior_pct": 0.0
+  },
+  {
+   "step": 8,
+   "n": 97,
+   "consensus_matches_truth_pct": 26.8,
+   "consensus_matches_prior_pct": 1.0
+  }
+ ]
+}

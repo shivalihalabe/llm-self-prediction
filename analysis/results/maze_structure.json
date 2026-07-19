@@ -1,0 +1,1191 @@
+{
+ "metadata": {
+  "experiment": "maze_structure",
+  "produced_by": "analysis/maze_structure.py",
+  "models": [
+   "opus",
+   "sonnet",
+   "gpt",
+   "glm",
+   "qwen"
+  ],
+  "n_mazes_total": 100,
+  "n_consistent": {
+   "opus": 97,
+   "sonnet": 74,
+   "gpt": 53,
+   "glm": 52,
+   "qwen": 90
+  },
+  "n_intersection": 19,
+  "scoring": {
+   "run_idx": 0,
+   "match": "exact per-step position vs the target's run-0 trajectory",
+   "unparsed": "skipped",
+   "branch": ">=2 unvisited legal moves at the pre-move cell",
+   "default_move": "alphabetically first legal direction (E < N < S < W)"
+  }
+ },
+ "per_maze": {
+  "maze_1": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 62.5,
+   "maze_effect": -7.2,
+   "mean_branch_steps": 5.25
+  },
+  "maze_10": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 5,
+   "mean_self_acc": 85.0,
+   "maze_effect": 18.1,
+   "mean_branch_steps": 3.6
+  },
+  "maze_100": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 13,
+   "n_models": 4,
+   "mean_self_acc": 43.8,
+   "maze_effect": -30.7,
+   "mean_branch_steps": 4.25
+  },
+  "maze_11": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 1,
+   "mean_self_acc": 100.0,
+   "maze_effect": 6.1,
+   "mean_branch_steps": 5
+  },
+  "maze_12": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 87.5,
+   "maze_effect": 17.9,
+   "mean_branch_steps": 3.33
+  },
+  "maze_13": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 75.0,
+   "maze_effect": -5.6,
+   "mean_branch_steps": 3.33
+  },
+  "maze_14": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 95.0,
+   "maze_effect": 28.1,
+   "mean_branch_steps": 1.8
+  },
+  "maze_15": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 70.8,
+   "maze_effect": 7.6,
+   "mean_branch_steps": 4.33
+  },
+  "maze_16": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 70.8,
+   "maze_effect": 7.6,
+   "mean_branch_steps": 4.33
+  },
+  "maze_17": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 3,
+   "mean_self_acc": 91.7,
+   "maze_effect": 22.1,
+   "mean_branch_steps": 3
+  },
+  "maze_18": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 4,
+   "mean_self_acc": 56.2,
+   "maze_effect": -5.2,
+   "mean_branch_steps": 3.5
+  },
+  "maze_19": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 66.7,
+   "maze_effect": 5.1,
+   "mean_branch_steps": 3.67
+  },
+  "maze_2": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 67.5,
+   "maze_effect": 0.6,
+   "mean_branch_steps": 3.8
+  },
+  "maze_20": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 2,
+   "mean_self_acc": 50.0,
+   "maze_effect": -7.5,
+   "mean_branch_steps": 3.5
+  },
+  "maze_21": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 2,
+   "mean_self_acc": 50.0,
+   "maze_effect": -23.9,
+   "mean_branch_steps": 4.5
+  },
+  "maze_22": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 2,
+   "mean_self_acc": 37.5,
+   "maze_effect": -25.5,
+   "mean_branch_steps": 4
+  },
+  "maze_23": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 53.1,
+   "maze_effect": -8.3,
+   "mean_branch_steps": 3.25
+  },
+  "maze_24": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 50.0,
+   "maze_effect": -16.9,
+   "mean_branch_steps": 5.2
+  },
+  "maze_25": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 8,
+   "n_models": 4,
+   "mean_self_acc": 46.9,
+   "maze_effect": -13.3,
+   "mean_branch_steps": 3.5
+  },
+  "maze_26": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 62.5,
+   "maze_effect": -11.9,
+   "mean_branch_steps": 3
+  },
+  "maze_27": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 4,
+   "mean_self_acc": 56.2,
+   "maze_effect": -13.4,
+   "mean_branch_steps": 4.25
+  },
+  "maze_28": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 75.0,
+   "maze_effect": 5.3,
+   "mean_branch_steps": 4
+  },
+  "maze_29": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 2,
+   "mean_self_acc": 87.5,
+   "maze_effect": 11.1,
+   "mean_branch_steps": 5.5
+  },
+  "maze_3": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 11,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 2,
+   "mean_self_acc": 87.5,
+   "maze_effect": 11.1,
+   "mean_branch_steps": 3
+  },
+  "maze_30": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 59.4,
+   "maze_effect": -10.3,
+   "mean_branch_steps": 5
+  },
+  "maze_31": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 4,
+   "mean_self_acc": 62.5,
+   "maze_effect": 1.1,
+   "mean_branch_steps": 3.5
+  },
+  "maze_32": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 5,
+   "mean_self_acc": 72.5,
+   "maze_effect": 5.6,
+   "mean_branch_steps": 4
+  },
+  "maze_33": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 82.5,
+   "maze_effect": 15.6,
+   "mean_branch_steps": 1.4
+  },
+  "maze_34": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 5,
+   "mean_self_acc": 60.0,
+   "maze_effect": -6.9,
+   "mean_branch_steps": 4.6
+  },
+  "maze_35": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 78.1,
+   "maze_effect": 8.5,
+   "mean_branch_steps": 4.5
+  },
+  "maze_36": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 50.0,
+   "maze_effect": -13.3,
+   "mean_branch_steps": 3.67
+  },
+  "maze_37": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 29.2,
+   "maze_effect": -21.5,
+   "mean_branch_steps": 2.33
+  },
+  "maze_38": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 2,
+   "mean_self_acc": 68.8,
+   "maze_effect": -7.6,
+   "mean_branch_steps": 4.5
+  },
+  "maze_39": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 4,
+   "mean_self_acc": 71.9,
+   "maze_effect": 10.4,
+   "mean_branch_steps": 4
+  },
+  "maze_4": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 4,
+   "mean_self_acc": 65.6,
+   "maze_effect": 4.2,
+   "mean_branch_steps": 2.75
+  },
+  "maze_40": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 58.3,
+   "maze_effect": -4.9,
+   "mean_branch_steps": 3.67
+  },
+  "maze_41": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 66.7,
+   "maze_effect": 3.4,
+   "mean_branch_steps": 4.67
+  },
+  "maze_42": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 11,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 5,
+   "mean_self_acc": 87.5,
+   "maze_effect": 20.6,
+   "mean_branch_steps": 3.4
+  },
+  "maze_43": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 4,
+   "mean_self_acc": 56.2,
+   "maze_effect": -13.4,
+   "mean_branch_steps": 4.5
+  },
+  "maze_44": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 11,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 84.4,
+   "maze_effect": 9.9,
+   "mean_branch_steps": 3.5
+  },
+  "maze_45": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 2,
+   "mean_self_acc": 75.0,
+   "maze_effect": -1.4,
+   "mean_branch_steps": 7
+  },
+  "maze_46": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 54.2,
+   "maze_effect": -15.4,
+   "mean_branch_steps": 4
+  },
+  "maze_47": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 58.3,
+   "maze_effect": -4.9,
+   "mean_branch_steps": 5.33
+  },
+  "maze_48": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 5,
+   "mean_self_acc": 77.5,
+   "maze_effect": 10.6,
+   "mean_branch_steps": 3.4
+  },
+  "maze_49": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 5,
+   "mean_self_acc": 77.5,
+   "maze_effect": 10.6,
+   "mean_branch_steps": 4
+  },
+  "maze_5": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 3,
+   "mean_self_acc": 91.7,
+   "maze_effect": 11.1,
+   "mean_branch_steps": 3.67
+  },
+  "maze_50": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 5,
+   "mean_self_acc": 85.0,
+   "maze_effect": 18.1,
+   "mean_branch_steps": 3.4
+  },
+  "maze_51": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 87.5,
+   "maze_effect": 24.2,
+   "mean_branch_steps": 4
+  },
+  "maze_52": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 53.1,
+   "maze_effect": -16.5,
+   "mean_branch_steps": 4.25
+  },
+  "maze_53": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 3,
+   "mean_self_acc": 66.7,
+   "maze_effect": 3.4,
+   "mean_branch_steps": 3
+  },
+  "maze_54": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 71.9,
+   "maze_effect": 10.4,
+   "mean_branch_steps": 3.25
+  },
+  "maze_55": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 5,
+   "mean_self_acc": 70.0,
+   "maze_effect": 3.1,
+   "mean_branch_steps": 3
+  },
+  "maze_56": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 78.1,
+   "maze_effect": 16.7,
+   "mean_branch_steps": 3
+  },
+  "maze_57": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 8,
+   "n_models": 4,
+   "mean_self_acc": 65.6,
+   "maze_effect": 4.2,
+   "mean_branch_steps": 2.5
+  },
+  "maze_58": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 16.7,
+   "maze_effect": -34.0,
+   "mean_branch_steps": 3.67
+  },
+  "maze_59": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 4,
+   "mean_self_acc": 71.9,
+   "maze_effect": 2.2,
+   "mean_branch_steps": 4.25
+  },
+  "maze_6": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 58.3,
+   "maze_effect": -22.2,
+   "mean_branch_steps": 6
+  },
+  "maze_60": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 84.4,
+   "maze_effect": 14.7,
+   "mean_branch_steps": 2.5
+  },
+  "maze_61": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 70.8,
+   "maze_effect": 1.2,
+   "mean_branch_steps": 4.33
+  },
+  "maze_62": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 14,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 5,
+   "mean_self_acc": 97.5,
+   "maze_effect": 30.6,
+   "mean_branch_steps": 1
+  },
+  "maze_63": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 93.8,
+   "maze_effect": 24.1,
+   "mean_branch_steps": 3
+  },
+  "maze_64": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 8,
+   "n_models": 4,
+   "mean_self_acc": 50.0,
+   "maze_effect": -19.7,
+   "mean_branch_steps": 3.5
+  },
+  "maze_65": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 60.0,
+   "maze_effect": -6.9,
+   "mean_branch_steps": 4
+  },
+  "maze_66": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 4,
+   "mean_self_acc": 56.2,
+   "maze_effect": -4.0,
+   "mean_branch_steps": 4.75
+  },
+  "maze_67": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 43.8,
+   "maze_effect": -17.7,
+   "mean_branch_steps": 4.75
+  },
+  "maze_68": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 4,
+   "mean_self_acc": 84.4,
+   "maze_effect": 22.9,
+   "mean_branch_steps": 1.75
+  },
+  "maze_69": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 78.1,
+   "maze_effect": 3.7,
+   "mean_branch_steps": 3
+  },
+  "maze_7": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 68.8,
+   "maze_effect": 7.3,
+   "mean_branch_steps": 3.25
+  },
+  "maze_70": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 40.6,
+   "maze_effect": -20.8,
+   "mean_branch_steps": 4.75
+  },
+  "maze_71": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 70.8,
+   "maze_effect": -9.7,
+   "mean_branch_steps": 3.33
+  },
+  "maze_72": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 56.2,
+   "maze_effect": -5.2,
+   "mean_branch_steps": 3
+  },
+  "maze_73": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 4,
+   "mean_self_acc": 71.9,
+   "maze_effect": 2.2,
+   "mean_branch_steps": 3.75
+  },
+  "maze_74": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 2,
+   "mean_self_acc": 31.2,
+   "maze_effect": -16.7,
+   "mean_branch_steps": 3
+  },
+  "maze_75": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 54.2,
+   "maze_effect": -15.4,
+   "mean_branch_steps": 4.67
+  },
+  "maze_76": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 66.7,
+   "maze_effect": 3.4,
+   "mean_branch_steps": 4.33
+  },
+  "maze_77": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 79.2,
+   "maze_effect": 15.9,
+   "mean_branch_steps": 4
+  },
+  "maze_78": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 5,
+   "mean_self_acc": 47.5,
+   "maze_effect": -19.4,
+   "mean_branch_steps": 5
+  },
+  "maze_79": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 2,
+   "mean_self_acc": 93.8,
+   "maze_effect": 17.4,
+   "mean_branch_steps": 5
+  },
+  "maze_8": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 50.0,
+   "maze_effect": -13.3,
+   "mean_branch_steps": 5.67
+  },
+  "maze_80": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 11,
+   "mean_open_degree": 2.4,
+   "n_junctions": 13,
+   "n_models": 4,
+   "mean_self_acc": 68.8,
+   "maze_effect": -0.9,
+   "mean_branch_steps": 3.5
+  },
+  "maze_81": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 62.5,
+   "maze_effect": -11.9,
+   "mean_branch_steps": 3.75
+  },
+  "maze_82": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 3,
+   "mean_self_acc": 66.7,
+   "maze_effect": 3.4,
+   "mean_branch_steps": 4.33
+  },
+  "maze_83": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 79.2,
+   "maze_effect": -1.4,
+   "mean_branch_steps": 3.67
+  },
+  "maze_84": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 84.4,
+   "maze_effect": 14.7,
+   "mean_branch_steps": 3.75
+  },
+  "maze_85": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 4,
+   "mean_self_acc": 78.1,
+   "maze_effect": 16.7,
+   "mean_branch_steps": 5
+  },
+  "maze_86": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 62.5,
+   "maze_effect": -4.4,
+   "mean_branch_steps": 3.4
+  },
+  "maze_87": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 62.5,
+   "maze_effect": -7.2,
+   "mean_branch_steps": 3.25
+  },
+  "maze_88": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 59.4,
+   "maze_effect": -10.3,
+   "mean_branch_steps": 3
+  },
+  "maze_89": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 62.5,
+   "maze_effect": -0.8,
+   "mean_branch_steps": 3.33
+  },
+  "maze_9": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 12,
+   "n_models": 3,
+   "mean_self_acc": 45.8,
+   "maze_effect": -23.8,
+   "mean_branch_steps": 5.33
+  },
+  "maze_90": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 10,
+   "n_models": 3,
+   "mean_self_acc": 70.8,
+   "maze_effect": 7.6,
+   "mean_branch_steps": 3.33
+  },
+  "maze_91": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 9,
+   "n_models": 4,
+   "mean_self_acc": 43.8,
+   "maze_effect": -17.7,
+   "mean_branch_steps": 3.5
+  },
+  "maze_92": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 45.8,
+   "maze_effect": -15.8,
+   "mean_branch_steps": 4
+  },
+  "maze_93": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 75.0,
+   "maze_effect": -5.6,
+   "mean_branch_steps": 3.67
+  },
+  "maze_94": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 62.5,
+   "maze_effect": -7.1,
+   "mean_branch_steps": 3
+  },
+  "maze_95": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 75.0,
+   "maze_effect": 8.1,
+   "mean_branch_steps": 3.4
+  },
+  "maze_96": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 8,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 57.5,
+   "maze_effect": -9.4,
+   "mean_branch_steps": 3.2
+  },
+  "maze_97": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 10,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 4,
+   "mean_self_acc": 62.5,
+   "maze_effect": -7.2,
+   "mean_branch_steps": 5.25
+  },
+  "maze_98": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 9,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 3,
+   "mean_self_acc": 83.3,
+   "maze_effect": 21.0,
+   "mean_branch_steps": 3.33
+  },
+  "maze_99": {
+   "n_walls": 10,
+   "n_reachable": 25,
+   "bfs_max_depth": 12,
+   "mean_open_degree": 2.4,
+   "n_junctions": 11,
+   "n_models": 5,
+   "mean_self_acc": 72.5,
+   "maze_effect": 5.6,
+   "mean_branch_steps": 2.4
+  }
+ },
+ "correlations_intersection19": {
+  "n": 19,
+  "n_walls": {
+   "pearson": null,
+   "perm_p": null
+  },
+  "n_reachable": {
+   "pearson": null,
+   "perm_p": null
+  },
+  "bfs_max_depth": {
+   "pearson": 0.638,
+   "perm_p": 0.0024
+  },
+  "mean_open_degree": {
+   "pearson": null,
+   "perm_p": null
+  },
+  "n_junctions": {
+   "pearson": 0.047,
+   "perm_p": 0.8647
+  },
+  "mean_branch_steps": {
+   "pearson": -0.748,
+   "perm_p": 0.0002
+  }
+ },
+ "correlations_k3plus": {
+  "n": 90,
+  "n_walls": {
+   "pearson": null,
+   "perm_p": null
+  },
+  "n_reachable": {
+   "pearson": null,
+   "perm_p": null
+  },
+  "bfs_max_depth": {
+   "pearson": 0.276,
+   "perm_p": 0.011
+  },
+  "mean_open_degree": {
+   "pearson": null,
+   "perm_p": null
+  },
+  "n_junctions": {
+   "pearson": -0.079,
+   "perm_p": 0.4604
+  },
+  "mean_branch_steps": {
+   "pearson": -0.467,
+   "perm_p": 0.0002
+  }
+ },
+ "self_vs_cross_predictability_per_maze": {
+  "n_mazes": 19,
+  "pearson": 0.882,
+  "perm_p": 0.0002,
+  "note": "high => the same mazes are easy/hard whether a model predicts itself or another model predicts it"
+ }
+}

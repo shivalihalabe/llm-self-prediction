@@ -1,0 +1,949 @@
+{
+ "metadata": {
+  "experiment": "outcomes",
+  "produced_by": "analysis/outcomes.py",
+  "models": [
+   "opus",
+   "sonnet",
+   "gpt",
+   "glm",
+   "qwen"
+  ],
+  "n_mazes_total": 100,
+  "n_consistent": {
+   "opus": 97,
+   "sonnet": 74,
+   "gpt": 53,
+   "glm": 52,
+   "qwen": 90
+  },
+  "n_intersection": 19,
+  "scoring": {
+   "run_idx": 0,
+   "match": "exact per-step position vs the target's run-0 trajectory",
+   "unparsed": "skipped",
+   "branch": ">=2 unvisited legal moves at the pre-move cell",
+   "default_move": "alphabetically first legal direction (E < N < S < W)"
+  }
+ },
+ "matrix_native": {
+  "opus": {
+   "opus": 58.9,
+   "sonnet": 43.1,
+   "gpt": 61.3,
+   "glm": 45.4,
+   "qwen": 68.9
+  },
+  "sonnet": {
+   "opus": 53.7,
+   "sonnet": 37.0,
+   "gpt": 85.8,
+   "glm": 55.0,
+   "qwen": 94.7
+  },
+  "gpt": {
+   "opus": 54.9,
+   "sonnet": 36.7,
+   "gpt": 88.9,
+   "glm": 57.2,
+   "qwen": 97.4
+  },
+  "glm": {
+   "opus": 54.0,
+   "sonnet": 38.5,
+   "gpt": 89.2,
+   "glm": 56.0,
+   "qwen": 96.7
+  },
+  "qwen": {
+   "opus": 56.3,
+   "sonnet": 39.9,
+   "gpt": 89.6,
+   "glm": 54.8,
+   "qwen": 93.9
+  }
+ },
+ "matrix_intersection19": {
+  "opus": {
+   "opus": 68.4,
+   "sonnet": 46.1,
+   "gpt": 61.2,
+   "glm": 54.6,
+   "qwen": 74.3
+  },
+  "sonnet": {
+   "opus": 61.2,
+   "sonnet": 40.1,
+   "gpt": 89.5,
+   "glm": 62.5,
+   "qwen": 98.0
+  },
+  "gpt": {
+   "opus": 66.4,
+   "sonnet": 40.8,
+   "gpt": 94.7,
+   "glm": 64.5,
+   "qwen": 99.3
+  },
+  "glm": {
+   "opus": 57.2,
+   "sonnet": 40.1,
+   "gpt": 92.8,
+   "glm": 63.2,
+   "qwen": 98.7
+  },
+  "qwen": {
+   "opus": 66.4,
+   "sonnet": 41.4,
+   "gpt": 94.1,
+   "glm": 62.5,
+   "qwen": 97.4
+  }
+ },
+ "self_vs_other_native": {
+  "opus": {
+   "self": 58.9,
+   "mean_other": 54.7,
+   "median_other": 54.4,
+   "best_other": 56.3,
+   "best_other_model": "qwen",
+   "gap_vs_mean": 4.2,
+   "gap_vs_best": 2.6,
+   "per_other": {
+    "sonnet": 53.7,
+    "gpt": 54.9,
+    "glm": 54.0,
+    "qwen": 56.3
+   },
+   "n_self": 776
+  },
+  "sonnet": {
+   "self": 37.0,
+   "mean_other": 39.5,
+   "median_other": 39.2,
+   "best_other": 43.1,
+   "best_other_model": "opus",
+   "gap_vs_mean": -2.5,
+   "gap_vs_best": -6.1,
+   "per_other": {
+    "opus": 43.1,
+    "gpt": 36.7,
+    "glm": 38.5,
+    "qwen": 39.9
+   },
+   "n_self": 592
+  },
+  "gpt": {
+   "self": 88.9,
+   "mean_other": 81.5,
+   "median_other": 87.5,
+   "best_other": 89.6,
+   "best_other_model": "qwen",
+   "gap_vs_mean": 7.4,
+   "gap_vs_best": -0.7,
+   "per_other": {
+    "opus": 61.3,
+    "sonnet": 85.8,
+    "glm": 89.2,
+    "qwen": 89.6
+   },
+   "n_self": 424
+  },
+  "glm": {
+   "self": 56.0,
+   "mean_other": 53.1,
+   "median_other": 54.9,
+   "best_other": 57.2,
+   "best_other_model": "gpt",
+   "gap_vs_mean": 2.9,
+   "gap_vs_best": -1.2,
+   "per_other": {
+    "opus": 45.4,
+    "sonnet": 55.0,
+    "gpt": 57.2,
+    "qwen": 54.8
+   },
+   "n_self": 416
+  },
+  "qwen": {
+   "self": 93.9,
+   "mean_other": 89.4,
+   "median_other": 95.7,
+   "best_other": 97.4,
+   "best_other_model": "gpt",
+   "gap_vs_mean": 4.5,
+   "gap_vs_best": -3.5,
+   "per_other": {
+    "opus": 68.9,
+    "sonnet": 94.7,
+    "gpt": 97.4,
+    "glm": 96.7
+   },
+   "n_self": 720
+  }
+ },
+ "self_vs_other_intersection19": {
+  "opus": {
+   "self": 68.4,
+   "mean_other": 62.8,
+   "median_other": 63.8,
+   "best_other": 66.4,
+   "best_other_model": "gpt",
+   "gap_vs_mean": 5.6,
+   "gap_vs_best": 2.0,
+   "per_other": {
+    "sonnet": 61.2,
+    "gpt": 66.4,
+    "glm": 57.2,
+    "qwen": 66.4
+   },
+   "n_self": 152
+  },
+  "sonnet": {
+   "self": 40.1,
+   "mean_other": 42.1,
+   "median_other": 41.1,
+   "best_other": 46.1,
+   "best_other_model": "opus",
+   "gap_vs_mean": -2.0,
+   "gap_vs_best": -5.9,
+   "per_other": {
+    "opus": 46.1,
+    "gpt": 40.8,
+    "glm": 40.1,
+    "qwen": 41.4
+   },
+   "n_self": 152
+  },
+  "gpt": {
+   "self": 94.7,
+   "mean_other": 84.4,
+   "median_other": 91.1,
+   "best_other": 94.1,
+   "best_other_model": "qwen",
+   "gap_vs_mean": 10.4,
+   "gap_vs_best": 0.7,
+   "per_other": {
+    "opus": 61.2,
+    "sonnet": 89.5,
+    "glm": 92.8,
+    "qwen": 94.1
+   },
+   "n_self": 152
+  },
+  "glm": {
+   "self": 63.2,
+   "mean_other": 61.0,
+   "median_other": 62.5,
+   "best_other": 64.5,
+   "best_other_model": "gpt",
+   "gap_vs_mean": 2.1,
+   "gap_vs_best": -1.3,
+   "per_other": {
+    "opus": 54.6,
+    "sonnet": 62.5,
+    "gpt": 64.5,
+    "qwen": 62.5
+   },
+   "n_self": 152
+  },
+  "qwen": {
+   "self": 97.4,
+   "mean_other": 92.6,
+   "median_other": 98.4,
+   "best_other": 99.3,
+   "best_other_model": "gpt",
+   "gap_vs_mean": 4.8,
+   "gap_vs_best": -2.0,
+   "per_other": {
+    "opus": 74.3,
+    "sonnet": 98.0,
+    "gpt": 99.3,
+    "glm": 98.7
+   },
+   "n_self": 152
+  }
+ },
+ "per_step_self_vs_other": {
+  "opus": {
+   "self": [
+    100,
+    93,
+    84,
+    53,
+    51,
+    34,
+    31,
+    27
+   ],
+   "mean_other": [
+    100,
+    95,
+    81,
+    43,
+    36,
+    31,
+    27,
+    26
+   ],
+   "best_other": [
+    100,
+    100,
+    84,
+    44,
+    39,
+    35,
+    29,
+    28
+   ],
+   "gap_vs_mean": [
+    0,
+    -2,
+    3,
+    10,
+    15,
+    3,
+    4,
+    1
+   ],
+   "gap_vs_best": [
+    0,
+    -7,
+    0,
+    8,
+    11,
+    -1,
+    2,
+    -1
+   ],
+   "n": [
+    97,
+    97,
+    97,
+    97,
+    97,
+    97,
+    97,
+    97
+   ]
+  },
+  "sonnet": {
+   "self": [
+    68,
+    55,
+    43,
+    35,
+    26,
+    20,
+    20,
+    28
+   ],
+   "mean_other": [
+    66,
+    57,
+    46,
+    38,
+    34,
+    21,
+    23,
+    31
+   ],
+   "best_other": [
+    66,
+    59,
+    50,
+    42,
+    36,
+    24,
+    32,
+    34
+   ],
+   "gap_vs_mean": [
+    1,
+    -2,
+    -2,
+    -3,
+    -8,
+    -1,
+    -3,
+    -2
+   ],
+   "gap_vs_best": [
+    1,
+    -4,
+    -7,
+    -7,
+    -11,
+    -4,
+    -12,
+    -5
+   ],
+   "n": [
+    74,
+    74,
+    74,
+    74,
+    74,
+    74,
+    74,
+    74
+   ]
+  },
+  "gpt": {
+   "self": [
+    100,
+    100,
+    94,
+    92,
+    91,
+    77,
+    79,
+    77
+   ],
+   "mean_other": [
+    100,
+    94,
+    87,
+    84,
+    79,
+    69,
+    69,
+    70
+   ],
+   "best_other": [
+    100,
+    100,
+    94,
+    91,
+    91,
+    81,
+    87,
+    83
+   ],
+   "gap_vs_mean": [
+    0,
+    6,
+    8,
+    8,
+    11,
+    8,
+    10,
+    8
+   ],
+   "gap_vs_best": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    -4,
+    -8,
+    -6
+   ],
+   "n": [
+    53,
+    53,
+    53,
+    53,
+    53,
+    53,
+    53,
+    53
+   ]
+  },
+  "glm": {
+   "self": [
+    100,
+    79,
+    65,
+    58,
+    42,
+    35,
+    42,
+    27
+   ],
+   "mean_other": [
+    100,
+    73,
+    61,
+    52,
+    38,
+    32,
+    38,
+    31
+   ],
+   "best_other": [
+    100,
+    79,
+    67,
+    58,
+    42,
+    35,
+    42,
+    35
+   ],
+   "gap_vs_mean": [
+    0,
+    6,
+    4,
+    5,
+    5,
+    3,
+    4,
+    -4
+   ],
+   "gap_vs_best": [
+    0,
+    0,
+    -2,
+    0,
+    0,
+    0,
+    0,
+    -8
+   ],
+   "n": [
+    52,
+    52,
+    52,
+    52,
+    52,
+    52,
+    52,
+    52
+   ]
+  },
+  "qwen": {
+   "self": [
+    100,
+    98,
+    100,
+    98,
+    93,
+    93,
+    83,
+    86
+   ],
+   "mean_other": [
+    100,
+    96,
+    92,
+    90,
+    86,
+    84,
+    83,
+    82
+   ],
+   "best_other": [
+    100,
+    100,
+    99,
+    99,
+    97,
+    98,
+    93,
+    96
+   ],
+   "gap_vs_mean": [
+    0,
+    2,
+    8,
+    8,
+    7,
+    9,
+    0,
+    3
+   ],
+   "gap_vs_best": [
+    0,
+    -2,
+    1,
+    -1,
+    -3,
+    -4,
+    -10,
+    -10
+   ],
+   "n": [
+    90,
+    90,
+    90,
+    90,
+    90,
+    90,
+    90,
+    90
+   ]
+  }
+ },
+ "target_predictability_per_step": {
+  "opus": [
+   100,
+   94,
+   81,
+   45,
+   39,
+   32,
+   27,
+   26
+  ],
+  "sonnet": [
+   66,
+   57,
+   45,
+   38,
+   32,
+   21,
+   22,
+   30
+  ],
+  "gpt": [
+   100,
+   95,
+   88,
+   86,
+   82,
+   71,
+   71,
+   71
+  ],
+  "glm": [
+   100,
+   74,
+   62,
+   53,
+   38,
+   32,
+   39,
+   30
+  ],
+  "qwen": [
+   100,
+   96,
+   94,
+   92,
+   88,
+   86,
+   83,
+   83
+  ]
+ },
+ "predictor_skill_per_step": {
+  "opus": [
+   92,
+   75,
+   62,
+   54,
+   43,
+   34,
+   40,
+   38
+  ],
+  "sonnet": [
+   100,
+   88,
+   83,
+   72,
+   65,
+   58,
+   57,
+   56
+  ],
+  "gpt": [
+   92,
+   83,
+   73,
+   58,
+   50,
+   45,
+   45,
+   46
+  ],
+  "glm": [
+   92,
+   87,
+   79,
+   67,
+   64,
+   57,
+   55,
+   57
+  ],
+  "qwen": [
+   92,
+   82,
+   71,
+   57,
+   51,
+   43,
+   44,
+   43
+  ]
+ },
+ "pairwise_on_intersection": {
+  "opus|sonnet": {
+   "n_mazes": 72,
+   "opus_self": 59.0,
+   "sonnet_self": 36.5,
+   "opus->sonnet": 43.9,
+   "sonnet->opus": 53.6
+  },
+  "opus|gpt": {
+   "n_mazes": 52,
+   "opus_self": 57.9,
+   "gpt_self": 89.4,
+   "opus->gpt": 61.3,
+   "gpt->opus": 53.8
+  },
+  "opus|glm": {
+   "n_mazes": 51,
+   "opus_self": 58.6,
+   "glm_self": 56.1,
+   "opus->glm": 45.8,
+   "glm->opus": 54.7
+  },
+  "opus|qwen": {
+   "n_mazes": 88,
+   "opus_self": 61.4,
+   "qwen_self": 93.8,
+   "opus->qwen": 69.0,
+   "qwen->opus": 58.5
+  },
+  "sonnet|gpt": {
+   "n_mazes": 41,
+   "sonnet_self": 37.8,
+   "gpt_self": 92.1,
+   "sonnet->gpt": 88.7,
+   "gpt->sonnet": 37.5
+  },
+  "sonnet|glm": {
+   "n_mazes": 39,
+   "sonnet_self": 41.0,
+   "glm_self": 59.9,
+   "sonnet->glm": 59.3,
+   "glm->sonnet": 40.7
+  },
+  "sonnet|qwen": {
+   "n_mazes": 66,
+   "sonnet_self": 38.6,
+   "qwen_self": 94.3,
+   "sonnet->qwen": 95.1,
+   "qwen->sonnet": 41.9
+  },
+  "gpt|glm": {
+   "n_mazes": 26,
+   "gpt_self": 91.3,
+   "glm_self": 57.2,
+   "gpt->glm": 58.2,
+   "glm->gpt": 90.9
+  },
+  "gpt|qwen": {
+   "n_mazes": 47,
+   "gpt_self": 89.4,
+   "qwen_self": 92.6,
+   "gpt->qwen": 97.3,
+   "qwen->gpt": 89.1
+  },
+  "glm|qwen": {
+   "n_mazes": 47,
+   "glm_self": 57.4,
+   "qwen_self": 94.1,
+   "glm->qwen": 96.0,
+   "qwen->glm": 56.1
+  }
+ },
+ "self_accuracy_by_difficulty": {
+  "1": {
+   "n_mazes": 1,
+   "self_acc_per_model": {
+    "opus": null,
+    "sonnet": null,
+    "gpt": null,
+    "glm": null,
+    "qwen": 100.0
+   },
+   "mean_self_acc": 100.0
+  },
+  "2": {
+   "n_mazes": 9,
+   "self_acc_per_model": {
+    "opus": 60.9,
+    "sonnet": 12.5,
+    "gpt": 62.5,
+    "glm": 62.5,
+    "qwen": 92.5
+   },
+   "mean_self_acc": 58.2
+  },
+  "3": {
+   "n_mazes": 32,
+   "self_acc_per_model": {
+    "opus": 58.5,
+    "sonnet": 31.6,
+    "gpt": 85.9,
+    "glm": 42.5,
+    "qwen": 97.3
+   },
+   "mean_self_acc": 63.2
+  },
+  "4": {
+   "n_mazes": 39,
+   "self_acc_per_model": {
+    "opus": 54.2,
+    "sonnet": 39.7,
+    "gpt": 87.5,
+    "glm": 55.7,
+    "qwen": 89.5
+   },
+   "mean_self_acc": 65.3
+  },
+  "5": {
+   "n_mazes": 19,
+   "self_acc_per_model": {
+    "opus": 68.4,
+    "sonnet": 40.1,
+    "gpt": 94.7,
+    "glm": 63.2,
+    "qwen": 97.4
+   },
+   "mean_self_acc": 72.8
+  }
+ },
+ "reasoning_vs_nr_self": {
+  "opus": {
+   "reasoning": 58.9,
+   "noreasoning": 34.8,
+   "gap": 24.1,
+   "reasoning_on_common": 58.9,
+   "nr_on_common": 34.8,
+   "per_step_reasoning": [
+    100.0,
+    92.8,
+    83.5,
+    52.6,
+    50.5,
+    34.0,
+    30.9,
+    26.8
+   ],
+   "per_step_nr": [
+    100.0,
+    99.0,
+    56.7,
+    10.3,
+    4.1,
+    5.2,
+    0.0,
+    3.1
+   ]
+  },
+  "sonnet": {
+   "reasoning": 37.0,
+   "noreasoning": 20.1,
+   "gap": 16.9,
+   "reasoning_on_common": 37.0,
+   "nr_on_common": 20.1,
+   "per_step_reasoning": [
+    67.6,
+    55.4,
+    43.2,
+    35.1,
+    25.7,
+    20.3,
+    20.3,
+    28.4
+   ],
+   "per_step_nr": [
+    66.2,
+    54.1,
+    23.0,
+    10.8,
+    2.7,
+    2.7,
+    0.0,
+    1.4
+   ]
+  },
+  "gpt": {
+   "reasoning": 88.9,
+   "noreasoning": 30.4,
+   "gap": 58.5,
+   "reasoning_on_common": 88.9,
+   "nr_on_common": 30.4,
+   "per_step_reasoning": [
+    100.0,
+    100.0,
+    94.3,
+    92.5,
+    90.6,
+    77.4,
+    79.2,
+    77.4
+   ],
+   "per_step_nr": [
+    100.0,
+    83.0,
+    49.1,
+    5.7,
+    1.9,
+    0.0,
+    3.8,
+    0.0
+   ]
+  },
+  "glm": {
+   "reasoning": 56.0,
+   "noreasoning": 26.7,
+   "gap": 29.3,
+   "reasoning_on_common": 56.0,
+   "nr_on_common": 26.7,
+   "per_step_reasoning": [
+    100.0,
+    78.8,
+    65.4,
+    57.7,
+    42.3,
+    34.6,
+    42.3,
+    26.9
+   ],
+   "per_step_nr": [
+    100.0,
+    63.5,
+    21.2,
+    13.5,
+    5.8,
+    3.8,
+    0.0,
+    5.8
+   ]
+  },
+  "qwen": {
+   "reasoning": 93.9,
+   "noreasoning": 31.7,
+   "gap": 62.2,
+   "reasoning_on_common": 93.9,
+   "nr_on_common": 31.7,
+   "per_step_reasoning": [
+    100.0,
+    97.8,
+    100.0,
+    97.8,
+    93.3,
+    93.3,
+    83.3,
+    85.6
+   ],
+   "per_step_nr": [
+    100.0,
+    77.8,
+    34.4,
+    34.4,
+    2.2,
+    2.2,
+    1.1,
+    1.1
+   ]
+  }
+ }
+}

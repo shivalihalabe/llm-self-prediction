@@ -1,0 +1,1218 @@
+{
+ "metadata": {
+  "experiment": "error_geometry",
+  "produced_by": "analysis/error_geometry.py",
+  "models": [
+   "opus",
+   "sonnet",
+   "gpt",
+   "glm",
+   "qwen"
+  ],
+  "n_mazes_total": 100,
+  "n_consistent": {
+   "opus": 97,
+   "sonnet": 74,
+   "gpt": 53,
+   "glm": 52,
+   "qwen": 90
+  },
+  "n_intersection": 19,
+  "scoring": {
+   "run_idx": 0,
+   "match": "exact per-step position vs the target's run-0 trajectory",
+   "unparsed": "skipped",
+   "branch": ">=2 unvisited legal moves at the pre-move cell",
+   "default_move": "alphabetically first legal direction (E < N < S < W)"
+  }
+ },
+ "self_error_geometry": {
+  "opus": {
+   "n": 776,
+   "exact_acc": 58.9,
+   "mean_dist_all": 1.22,
+   "mean_dist_when_wrong": 2.97,
+   "row_acc": 64.0,
+   "col_acc": 62.1,
+   "frac_reachable": 99.9,
+   "of_wrong_frac_on_path": 11.9,
+   "of_onpath_wrong_overshoot": 20,
+   "of_onpath_wrong_undershoot": 18,
+   "step_offset_hist": {
+    "-4": 1,
+    "-2": 17,
+    "2": 13,
+    "4": 6,
+    "6": 1
+   }
+  },
+  "sonnet": {
+   "n": 592,
+   "exact_acc": 37.0,
+   "mean_dist_all": 2.11,
+   "mean_dist_when_wrong": 3.35,
+   "row_acc": 41.0,
+   "col_acc": 43.4,
+   "frac_reachable": 100.0,
+   "of_wrong_frac_on_path": 13.4,
+   "of_onpath_wrong_overshoot": 44,
+   "of_onpath_wrong_undershoot": 6,
+   "step_offset_hist": {
+    "-4": 1,
+    "-2": 5,
+    "2": 29,
+    "4": 11,
+    "6": 4
+   }
+  },
+  "gpt": {
+   "n": 424,
+   "exact_acc": 88.9,
+   "mean_dist_all": 0.32,
+   "mean_dist_when_wrong": 2.85,
+   "row_acc": 88.9,
+   "col_acc": 94.3,
+   "frac_reachable": 100.0,
+   "of_wrong_frac_on_path": 19.1,
+   "of_onpath_wrong_overshoot": 0,
+   "of_onpath_wrong_undershoot": 9,
+   "step_offset_hist": {
+    "-4": 1,
+    "-2": 8
+   }
+  },
+  "glm": {
+   "n": 416,
+   "exact_acc": 56.0,
+   "mean_dist_all": 1.21,
+   "mean_dist_when_wrong": 2.74,
+   "row_acc": 63.2,
+   "col_acc": 62.3,
+   "frac_reachable": 100.0,
+   "of_wrong_frac_on_path": 29.0,
+   "of_onpath_wrong_overshoot": 47,
+   "of_onpath_wrong_undershoot": 6,
+   "step_offset_hist": {
+    "-4": 1,
+    "-2": 5,
+    "2": 41,
+    "4": 6
+   }
+  },
+  "qwen": {
+   "n": 720,
+   "exact_acc": 93.9,
+   "mean_dist_all": 0.17,
+   "mean_dist_when_wrong": 2.75,
+   "row_acc": 93.9,
+   "col_acc": 96.5,
+   "frac_reachable": 99.9,
+   "of_wrong_frac_on_path": 34.1,
+   "of_onpath_wrong_overshoot": 8,
+   "of_onpath_wrong_undershoot": 7,
+   "step_offset_hist": {
+    "-4": 1,
+    "-2": 6,
+    "1": 1,
+    "2": 7
+   }
+  }
+ },
+ "accuracy_by_true_row": {
+  "opus": {
+   "0": {
+    "acc": 97.1,
+    "n": 175
+   },
+   "1": {
+    "acc": 80.0,
+    "n": 175
+   },
+   "2": {
+    "acc": 51.1,
+    "n": 139
+   },
+   "3": {
+    "acc": 30.7,
+    "n": 150
+   },
+   "4": {
+    "acc": 21.9,
+    "n": 137
+   }
+  },
+  "sonnet": {
+   "0": {
+    "acc": 75.0,
+    "n": 100
+   },
+   "1": {
+    "acc": 59.0,
+    "n": 144
+   },
+   "2": {
+    "acc": 26.8,
+    "n": 123
+   },
+   "3": {
+    "acc": 10.1,
+    "n": 109
+   },
+   "4": {
+    "acc": 12.9,
+    "n": 116
+   }
+  },
+  "gpt": {
+   "0": {
+    "acc": 100.0,
+    "n": 148
+   },
+   "1": {
+    "acc": 96.2,
+    "n": 133
+   },
+   "2": {
+    "acc": 80.9,
+    "n": 68
+   },
+   "3": {
+    "acc": 64.1,
+    "n": 39
+   },
+   "4": {
+    "acc": 58.3,
+    "n": 36
+   }
+  },
+  "glm": {
+   "0": {
+    "acc": 59.0,
+    "n": 166
+   },
+   "1": {
+    "acc": 64.0,
+    "n": 139
+   },
+   "2": {
+    "acc": 48.4,
+    "n": 64
+   },
+   "3": {
+    "acc": 38.5,
+    "n": 26
+   },
+   "4": {
+    "acc": 23.8,
+    "n": 21
+   }
+  },
+  "qwen": {
+   "0": {
+    "acc": 94.0,
+    "n": 300
+   },
+   "1": {
+    "acc": 92.0,
+    "n": 237
+   },
+   "2": {
+    "acc": 94.8,
+    "n": 115
+   },
+   "3": {
+    "acc": 97.4,
+    "n": 38
+   },
+   "4": {
+    "acc": 100.0,
+    "n": 30
+   }
+  }
+ },
+ "corner_attractor_step8": {
+  "opus": {
+   "n_mazes_with_step8": 97,
+   "actual_end_at_4_4": 31,
+   "predicted_4_4": 33,
+   "top3_predicted_step8": [
+    [
+     [
+      4,
+      4
+     ],
+     33
+    ],
+    [
+     [
+      2,
+      4
+     ],
+     27
+    ],
+    [
+     [
+      3,
+      3
+     ],
+     11
+    ]
+   ]
+  },
+  "sonnet": {
+   "n_mazes_with_step8": 74,
+   "actual_end_at_4_4": 23,
+   "predicted_4_4": 18,
+   "top3_predicted_step8": [
+    [
+     [
+      2,
+      4
+     ],
+     24
+    ],
+    [
+     [
+      4,
+      4
+     ],
+     18
+    ],
+    [
+     [
+      0,
+      4
+     ],
+     17
+    ]
+   ]
+  },
+  "gpt": {
+   "n_mazes_with_step8": 53,
+   "actual_end_at_4_4": 25,
+   "predicted_4_4": 16,
+   "top3_predicted_step8": [
+    [
+     [
+      4,
+      4
+     ],
+     16
+    ],
+    [
+     [
+      2,
+      4
+     ],
+     13
+    ],
+    [
+     [
+      0,
+      4
+     ],
+     10
+    ]
+   ]
+  },
+  "glm": {
+   "n_mazes_with_step8": 52,
+   "actual_end_at_4_4": 5,
+   "predicted_4_4": 17,
+   "top3_predicted_step8": [
+    [
+     [
+      4,
+      4
+     ],
+     17
+    ],
+    [
+     [
+      2,
+      4
+     ],
+     13
+    ],
+    [
+     [
+      0,
+      4
+     ],
+     8
+    ]
+   ]
+  },
+  "qwen": {
+   "n_mazes_with_step8": 90,
+   "actual_end_at_4_4": 25,
+   "predicted_4_4": 28,
+   "top3_predicted_step8": [
+    [
+     [
+      4,
+      4
+     ],
+     28
+    ],
+    [
+     [
+      2,
+      4
+     ],
+     24
+    ],
+    [
+     [
+      0,
+      4
+     ],
+     16
+    ]
+   ]
+  }
+ },
+ "prediction_distribution_divergence": {
+  "opus": {
+   "mean_tv": 0.228,
+   "per_step_tv": [
+    0.0,
+    0.072,
+    0.093,
+    0.155,
+    0.258,
+    0.402,
+    0.443,
+    0.402
+   ],
+   "most_overpredicted_cell": [
+    [
+     2,
+     4
+    ],
+    37
+   ],
+   "most_underpredicted_cell": [
+    [
+     4,
+     2
+    ],
+    -29
+   ]
+  },
+  "sonnet": {
+   "mean_tv": 0.465,
+   "per_step_tv": [
+    0.324,
+    0.324,
+    0.392,
+    0.459,
+    0.514,
+    0.581,
+    0.608,
+    0.514
+   ],
+   "most_overpredicted_cell": [
+    [
+     0,
+     4
+    ],
+    52
+   ],
+   "most_underpredicted_cell": [
+    [
+     3,
+     1
+    ],
+    -31
+   ]
+  },
+  "gpt": {
+   "mean_tv": 0.101,
+   "per_step_tv": [
+    0.0,
+    0.0,
+    0.057,
+    0.075,
+    0.094,
+    0.208,
+    0.189,
+    0.189
+   ],
+   "most_overpredicted_cell": [
+    [
+     0,
+     4
+    ],
+    16
+   ],
+   "most_underpredicted_cell": [
+    [
+     4,
+     4
+    ],
+    -9
+   ]
+  },
+  "glm": {
+   "mean_tv": 0.286,
+   "per_step_tv": [
+    0.0,
+    0.212,
+    0.25,
+    0.365,
+    0.423,
+    0.404,
+    0.365,
+    0.269
+   ],
+   "most_overpredicted_cell": [
+    [
+     1,
+     4
+    ],
+    24
+   ],
+   "most_underpredicted_cell": [
+    [
+     0,
+     1
+    ],
+    -12
+   ]
+  },
+  "qwen": {
+   "mean_tv": 0.042,
+   "per_step_tv": [
+    0.0,
+    0.011,
+    0.0,
+    0.022,
+    0.056,
+    0.056,
+    0.122,
+    0.067
+   ],
+   "most_overpredicted_cell": [
+    [
+     3,
+     4
+    ],
+    7
+   ],
+   "most_underpredicted_cell": [
+    [
+     0,
+     3
+    ],
+    -5
+   ]
+  }
+ },
+ "row_confusion_actual_to_predicted": {
+  "opus": [
+   [
+    170,
+    2,
+    2,
+    0,
+    1
+   ],
+   [
+    16,
+    144,
+    12,
+    2,
+    1
+   ],
+   [
+    9,
+    40,
+    78,
+    7,
+    5
+   ],
+   [
+    10,
+    20,
+    46,
+    61,
+    13
+   ],
+   [
+    16,
+    15,
+    33,
+    29,
+    44
+   ]
+  ],
+  "sonnet": [
+   [
+    83,
+    10,
+    7,
+    0,
+    0
+   ],
+   [
+    47,
+    90,
+    6,
+    1,
+    0
+   ],
+   [
+    47,
+    31,
+    38,
+    3,
+    4
+   ],
+   [
+    28,
+    39,
+    24,
+    15,
+    3
+   ],
+   [
+    28,
+    29,
+    29,
+    13,
+    17
+   ]
+  ],
+  "gpt": [
+   [
+    148,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    5,
+    128,
+    0,
+    0,
+    0
+   ],
+   [
+    11,
+    2,
+    55,
+    0,
+    0
+   ],
+   [
+    5,
+    6,
+    3,
+    25,
+    0
+   ],
+   [
+    7,
+    2,
+    3,
+    3,
+    21
+   ]
+  ],
+  "glm": [
+   [
+    114,
+    28,
+    15,
+    4,
+    5
+   ],
+   [
+    28,
+    96,
+    7,
+    4,
+    4
+   ],
+   [
+    8,
+    10,
+    36,
+    4,
+    6
+   ],
+   [
+    5,
+    5,
+    5,
+    10,
+    1
+   ],
+   [
+    6,
+    6,
+    1,
+    1,
+    7
+   ]
+  ],
+  "qwen": [
+   [
+    282,
+    7,
+    2,
+    4,
+    5
+   ],
+   [
+    5,
+    218,
+    2,
+    9,
+    3
+   ],
+   [
+    3,
+    1,
+    109,
+    1,
+    1
+   ],
+   [
+    0,
+    1,
+    0,
+    37,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    30
+   ]
+  ]
+ },
+ "col_confusion_actual_to_predicted": {
+  "opus": [
+   [
+    47,
+    8,
+    9,
+    13,
+    15
+   ],
+   [
+    9,
+    138,
+    21,
+    17,
+    18
+   ],
+   [
+    3,
+    2,
+    104,
+    36,
+    48
+   ],
+   [
+    0,
+    2,
+    4,
+    92,
+    64
+   ],
+   [
+    1,
+    3,
+    7,
+    14,
+    101
+   ]
+  ],
+  "sonnet": [
+   [
+    39,
+    44,
+    24,
+    12,
+    13
+   ],
+   [
+    0,
+    61,
+    39,
+    35,
+    24
+   ],
+   [
+    0,
+    1,
+    38,
+    25,
+    66
+   ],
+   [
+    0,
+    0,
+    5,
+    46,
+    39
+   ],
+   [
+    0,
+    0,
+    3,
+    5,
+    73
+   ]
+  ],
+  "gpt": [
+   [
+    25,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    2,
+    74,
+    0,
+    0,
+    2
+   ],
+   [
+    0,
+    1,
+    74,
+    4,
+    4
+   ],
+   [
+    0,
+    0,
+    0,
+    83,
+    5
+   ],
+   [
+    0,
+    0,
+    0,
+    6,
+    144
+   ]
+  ],
+  "glm": [
+   [
+    26,
+    1,
+    1,
+    3,
+    5
+   ],
+   [
+    0,
+    76,
+    23,
+    12,
+    6
+   ],
+   [
+    0,
+    0,
+    46,
+    26,
+    33
+   ],
+   [
+    0,
+    0,
+    0,
+    44,
+    38
+   ],
+   [
+    0,
+    0,
+    3,
+    6,
+    67
+   ]
+  ],
+  "qwen": [
+   [
+    44,
+    1,
+    0,
+    0,
+    0
+   ],
+   [
+    3,
+    125,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    2,
+    124,
+    1,
+    0
+   ],
+   [
+    0,
+    2,
+    1,
+    143,
+    9
+   ],
+   [
+    0,
+    2,
+    1,
+    3,
+    259
+   ]
+  ]
+ },
+ "geometry_by_step": {
+  "opus": [
+   {
+    "step": 1,
+    "n": 97,
+    "row_acc": 100.0,
+    "mean_dist_when_wrong": null,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 2,
+    "n": 97,
+    "row_acc": 92.8,
+    "mean_dist_when_wrong": 2.0,
+    "overshoot": 1,
+    "undershoot": 0
+   },
+   {
+    "step": 3,
+    "n": 97,
+    "row_acc": 83.5,
+    "mean_dist_when_wrong": 2.12,
+    "overshoot": 4,
+    "undershoot": 0
+   },
+   {
+    "step": 4,
+    "n": 97,
+    "row_acc": 53.6,
+    "mean_dist_when_wrong": 2.43,
+    "overshoot": 6,
+    "undershoot": 0
+   },
+   {
+    "step": 5,
+    "n": 97,
+    "row_acc": 53.6,
+    "mean_dist_when_wrong": 2.88,
+    "overshoot": 2,
+    "undershoot": 2
+   },
+   {
+    "step": 6,
+    "n": 97,
+    "row_acc": 43.3,
+    "mean_dist_when_wrong": 3.44,
+    "overshoot": 7,
+    "undershoot": 4
+   },
+   {
+    "step": 7,
+    "n": 97,
+    "row_acc": 47.4,
+    "mean_dist_when_wrong": 3.01,
+    "overshoot": 0,
+    "undershoot": 4
+   },
+   {
+    "step": 8,
+    "n": 97,
+    "row_acc": 38.1,
+    "mean_dist_when_wrong": 3.23,
+    "overshoot": 0,
+    "undershoot": 8
+   }
+  ],
+  "sonnet": [
+   {
+    "step": 1,
+    "n": 74,
+    "row_acc": 67.6,
+    "mean_dist_when_wrong": 2.0,
+    "overshoot": 5,
+    "undershoot": 0
+   },
+   {
+    "step": 2,
+    "n": 74,
+    "row_acc": 55.4,
+    "mean_dist_when_wrong": 2.79,
+    "overshoot": 9,
+    "undershoot": 0
+   },
+   {
+    "step": 3,
+    "n": 74,
+    "row_acc": 47.3,
+    "mean_dist_when_wrong": 3.0,
+    "overshoot": 9,
+    "undershoot": 0
+   },
+   {
+    "step": 4,
+    "n": 74,
+    "row_acc": 37.8,
+    "mean_dist_when_wrong": 3.75,
+    "overshoot": 10,
+    "undershoot": 0
+   },
+   {
+    "step": 5,
+    "n": 74,
+    "row_acc": 27.0,
+    "mean_dist_when_wrong": 3.64,
+    "overshoot": 5,
+    "undershoot": 0
+   },
+   {
+    "step": 6,
+    "n": 74,
+    "row_acc": 25.7,
+    "mean_dist_when_wrong": 3.76,
+    "overshoot": 6,
+    "undershoot": 0
+   },
+   {
+    "step": 7,
+    "n": 74,
+    "row_acc": 31.1,
+    "mean_dist_when_wrong": 3.22,
+    "overshoot": 0,
+    "undershoot": 3
+   },
+   {
+    "step": 8,
+    "n": 74,
+    "row_acc": 36.5,
+    "mean_dist_when_wrong": 3.58,
+    "overshoot": 0,
+    "undershoot": 3
+   }
+  ],
+  "gpt": [
+   {
+    "step": 1,
+    "n": 53,
+    "row_acc": 100.0,
+    "mean_dist_when_wrong": null,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 2,
+    "n": 53,
+    "row_acc": 100.0,
+    "mean_dist_when_wrong": null,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 3,
+    "n": 53,
+    "row_acc": 94.3,
+    "mean_dist_when_wrong": 2.0,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 4,
+    "n": 53,
+    "row_acc": 92.5,
+    "mean_dist_when_wrong": 3.0,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 5,
+    "n": 53,
+    "row_acc": 90.6,
+    "mean_dist_when_wrong": 3.2,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 6,
+    "n": 53,
+    "row_acc": 77.4,
+    "mean_dist_when_wrong": 2.33,
+    "overshoot": 0,
+    "undershoot": 1
+   },
+   {
+    "step": 7,
+    "n": 53,
+    "row_acc": 79.2,
+    "mean_dist_when_wrong": 3.09,
+    "overshoot": 0,
+    "undershoot": 3
+   },
+   {
+    "step": 8,
+    "n": 53,
+    "row_acc": 77.4,
+    "mean_dist_when_wrong": 3.17,
+    "overshoot": 0,
+    "undershoot": 5
+   }
+  ],
+  "glm": [
+   {
+    "step": 1,
+    "n": 52,
+    "row_acc": 100.0,
+    "mean_dist_when_wrong": null,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 2,
+    "n": 52,
+    "row_acc": 78.8,
+    "mean_dist_when_wrong": 2.0,
+    "overshoot": 7,
+    "undershoot": 0
+   },
+   {
+    "step": 3,
+    "n": 52,
+    "row_acc": 67.3,
+    "mean_dist_when_wrong": 2.33,
+    "overshoot": 9,
+    "undershoot": 0
+   },
+   {
+    "step": 4,
+    "n": 52,
+    "row_acc": 67.3,
+    "mean_dist_when_wrong": 2.64,
+    "overshoot": 8,
+    "undershoot": 0
+   },
+   {
+    "step": 5,
+    "n": 52,
+    "row_acc": 53.8,
+    "mean_dist_when_wrong": 2.67,
+    "overshoot": 10,
+    "undershoot": 0
+   },
+   {
+    "step": 6,
+    "n": 52,
+    "row_acc": 50.0,
+    "mean_dist_when_wrong": 2.94,
+    "overshoot": 13,
+    "undershoot": 0
+   },
+   {
+    "step": 7,
+    "n": 52,
+    "row_acc": 48.1,
+    "mean_dist_when_wrong": 2.87,
+    "overshoot": 0,
+    "undershoot": 1
+   },
+   {
+    "step": 8,
+    "n": 52,
+    "row_acc": 40.4,
+    "mean_dist_when_wrong": 3.0,
+    "overshoot": 0,
+    "undershoot": 5
+   }
+  ],
+  "qwen": [
+   {
+    "step": 1,
+    "n": 90,
+    "row_acc": 100.0,
+    "mean_dist_when_wrong": null,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 2,
+    "n": 90,
+    "row_acc": 97.8,
+    "mean_dist_when_wrong": 2.0,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 3,
+    "n": 90,
+    "row_acc": 100.0,
+    "mean_dist_when_wrong": null,
+    "overshoot": 0,
+    "undershoot": 0
+   },
+   {
+    "step": 4,
+    "n": 90,
+    "row_acc": 97.8,
+    "mean_dist_when_wrong": 3.0,
+    "overshoot": 1,
+    "undershoot": 0
+   },
+   {
+    "step": 5,
+    "n": 90,
+    "row_acc": 93.3,
+    "mean_dist_when_wrong": 2.67,
+    "overshoot": 4,
+    "undershoot": 0
+   },
+   {
+    "step": 6,
+    "n": 90,
+    "row_acc": 93.3,
+    "mean_dist_when_wrong": 3.67,
+    "overshoot": 2,
+    "undershoot": 0
+   },
+   {
+    "step": 7,
+    "n": 90,
+    "row_acc": 83.3,
+    "mean_dist_when_wrong": 2.47,
+    "overshoot": 1,
+    "undershoot": 4
+   },
+   {
+    "step": 8,
+    "n": 90,
+    "row_acc": 85.6,
+    "mean_dist_when_wrong": 2.77,
+    "overshoot": 0,
+    "undershoot": 3
+   }
+  ]
+ }
+}

@@ -1,0 +1,476 @@
+{
+ "metadata": {
+  "experiment": "cross_structure",
+  "produced_by": "analysis/cross_structure.py",
+  "models": [
+   "opus",
+   "sonnet",
+   "gpt",
+   "glm",
+   "qwen"
+  ],
+  "n_mazes_total": 100,
+  "n_consistent": {
+   "opus": 97,
+   "sonnet": 74,
+   "gpt": 53,
+   "glm": 52,
+   "qwen": 90
+  },
+  "n_intersection": 19,
+  "scoring": {
+   "run_idx": 0,
+   "match": "exact per-step position vs the target's run-0 trajectory",
+   "unparsed": "skipped",
+   "branch": ">=2 unvisited legal moves at the pre-move cell",
+   "default_move": "alphabetically first legal direction (E < N < S < W)"
+  }
+ },
+ "per_target_structure": {
+  "opus": {
+   "n_shared_items": 776,
+   "per_predictor_acc": {
+    "self": 58.9,
+    "sonnet": 53.7,
+    "gpt": 54.9,
+    "glm": 54.0,
+    "qwen": 56.3
+   },
+   "convergence": {
+    "std": 1.9,
+    "range": 5.2
+   },
+   "mean_pairwise_position_agreement_pct": 81.8,
+   "wrong_predictor_agreement_pct": 77.8,
+   "best_single_acc": 58.9,
+   "ensemble_others_acc": 53.5,
+   "ensemble_all_acc": 54.8,
+   "self_matches_truth_pct": 58.9,
+   "self_matches_consensus_pct": 75.9
+  },
+  "sonnet": {
+   "n_shared_items": 592,
+   "per_predictor_acc": {
+    "self": 37.0,
+    "opus": 43.1,
+    "gpt": 36.7,
+    "glm": 38.5,
+    "qwen": 39.9
+   },
+   "convergence": {
+    "std": 2.33,
+    "range": 6.4
+   },
+   "mean_pairwise_position_agreement_pct": 80.3,
+   "wrong_predictor_agreement_pct": 84.6,
+   "best_single_acc": 43.1,
+   "ensemble_others_acc": 40.0,
+   "ensemble_all_acc": 37.8,
+   "self_matches_truth_pct": 37.0,
+   "self_matches_consensus_pct": 87.7
+  },
+  "gpt": {
+   "n_shared_items": 424,
+   "per_predictor_acc": {
+    "self": 88.9,
+    "opus": 61.3,
+    "sonnet": 85.8,
+    "glm": 89.2,
+    "qwen": 89.6
+   },
+   "convergence": {
+    "std": 10.91,
+    "range": 28.3
+   },
+   "mean_pairwise_position_agreement_pct": 80.0,
+   "wrong_predictor_agreement_pct": 80.1,
+   "best_single_acc": 89.6,
+   "ensemble_others_acc": 86.8,
+   "ensemble_all_acc": 89.2,
+   "self_matches_truth_pct": 88.9,
+   "self_matches_consensus_pct": 91.3
+  },
+  "glm": {
+   "n_shared_items": 416,
+   "per_predictor_acc": {
+    "self": 56.0,
+    "opus": 45.4,
+    "sonnet": 55.0,
+    "gpt": 57.2,
+    "qwen": 54.8
+   },
+   "convergence": {
+    "std": 4.23,
+    "range": 11.8
+   },
+   "mean_pairwise_position_agreement_pct": 86.0,
+   "wrong_predictor_agreement_pct": 82.9,
+   "best_single_acc": 57.2,
+   "ensemble_others_acc": 54.8,
+   "ensemble_all_acc": 56.7,
+   "self_matches_truth_pct": 56.0,
+   "self_matches_consensus_pct": 95.0
+  },
+  "qwen": {
+   "n_shared_items": 720,
+   "per_predictor_acc": {
+    "self": 93.9,
+    "opus": 68.9,
+    "sonnet": 94.7,
+    "gpt": 97.4,
+    "glm": 96.7
+   },
+   "convergence": {
+    "std": 10.79,
+    "range": 28.5
+   },
+   "mean_pairwise_position_agreement_pct": 85.3,
+   "wrong_predictor_agreement_pct": 76.2,
+   "best_single_acc": 97.4,
+   "ensemble_others_acc": 95.1,
+   "ensemble_all_acc": 96.9,
+   "self_matches_truth_pct": 93.9,
+   "self_matches_consensus_pct": 93.2
+  }
+ },
+ "asymmetry_vs_predictability": {
+  "pearson": 0.927,
+  "perm_p": 0.0002,
+  "n_pairs": 10,
+  "note": "positive => the direction pointing at the more predictable target is the higher one",
+  "pairs": [
+   {
+    "pair": "opus|sonnet",
+    "a_to_b": 43.1,
+    "b_to_a": 53.7,
+    "acc_gap": -10.7,
+    "predictability_gap_b_minus_a": -16.5
+   },
+   {
+    "pair": "opus|gpt",
+    "a_to_b": 61.3,
+    "b_to_a": 54.9,
+    "acc_gap": 6.4,
+    "predictability_gap_b_minus_a": 27.4
+   },
+   {
+    "pair": "opus|glm",
+    "a_to_b": 45.4,
+    "b_to_a": 54.0,
+    "acc_gap": -8.6,
+    "predictability_gap_b_minus_a": -1.9
+   },
+   {
+    "pair": "opus|qwen",
+    "a_to_b": 68.9,
+    "b_to_a": 56.3,
+    "acc_gap": 12.6,
+    "predictability_gap_b_minus_a": 34.7
+   },
+   {
+    "pair": "sonnet|gpt",
+    "a_to_b": 85.8,
+    "b_to_a": 36.7,
+    "acc_gap": 49.2,
+    "predictability_gap_b_minus_a": 44.0
+   },
+   {
+    "pair": "sonnet|glm",
+    "a_to_b": 55.0,
+    "b_to_a": 38.5,
+    "acc_gap": 16.5,
+    "predictability_gap_b_minus_a": 14.7
+   },
+   {
+    "pair": "sonnet|qwen",
+    "a_to_b": 94.7,
+    "b_to_a": 39.9,
+    "acc_gap": 54.9,
+    "predictability_gap_b_minus_a": 51.3
+   },
+   {
+    "pair": "gpt|glm",
+    "a_to_b": 57.2,
+    "b_to_a": 89.2,
+    "acc_gap": -31.9,
+    "predictability_gap_b_minus_a": -29.3
+   },
+   {
+    "pair": "gpt|qwen",
+    "a_to_b": 97.4,
+    "b_to_a": 89.6,
+    "acc_gap": 7.7,
+    "predictability_gap_b_minus_a": 7.3
+   },
+   {
+    "pair": "glm|qwen",
+    "a_to_b": 96.7,
+    "b_to_a": 54.8,
+    "acc_gap": 41.9,
+    "predictability_gap_b_minus_a": 36.6
+   }
+  ]
+ },
+ "cross_acc_vs_target_self_acc": {
+  "pearson": 0.919,
+  "perm_p": 0.0002,
+  "note": "high => predicting a model is governed by that model's own predictability (simulation, not self-knowledge)",
+  "n_cells": 20
+ },
+ "oracle_ceiling": {
+  "opus": {
+   "n": 776,
+   "best_single_acc": 58.9,
+   "oracle_any_other_acc": 61.6,
+   "oracle_any_incl_self_acc": 67.1,
+   "items_only_self_correct_pct": 5.5
+  },
+  "sonnet": {
+   "n": 592,
+   "best_single_acc": 43.1,
+   "oracle_any_other_acc": 52.0,
+   "oracle_any_incl_self_acc": 52.4,
+   "items_only_self_correct_pct": 0.3
+  },
+  "gpt": {
+   "n": 424,
+   "best_single_acc": 89.6,
+   "oracle_any_other_acc": 96.5,
+   "oracle_any_incl_self_acc": 96.7,
+   "items_only_self_correct_pct": 0.2
+  },
+  "glm": {
+   "n": 416,
+   "best_single_acc": 57.2,
+   "oracle_any_other_acc": 57.7,
+   "oracle_any_incl_self_acc": 57.7,
+   "items_only_self_correct_pct": 0.0
+  },
+  "qwen": {
+   "n": 720,
+   "best_single_acc": 97.4,
+   "oracle_any_other_acc": 98.3,
+   "oracle_any_incl_self_acc": 98.3,
+   "items_only_self_correct_pct": 0.0
+  }
+ },
+ "predictor_target_specialization": {
+  "grand_mean": 63.7,
+  "predictor_skill": {
+   "opus": 54.7,
+   "sonnet": 72.3,
+   "gpt": 61.5,
+   "glm": 69.6,
+   "qwen": 60.2
+  },
+  "target_predictability": {
+   "opus": 54.7,
+   "sonnet": 39.5,
+   "gpt": 81.5,
+   "glm": 53.1,
+   "qwen": 89.4
+  },
+  "residuals": {
+   "opus->sonnet": 12.5,
+   "opus->gpt": -11.2,
+   "opus->glm": 1.3,
+   "opus->qwen": -11.5,
+   "sonnet->opus": -9.7,
+   "sonnet->gpt": -4.3,
+   "sonnet->glm": -6.8,
+   "sonnet->qwen": -3.4,
+   "gpt->opus": 2.3,
+   "gpt->sonnet": -0.7,
+   "gpt->glm": 6.2,
+   "gpt->qwen": 10.1,
+   "glm->opus": -6.7,
+   "glm->sonnet": -6.9,
+   "glm->gpt": 1.7,
+   "glm->qwen": 1.3,
+   "qwen->opus": 5.1,
+   "qwen->sonnet": 3.8,
+   "qwen->gpt": 11.6,
+   "qwen->glm": 5.2
+  },
+  "note": "residual = cross_acc - (predictor_skill + target_predictability - grand_mean); + => affinity beyond main effects"
+ },
+ "developer_affinity": {
+  "same_developer_pairs": {
+   "opus->sonnet": 12.5,
+   "sonnet->opus": -9.7
+  },
+  "mean_residual_same_developer": 1.4,
+  "mean_residual_different_developer": -0.16,
+  "open_weight_pair_glm_qwen": {
+   "glm->qwen": 1.3,
+   "qwen->glm": 5.2
+  },
+  "note": "developers: anthropic={opus,sonnet}, openai={gpt}, zhipu={glm}, alibaba={qwen}. Only opus<->sonnet is same-developer (n=2, asymmetric: opus->sonnet +12.5 vs sonnet->opus -9.7) so this is underpowered. GLM and Qwen are DIFFERENT developers; their pair is listed separately, not as same-developer."
+ },
+ "self_vs_other_prediction_dissociation": {
+  "opus": {
+   "self_acc": 58.9,
+   "skill_predicting_others": 54.7,
+   "predictability_by_others": 54.7,
+   "self_minus_other_skill": 4.2,
+   "mean_residual_as_predictor": -2.22
+  },
+  "sonnet": {
+   "self_acc": 37.0,
+   "skill_predicting_others": 72.3,
+   "predictability_by_others": 39.5,
+   "self_minus_other_skill": -35.3,
+   "mean_residual_as_predictor": -6.05
+  },
+  "gpt": {
+   "self_acc": 88.9,
+   "skill_predicting_others": 61.5,
+   "predictability_by_others": 81.5,
+   "self_minus_other_skill": 27.4,
+   "mean_residual_as_predictor": 4.47
+  },
+  "glm": {
+   "self_acc": 56.0,
+   "skill_predicting_others": 69.6,
+   "predictability_by_others": 53.1,
+   "self_minus_other_skill": -13.6,
+   "mean_residual_as_predictor": -2.65
+  },
+  "qwen": {
+   "self_acc": 93.9,
+   "skill_predicting_others": 60.2,
+   "predictability_by_others": 89.4,
+   "self_minus_other_skill": 33.7,
+   "mean_residual_as_predictor": 6.42
+  }
+ },
+ "self_projection": {
+  "pearson_similarity_vs_cross_acc": 0.571,
+  "perm_p_raw": 0.0114,
+  "pearson_similarity_vs_residual": 0.544,
+  "perm_p_residual": 0.0138,
+  "pairs": [
+   {
+    "pair": "opus->sonnet",
+    "behavioral_similarity": 46.2,
+    "cross_acc": 43.1,
+    "residual": 12.5
+   },
+   {
+    "pair": "qwen->gpt",
+    "behavioral_similarity": 88.6,
+    "cross_acc": 89.6,
+    "residual": 11.6
+   },
+   {
+    "pair": "gpt->qwen",
+    "behavioral_similarity": 88.6,
+    "cross_acc": 97.4,
+    "residual": 10.1
+   },
+   {
+    "pair": "gpt->glm",
+    "behavioral_similarity": 58.2,
+    "cross_acc": 57.2,
+    "residual": 6.2
+   },
+   {
+    "pair": "qwen->glm",
+    "behavioral_similarity": 58.0,
+    "cross_acc": 54.8,
+    "residual": 5.2
+   },
+   {
+    "pair": "qwen->opus",
+    "behavioral_similarity": 56.5,
+    "cross_acc": 56.3,
+    "residual": 5.1
+   },
+   {
+    "pair": "qwen->sonnet",
+    "behavioral_similarity": 38.4,
+    "cross_acc": 39.9,
+    "residual": 3.8
+   },
+   {
+    "pair": "gpt->opus",
+    "behavioral_similarity": 55.5,
+    "cross_acc": 54.9,
+    "residual": 2.3
+   },
+   {
+    "pair": "glm->gpt",
+    "behavioral_similarity": 58.2,
+    "cross_acc": 89.2,
+    "residual": 1.7
+   },
+   {
+    "pair": "opus->glm",
+    "behavioral_similarity": 40.9,
+    "cross_acc": 45.4,
+    "residual": 1.3
+   },
+   {
+    "pair": "glm->qwen",
+    "behavioral_similarity": 58.0,
+    "cross_acc": 96.7,
+    "residual": 1.3
+   },
+   {
+    "pair": "gpt->sonnet",
+    "behavioral_similarity": 41.8,
+    "cross_acc": 36.7,
+    "residual": -0.7
+   },
+   {
+    "pair": "sonnet->qwen",
+    "behavioral_similarity": 38.4,
+    "cross_acc": 94.7,
+    "residual": -3.4
+   },
+   {
+    "pair": "sonnet->gpt",
+    "behavioral_similarity": 41.8,
+    "cross_acc": 85.8,
+    "residual": -4.3
+   },
+   {
+    "pair": "glm->opus",
+    "behavioral_similarity": 40.9,
+    "cross_acc": 54.0,
+    "residual": -6.7
+   },
+   {
+    "pair": "sonnet->glm",
+    "behavioral_similarity": 32.7,
+    "cross_acc": 55.0,
+    "residual": -6.8
+   },
+   {
+    "pair": "glm->sonnet",
+    "behavioral_similarity": 32.7,
+    "cross_acc": 38.5,
+    "residual": -6.9
+   },
+   {
+    "pair": "sonnet->opus",
+    "behavioral_similarity": 46.2,
+    "cross_acc": 53.7,
+    "residual": -9.7
+   },
+   {
+    "pair": "opus->gpt",
+    "behavioral_similarity": 55.5,
+    "cross_acc": 61.3,
+    "residual": -11.2
+   },
+   {
+    "pair": "opus->qwen",
+    "behavioral_similarity": 56.5,
+    "cross_acc": 68.9,
+    "residual": -11.5
+   }
+  ],
+  "note": "positive residual correlation => predictors have genuine affinity for behaviorally-similar targets (self-projection) beyond general predictability"
+ }
+}
