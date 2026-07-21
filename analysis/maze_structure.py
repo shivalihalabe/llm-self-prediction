@@ -136,6 +136,17 @@ RES["self_vs_cross_predictability_per_maze"] = {
 
 
 # ============================================================
+# PER-MAZE SELF VS CROSS PAIRS
+# ============================================================
+
+# The per-maze points behind the self-vs-cross correlation above: mean self-accuracy across the
+# models consistent on the maze vs mean cross-accuracy across all ordered pairs, intersection set.
+RES["per_maze_self_vs_cross"] = [
+    {"maze": mz, "self": x, "cross": y} for mz, (x, y) in zip(inter, self_cross)
+]
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

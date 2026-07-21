@@ -195,6 +195,25 @@ RES["reasoned_consensus_vs_truth_vs_prior"] = cons_track
 
 
 # ============================================================
+# NO-REASONING PREDICTED-POSITION GRID BY STEP
+# ============================================================
+
+# Where no-reasoning self-predictions land on the 5x5 grid, pooled across models, per step --
+# the spatial shape of the prior (concentration toward the centre / diagonal).
+grids = {}
+for step in range(1, 9):
+    g = [[0] * C.COLS for _ in range(C.ROWS)]
+    tot = 0
+    for m in MODELS:
+        for (mz, st2), pos in C.SELF_NR_POS[m].items():
+            if st2 == step:
+                g[pos[0]][pos[1]] += 1
+                tot += 1
+    grids[step] = {"grid": g, "tot": tot}
+RES["nr_predicted_position_grid_by_step"] = grids
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

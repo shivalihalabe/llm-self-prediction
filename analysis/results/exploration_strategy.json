@@ -783,5 +783,124 @@
    "corr_gap_vs_branch_rate": 0.347,
    "corr_gap_vs_prior_nr": 0.602
   }
+ },
+ "self_model_mismatch": {
+  "opus": {
+   "n_atypical_cells": 254,
+   "chosen_direction_distribution": {
+    "South": 211,
+    "North": 14,
+    "West": 29
+   },
+   "firstlisted_direction_distribution": {
+    "North": 85,
+    "East": 169
+   },
+   "wrong_self_pred_on_firstlisted_cell": {
+    "n_wrong": 183,
+    "on_firstlisted": 87,
+    "pct": 47.5
+   },
+   "atypical_cell_accuracy_per_predictor": {
+    "opus": 28.0,
+    "sonnet": 16.1,
+    "gpt": 16.5,
+    "glm": 24.4,
+    "qwen": 18.9
+   }
+  },
+  "sonnet": {
+   "n_atypical_cells": 182,
+   "chosen_direction_distribution": {
+    "South": 153,
+    "North": 20,
+    "West": 9
+   },
+   "firstlisted_direction_distribution": {
+    "East": 132,
+    "North": 50
+   },
+   "wrong_self_pred_on_firstlisted_cell": {
+    "n_wrong": 161,
+    "on_firstlisted": 69,
+    "pct": 42.9
+   },
+   "atypical_cell_accuracy_per_predictor": {
+    "opus": 29.7,
+    "sonnet": 11.5,
+    "gpt": 9.9,
+    "glm": 17.6,
+    "qwen": 15.9
+   }
+  },
+  "gpt": {
+   "n_atypical_cells": 61,
+   "chosen_direction_distribution": {
+    "South": 61
+   },
+   "firstlisted_direction_distribution": {
+    "North": 56,
+    "East": 5
+   },
+   "wrong_self_pred_on_firstlisted_cell": {
+    "n_wrong": 27,
+    "on_firstlisted": 16,
+    "pct": 59.3
+   },
+   "atypical_cell_accuracy_per_predictor": {
+    "opus": 54.1,
+    "sonnet": 54.1,
+    "gpt": 55.7,
+    "glm": 62.3,
+    "qwen": 72.1
+   }
+  },
+  "glm": {
+   "n_atypical_cells": 95,
+   "chosen_direction_distribution": {
+    "North": 27,
+    "South": 60,
+    "West": 8
+   },
+   "firstlisted_direction_distribution": {
+    "East": 71,
+    "North": 24
+   },
+   "wrong_self_pred_on_firstlisted_cell": {
+    "n_wrong": 81,
+    "on_firstlisted": 42,
+    "pct": 51.9
+   },
+   "atypical_cell_accuracy_per_predictor": {
+    "opus": 15.8,
+    "sonnet": 17.9,
+    "gpt": 17.9,
+    "glm": 14.7,
+    "qwen": 13.7
+   }
+  },
+  "qwen": {
+   "n_atypical_cells": 60,
+   "chosen_direction_distribution": {
+    "South": 57,
+    "North": 3
+   },
+   "firstlisted_direction_distribution": {
+    "North": 54,
+    "East": 6
+   },
+   "wrong_self_pred_on_firstlisted_cell": {
+    "n_wrong": 4,
+    "on_firstlisted": 3,
+    "pct": 75.0
+   },
+   "atypical_cell_accuracy_per_predictor": {
+    "opus": 80.0,
+    "sonnet": 93.3,
+    "gpt": 93.3,
+    "glm": 93.3,
+    "qwen": 93.3
+   }
+  }
  }
 }

@@ -338,6 +338,76 @@ RES["hedging_calibration"] = hedging_cal
 
 
 # ============================================================
+# DIRECTION LANGUAGE AT ATYPICAL CELLS
+# ============================================================
+
+# Which compass words a model's reasoning uses on its own atypical cells -- a lexical view of the
+# self-model (e.g. a model whose atypical moves are southward while its traces talk about "east").
+_DIRWORDS = {d: re.compile(rf"\b{d}\b", re.I) for d in ("north", "south", "east", "west")}
+dirlang = {}
+for m in MODELS:
+    at = {
+        (mz, s)
+        for (mz, s) in C.SELF[m]
+        if C.is_branch(m, mz, s) and not C.chose_first_listed(m, mz, s)
+    }
+    sub = TRACES[(TRACES.model == m) & ~TRACES.is_empty]
+    sub = sub[[k in at for k in zip(sub.maze, sub.step)]]
+    n = int(len(sub))
+    counts = {d: 0 for d in _DIRWORDS}
+    for mz, s, ri, rec in C.self_records(m, "reasoning"):
+        if ri != 0 or (mz, s) not in at or rec.get("parsed_position") is None:
+            continue
+        txt = trace_text(rec)
+        if not txt.strip():
+            continue
+        for d, pat in _DIRWORDS.items():
+            counts[d] += bool(pat.search(txt))
+    dirlang[m] = {"n_traces": n, "pct_mentioning": {d: C.pct(c, n) for d, c in counts.items()}}
+RES["atypical_cell_direction_language"] = dirlang
+
+
+# ============================================================
+# WORDS PER BRANCH POINT VS ACCURACY
+# ============================================================
+
+# Reasoning length normalised by difficulty: words in the trace divided by the number of genuine
+# branch decisions in the predicted path (cells with >=1 branch). Terciles replace the raw
+# character-length split, whose gradient is a difficulty confound.
+wpb = {}
+for m in MODELS:
+    rows = []
+    for mz, s, ri, rec in C.self_records(m, "reasoning"):
+        if ri != 0 or rec.get("parsed_position") is None:
+            continue
+        txt = trace_text(rec)
+        if not txt.strip() or mz not in C.TRUTH[m] or s >= len(C.TRUTH[m][mz]):
+            continue
+        nb = sum(1 for i in range(1, s + 1) if C.is_branch(m, mz, i))
+        if nb == 0:
+            continue
+        rows.append(
+            (len(txt.split()) / nb, tuple(rec["parsed_position"]) == tuple(C.TRUTH[m][mz][s]))
+        )
+    rows.sort(key=lambda x: (x[0], x[1]))
+    n = len(rows)
+    terc = {}
+    for name, seg in (
+        ("short", rows[: n // 3]),
+        ("medium", rows[n // 3 : 2 * n // 3]),
+        ("long", rows[2 * n // 3 :]),
+    ):
+        if seg:
+            terc[name] = {
+                "n": len(seg),
+                "acc": C.pct(sum(okv for _, okv in seg), len(seg)),
+                "ratio_range": [round(seg[0][0], 1), round(seg[-1][0], 1)],
+            }
+    wpb[m] = terc
+RES["words_per_branch_terciles"] = wpb
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

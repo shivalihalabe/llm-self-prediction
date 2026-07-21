@@ -1187,5 +1187,102 @@
   "pearson": 0.882,
   "perm_p": 0.0002,
   "note": "high => the same mazes are easy/hard whether a model predicts itself or another model predicts it"
- }
+ },
+ "per_maze_self_vs_cross": [
+  {
+   "maze": "maze_10",
+   "self": 85.0,
+   "cross": 80.625
+  },
+  {
+   "maze": "maze_14",
+   "self": 95.0,
+   "cross": 83.75
+  },
+  {
+   "maze": "maze_2",
+   "self": 67.5,
+   "cross": 67.5
+  },
+  {
+   "maze": "maze_24",
+   "self": 50.0,
+   "cross": 49.375
+  },
+  {
+   "maze": "maze_32",
+   "self": 72.5,
+   "cross": 68.75
+  },
+  {
+   "maze": "maze_33",
+   "self": 82.5,
+   "cross": 76.875
+  },
+  {
+   "maze": "maze_34",
+   "self": 60.0,
+   "cross": 56.25
+  },
+  {
+   "maze": "maze_42",
+   "self": 87.5,
+   "cross": 78.125
+  },
+  {
+   "maze": "maze_48",
+   "self": 77.5,
+   "cross": 80.0
+  },
+  {
+   "maze": "maze_49",
+   "self": 77.5,
+   "cross": 79.375
+  },
+  {
+   "maze": "maze_50",
+   "self": 85.0,
+   "cross": 63.125
+  },
+  {
+   "maze": "maze_55",
+   "self": 70.0,
+   "cross": 63.75
+  },
+  {
+   "maze": "maze_62",
+   "self": 97.5,
+   "cross": 98.75
+  },
+  {
+   "maze": "maze_65",
+   "self": 60.0,
+   "cross": 67.5
+  },
+  {
+   "maze": "maze_78",
+   "self": 47.5,
+   "cross": 46.875
+  },
+  {
+   "maze": "maze_86",
+   "self": 62.5,
+   "cross": 62.5
+  },
+  {
+   "maze": "maze_95",
+   "self": 75.0,
+   "cross": 60.625
+  },
+  {
+   "maze": "maze_96",
+   "self": 57.5,
+   "cross": 51.25
+  },
+  {
+   "maze": "maze_99",
+   "self": 72.5,
+   "cross": 68.125
+  }
+ ]
 }

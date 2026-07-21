@@ -311,6 +311,180 @@ RES["self_consistency_vs_accuracy"] = consistency_acc
 
 
 # ============================================================
+# SELF-ACCURACY BY MOVE TYPE, REASONING VS NO-REASONING
+# ============================================================
+
+
+# The A5 split: each model's self-accuracy on atypical / default / determined cells, with and
+# without a reasoning trace. "Determined" = non-branch cells (one unvisited move).
+def _move_type(t, mz, step):
+    if not C.is_branch(t, mz, step):
+        return "determined"
+    return "default" if C.chose_first_listed(t, mz, step) else "atypical"
+
+
+by_move_type = {}
+for t in MODELS:
+    out = {}
+    for kind, scored in (("reason", C.SELF[t]), ("nr", C.SELF_NR[t])):
+        buckets = {"atypical": [], "default": [], "determined": []}
+        for (mz, step), okv in scored.items():
+            buckets[_move_type(t, mz, step)].append(okv)
+        for k, v in buckets.items():
+            out.setdefault(k, {})[kind] = C.pct(sum(v), len(v))
+            out[k]["n_" + kind] = len(v)
+    by_move_type[t] = out
+RES["self_by_move_type_reasoning_vs_nr"] = by_move_type
+
+
+# ============================================================
+# ATYPICAL-CELL SENSITIVITY: PER-PREDICTOR AND ROTATING-BEST COMPARATORS
+# ============================================================
+
+
+# Robustness of the atypical-cell self-advantage to the choice of comparator. Per-predictor:
+# self vs each cross-predictor individually. Rotating-best: at each step, the opponent is the
+# cross-predictor with the highest accuracy on ALL of the target's cells at that step (a harsher,
+# selection-biased comparator), evaluated on the atypical cells only.
+def _atypical_cells(t):
+    return sorted(
+        (mz, step)
+        for (mz, step) in C.SELF[t]
+        if C.is_branch(t, mz, step) and not C.chose_first_listed(t, mz, step)
+    )
+
+
+def _step_best_opponent(t, step):
+    best, bacc = None, -1.0
+    for p in MODELS:
+        if p == t:
+            continue
+        vals = [v for (mz, st2), v in C.CROSS[(p, t)].items() if st2 == step]
+        if vals and 100.0 * sum(vals) / len(vals) > bacc:
+            bacc, best = 100.0 * sum(vals) / len(vals), p
+    return best
+
+
+atyp_sensitivity = {}
+for t in MODELS:
+    cells = _atypical_cells(t)
+    per_pred = {}
+    for p in MODELS:
+        if p == t:
+            continue
+        pairs = [(C.SELF[t][k], C.CROSS[(p, t)][k]) for k in cells if k in C.CROSS[(p, t)]]
+        mc = mcnemar(pairs)
+        per_pred[p] = {
+            "gap": C.pct(sum(x for x, _ in pairs), len(pairs))
+            - C.pct(sum(y for _, y in pairs), len(pairs)),
+            "gap_exact": round(
+                100.0 * (sum(x for x, _ in pairs) - sum(y for _, y in pairs)) / len(pairs), 1
+            ),
+            "p_value": mc["p_value"],
+            "n": len(pairs),
+        }
+    rot_pairs = []
+    opp_by_step = {}
+    for step in sorted(set(k[1] for k in cells)):
+        opp = _step_best_opponent(t, step)
+        opp_by_step[step] = opp
+        rot_pairs += [
+            (C.SELF[t][k], C.CROSS[(opp, t)][k])
+            for k in cells
+            if k[1] == step and k in C.CROSS[(opp, t)]
+        ]
+    mc = mcnemar(rot_pairs)
+    atyp_sensitivity[t] = {
+        "per_predictor": per_pred,
+        "rotating_best": {
+            "gap": round(
+                100.0
+                * (sum(x for x, _ in rot_pairs) - sum(y for _, y in rot_pairs))
+                / len(rot_pairs),
+                1,
+            ),
+            "p_value": mc["p_value"],
+            "n": len(rot_pairs),
+            "opponent_by_step": opp_by_step,
+        },
+    }
+RES["atypical_comparator_sensitivity"] = atyp_sensitivity
+
+
+# ============================================================
+# PER-STEP McNEMAR WITH HOLM CORRECTION (FIXED AND ROTATING OPPONENT)
+# ============================================================
+
+
+# Two versions of "is any single step significant after multiple testing": against the fixed
+# best-overall opponent, and against the per-step rotating best opponent (harsher).
+def _holm(raw):
+    order = sorted(raw, key=lambda k: raw[k])
+    out, running = {}, 0.0
+    for rank, k in enumerate(order):
+        running = max(running, min(1.0, (len(raw) - rank) * raw[k]))
+        out[k] = round(running, 4)
+    return out
+
+
+per_step_holm = {}
+for t in MODELS:
+    bo = best_other_model(t)
+    fixed_raw = {}
+    rot_raw = {}
+    for step in range(1, 9):
+        ks = sorted(k for k in set(C.SELF[t]) & set(C.CROSS[(bo, t)]) if k[1] == step)
+        fixed_raw[step] = mcnemar([(C.SELF[t][k], C.CROSS[(bo, t)][k]) for k in ks])["p_value"]
+        opp = _step_best_opponent(t, step)
+        ks2 = sorted(k for k in set(C.SELF[t]) & set(C.CROSS[(opp, t)]) if k[1] == step)
+        rot_raw[step] = mcnemar([(C.SELF[t][k], C.CROSS[(opp, t)][k]) for k in ks2])["p_value"]
+    per_step_holm[t] = {
+        "fixed_opponent": {"opponent": bo, "raw": fixed_raw, "holm": _holm(fixed_raw)},
+        "rotating_opponent": {"raw": rot_raw, "holm": _holm(rot_raw)},
+    }
+RES["per_step_mcnemar_holm"] = per_step_holm
+
+
+# ============================================================
+# NO-REASONING UNIQUE INFORMATION
+# ============================================================
+
+# Cells where the no-reasoning self-prediction is correct while all four (reasoning)
+# cross-predictors are wrong. No-reasoning cross-predictions were not collected, so the
+# reasoning cross-predictors are the only available comparator.
+nr_unique = {}
+for t in MODELS:
+    n = only = 0
+    for (mz, step), okv in C.SELF_NR[t].items():
+        others = [C.CROSS[(p, t)].get((mz, step)) for p in MODELS if p != t]
+        others = [x for x in others if x is not None]
+        if len(others) < 4:
+            continue
+        n += 1
+        if okv and not any(others):
+            only += 1
+    nr_unique[t] = {"only": only, "n": n, "pct": C.pct(only, n)}
+RES["nr_unique_info"] = nr_unique
+
+
+# ============================================================
+# DETERMINED-CELL SELF-ADVANTAGE
+# ============================================================
+
+# Completes the move-type split: the paired self-vs-best-other gap on determined (non-branch)
+# cells, same methodology as the prior-aligned / idiosyncratic split above.
+det = {}
+for t in MODELS:
+    bo = best_other_model(t)
+    pairs = paired(
+        C.SELF[t], C.CROSS[(bo, t)], restrict=lambda k, tt=t: not C.is_branch(tt, k[0], k[1])
+    )
+    ci = boot_gap_ci(pairs)
+    det[t] = {**ci, **mcnemar(pairs), "best_other": bo}
+RES["self_advantage_determined"] = det
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

@@ -271,6 +271,54 @@ RES["self_advantage_vs_branch_rate"] = midh
 
 
 # ============================================================
+# SELF-MODEL MISMATCH AT ATYPICAL CELLS
+# ============================================================
+
+# Why some models predict themselves worse than others do: at atypical cells, compare what the
+# model actually chose against the first-listed move its simplified self-model would pick, where
+# wrong self-predictions land, and how every predictor scores on exactly those cells.
+mismatch = {}
+for t in MODELS:
+    cells = [
+        (mz, s)
+        for (mz, s) in C.SELF[t]
+        if C.is_branch(t, mz, s) and not C.chose_first_listed(t, mz, s)
+    ]
+    chosen, firstlisted = collections.Counter(), collections.Counter()
+    n_wrong = on_fl = 0
+    for mz, s in cells:
+        traj = [tuple(p) for p in C.TRUTH[t][mz]]
+        a = traj[s - 1]
+        chosen[direction(a, traj[s])] += 1
+        legal = {direction(a, tuple(nb)): tuple(nb) for nb in C.legal_moves(t, mz, s)}
+        fl = sorted(legal)[0]
+        firstlisted[fl] += 1
+        if C.SELF[t].get((mz, s)) is False:
+            n_wrong += 1
+            on_fl += tuple(C.SELF_POS[t][(mz, s)]) == legal[fl]
+    per_pred = {}
+    for p in MODELS:
+        vals = (
+            [C.SELF[t][k] for k in cells]
+            if p == t
+            else [v for v in (C.CROSS[(p, t)].get(k) for k in cells) if v is not None]
+        )
+        per_pred[p] = C.pct(sum(vals), len(vals))
+    mismatch[t] = {
+        "n_atypical_cells": len(cells),
+        "chosen_direction_distribution": dict(chosen),
+        "firstlisted_direction_distribution": dict(firstlisted),
+        "wrong_self_pred_on_firstlisted_cell": {
+            "n_wrong": n_wrong,
+            "on_firstlisted": on_fl,
+            "pct": C.pct(on_fl, n_wrong),
+        },
+        "atypical_cell_accuracy_per_predictor": per_pred,
+    }
+RES["self_model_mismatch"] = mismatch
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

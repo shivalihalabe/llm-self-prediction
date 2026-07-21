@@ -1066,5 +1066,184 @@
    "acc_when_not_hedging": 100.0,
    "n_plain": 61
   }
+ },
+ "atypical_cell_direction_language": {
+  "opus": {
+   "n_traces": 254,
+   "pct_mentioning": {
+    "north": 76.4,
+    "south": 100.0,
+    "east": 100.0,
+    "west": 93.7
+   }
+  },
+  "sonnet": {
+   "n_traces": 157,
+   "pct_mentioning": {
+    "north": 62.4,
+    "south": 100.0,
+    "east": 100.0,
+    "west": 70.1
+   }
+  },
+  "gpt": {
+   "n_traces": 59,
+   "pct_mentioning": {
+    "north": 88.1,
+    "south": 98.3,
+    "east": 96.6,
+    "west": 94.9
+   }
+  },
+  "glm": {
+   "n_traces": 95,
+   "pct_mentioning": {
+    "north": 98.9,
+    "south": 100.0,
+    "east": 100.0,
+    "west": 100.0
+   }
+  },
+  "qwen": {
+   "n_traces": 60,
+   "pct_mentioning": {
+    "north": 100.0,
+    "south": 100.0,
+    "east": 100.0,
+    "west": 100.0
+   }
+  }
+ },
+ "words_per_branch_terciles": {
+  "opus": {
+   "short": {
+    "n": 205,
+    "acc": 43.9,
+    "ratio_range": [
+     11.5,
+     37.5
+    ]
+   },
+   "medium": {
+    "n": 205,
+    "acc": 53.2,
+    "ratio_range": [
+     37.7,
+     69.2
+    ]
+   },
+   "long": {
+    "n": 205,
+    "acc": 47.3,
+    "ratio_range": [
+     69.5,
+     456.5
+    ]
+   }
+  },
+  "sonnet": {
+   "short": {
+    "n": 152,
+    "acc": 19.1,
+    "ratio_range": [
+     18.2,
+     48.8
+    ]
+   },
+   "medium": {
+    "n": 153,
+    "acc": 20.3,
+    "ratio_range": [
+     48.8,
+     84.0
+    ]
+   },
+   "long": {
+    "n": 153,
+    "acc": 32.0,
+    "ratio_range": [
+     84.5,
+     382.0
+    ]
+   }
+  },
+  "gpt": {
+   "short": {
+    "n": 106,
+    "acc": 83.0,
+    "ratio_range": [
+     13.4,
+     81.7
+    ]
+   },
+   "medium": {
+    "n": 107,
+    "acc": 83.2,
+    "ratio_range": [
+     82.0,
+     158.5
+    ]
+   },
+   "long": {
+    "n": 107,
+    "acc": 92.5,
+    "ratio_range": [
+     159.5,
+     755.0
+    ]
+   }
+  },
+  "glm": {
+   "short": {
+    "n": 113,
+    "acc": 43.4,
+    "ratio_range": [
+     99.0,
+     405.3
+    ]
+   },
+   "medium": {
+    "n": 113,
+    "acc": 50.4,
+    "ratio_range": [
+     408.0,
+     726.7
+    ]
+   },
+   "long": {
+    "n": 114,
+    "acc": 44.7,
+    "ratio_range": [
+     741.0,
+     2721.0
+    ]
+   }
+  },
+  "qwen": {
+   "short": {
+    "n": 201,
+    "acc": 92.0,
+    "ratio_range": [
+     216.8,
+     602.8
+    ]
+   },
+   "medium": {
+    "n": 201,
+    "acc": 91.5,
+    "ratio_range": [
+     603.0,
+     1338.0
+    ]
+   },
+   "long": {
+    "n": 201,
+    "acc": 94.5,
+    "ratio_range": [
+     1349.0,
+     35836.0
+    ]
+   }
+  }
  }
 }
