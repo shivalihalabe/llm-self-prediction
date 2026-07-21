@@ -786,6 +786,15 @@
  },
  "self_model_mismatch": {
   "opus": {
+   "firstlisted_landing_test": {
+    "n_wrong": 183,
+    "on_firstlisted": 87,
+    "pct": 47.5,
+    "landed_on_legal_nonchosen": 102,
+    "expected_on_firstlisted_null": 46.2,
+    "expected_pct_null": 25.2,
+    "perm_p": 0.0
+   },
    "n_atypical_cells": 254,
    "chosen_direction_distribution": {
     "South": 211,
@@ -810,6 +819,15 @@
    }
   },
   "sonnet": {
+   "firstlisted_landing_test": {
+    "n_wrong": 161,
+    "on_firstlisted": 69,
+    "pct": 42.9,
+    "landed_on_legal_nonchosen": 69,
+    "expected_on_firstlisted_null": 44.5,
+    "expected_pct_null": 27.6,
+    "perm_p": 0.0
+   },
    "n_atypical_cells": 182,
    "chosen_direction_distribution": {
     "South": 153,
@@ -834,6 +852,15 @@
    }
   },
   "gpt": {
+   "firstlisted_landing_test": {
+    "n_wrong": 27,
+    "on_firstlisted": 16,
+    "pct": 59.3,
+    "landed_on_legal_nonchosen": 17,
+    "expected_on_firstlisted_null": 8.5,
+    "expected_pct_null": 31.5,
+    "perm_p": 0.0002
+   },
    "n_atypical_cells": 61,
    "chosen_direction_distribution": {
     "South": 61
@@ -856,6 +883,15 @@
    }
   },
   "glm": {
+   "firstlisted_landing_test": {
+    "n_wrong": 81,
+    "on_firstlisted": 42,
+    "pct": 51.9,
+    "landed_on_legal_nonchosen": 45,
+    "expected_on_firstlisted_null": 21.0,
+    "expected_pct_null": 25.9,
+    "perm_p": 0.0
+   },
    "n_atypical_cells": 95,
    "chosen_direction_distribution": {
     "North": 27,
@@ -880,6 +916,15 @@
    }
   },
   "qwen": {
+   "firstlisted_landing_test": {
+    "n_wrong": 4,
+    "on_firstlisted": 3,
+    "pct": 75.0,
+    "landed_on_legal_nonchosen": 4,
+    "expected_on_firstlisted_null": 1.7,
+    "expected_pct_null": 41.7,
+    "perm_p": 0.1989
+   },
    "n_atypical_cells": 60,
    "chosen_direction_distribution": {
     "South": 57,

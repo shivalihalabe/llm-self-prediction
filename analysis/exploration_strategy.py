@@ -22,6 +22,8 @@ import statistics as st
 
 import pandas as pd
 
+import numpy as np
+
 import common as C
 
 OUT = os.path.join(os.path.dirname(__file__), "results")
@@ -304,7 +306,39 @@ for t in MODELS:
             else [v for v in (C.CROSS[(p, t)].get(k) for k in cells) if v is not None]
         )
         per_pred[p] = C.pct(sum(vals), len(vals))
+    # Permutation baseline for the first-listed landing rate: under the null, a wrong prediction
+    # that lands on a legal non-chosen move is equally likely to land on any of them, so the
+    # designated "first-listed" cell is no more likely than a random alternative. (The analogous
+    # default-cell comparison is degenerate: there the first-listed cell IS the true cell, so a
+    # wrong prediction can never land on it.)
+    wrong = []
+    for mz, s in cells:
+        if C.SELF[t].get((mz, s)) is False:
+            traj = [tuple(p2) for p2 in C.TRUTH[t][mz]]
+            a = traj[s - 1]
+            legal = {direction(a, tuple(nb)): tuple(nb) for nb in C.legal_moves(t, mz, s)}
+            fl_cell = legal[sorted(legal)[0]]
+            candidates = sorted(c2 for c2 in legal.values() if c2 != traj[s])
+            wrong.append((tuple(C.SELF_POS[t][(mz, s)]), fl_cell, candidates))
+    on_legal = [w for w in wrong if w[0] in w[2]]
+    expected = sum(1.0 / len(cand) for _, _, cand in on_legal)
+    rng = np.random.default_rng(20260609)
+    observed = sum(pred == fl for pred, fl, _ in wrong)
+    draws = np.zeros(10000, dtype=int)
+    for pred, _, cand in on_legal:
+        draws += rng.integers(0, len(cand), 10000) == cand.index(pred) if pred in cand else 0
+    perm_p = round(float((draws >= observed).mean()), 4)
+    test = {
+        "n_wrong": len(wrong),
+        "on_firstlisted": observed,
+        "pct": C.pct(observed, len(wrong)),
+        "landed_on_legal_nonchosen": len(on_legal),
+        "expected_on_firstlisted_null": round(expected, 1),
+        "expected_pct_null": C.pct(expected, len(wrong)),
+        "perm_p": perm_p,
+    }
     mismatch[t] = {
+        "firstlisted_landing_test": test,
         "n_atypical_cells": len(cells),
         "chosen_direction_distribution": dict(chosen),
         "firstlisted_direction_distribution": dict(firstlisted),
