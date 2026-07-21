@@ -147,6 +147,30 @@ RES["per_maze_self_vs_cross"] = [
 
 
 # ============================================================
+# CONSISTENT-SET STRUCTURAL DIFFICULTY
+# ============================================================
+
+# Whether models differ in the structural difficulty of the mazes they navigate consistently.
+# Uses the model-independent structural measures (branch steps, BFS depth), not maze_effect,
+# which is centred per navigator and therefore circular for this comparison. The all-mazes row
+# is the baseline: a consistent set harder or easier than it reflects selection.
+cons_diff = {}
+for m in MODELS:
+    mzs = sorted(C.CONSISTENT[m])
+    cons_diff[m] = {
+        "n_mazes": len(mzs),
+        "mean_branch_steps": round(st.mean(per_maze[mz]["mean_branch_steps"] for mz in mzs), 2),
+        "mean_bfs_depth": round(st.mean(per_maze[mz]["bfs_max_depth"] for mz in mzs), 2),
+    }
+cons_diff["all_mazes"] = {
+    "n_mazes": len(per_maze),
+    "mean_branch_steps": round(st.mean(d["mean_branch_steps"] for d in per_maze.values()), 2),
+    "mean_bfs_depth": round(st.mean(d["bfs_max_depth"] for d in per_maze.values()), 2),
+}
+RES["consistent_set_difficulty"] = cons_diff
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 
