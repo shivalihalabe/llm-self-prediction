@@ -353,6 +353,29 @@ RES["self_model_mismatch"] = mismatch
 
 
 # ============================================================
+# PREDICTOR ACCURACY ON DEFAULT VS ATYPICAL CELLS (POOLED CROSS)
+# ============================================================
+
+# For each predictor, cross-prediction accuracy pooled across its four targets, restricted to
+# the target's decision points and split by whether the target took the alphabetically-first
+# move. Cross-only by design: the confound argument is about predicting others, and the
+# self-diagonal versions live in self_model_mismatch and the stats splits.
+pooled = {}
+for p in MODELS:
+    buckets = {"default": [], "atypical": []}
+    for t in MODELS:
+        if t == p:
+            continue
+        for (mz, step), okv in C.CROSS[(p, t)].items():
+            if not C.is_branch(t, mz, step):
+                continue
+            key = "default" if C.chose_first_listed(t, mz, step) else "atypical"
+            buckets[key].append(okv)
+    pooled[p] = {k: {"acc": C.pct(sum(v), len(v)), "n": len(v)} for k, v in buckets.items()}
+RES["predictor_default_vs_atypical_pooled"] = pooled
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

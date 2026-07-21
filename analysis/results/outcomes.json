@@ -21,7 +21,7 @@
   "scoring": {
    "run_idx": 0,
    "match": "exact per-step position vs the target's run-0 trajectory",
-   "unparsed": "skipped",
+   "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
    "default_move": "alphabetically first legal direction (E < N < S < W)"
   }
@@ -944,6 +944,74 @@
     1.1,
     1.1
    ]
+  }
+ },
+ "unparsed_records": {
+  "per_file": {
+   "glm_self_noreasoning.json": {
+    "unparsed": 0,
+    "records": 578
+   },
+   "glm_self_reasoning.json": {
+    "unparsed": 0,
+    "records": 566
+   },
+   "gpt_self_noreasoning.json": {
+    "unparsed": 0,
+    "records": 610
+   },
+   "gpt_self_reasoning.json": {
+    "unparsed": 0,
+    "records": 596
+   },
+   "opus_self_noreasoning.json": {
+    "unparsed": 0,
+    "records": 1108
+   },
+   "opus_self_reasoning.json": {
+    "unparsed": 0,
+    "records": 1054
+   },
+   "qwen_self_noreasoning.json": {
+    "unparsed": 0,
+    "records": 998
+   },
+   "qwen_self_reasoning.json": {
+    "unparsed": 0,
+    "records": 986
+   },
+   "sonnet_self_noreasoning.json": {
+    "unparsed": 0,
+    "records": 828
+   },
+   "sonnet_self_reasoning.json": {
+    "unparsed": 0,
+    "records": 852
+   },
+   "glm_xpred_reasoning.json": {
+    "unparsed": 0,
+    "records": 3492
+   },
+   "gpt_xpred_reasoning.json": {
+    "unparsed": 0,
+    "records": 3488
+   },
+   "opus_xpred_reasoning.json": {
+    "unparsed": 0,
+    "records": 2990
+   },
+   "qwen_xpred_reasoning.json": {
+    "unparsed": 0,
+    "records": 3150
+   },
+   "sonnet_xpred_reasoning.json": {
+    "unparsed": 0,
+    "records": 3270
+   }
+  },
+  "total": {
+   "unparsed": 0,
+   "records": 24566
   }
  }
 }

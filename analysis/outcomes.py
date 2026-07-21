@@ -203,6 +203,32 @@ RES["reasoning_vs_nr_self"] = rvn
 
 
 # ============================================================
+# UNPARSED-RECORD AUDIT
+# ============================================================
+
+# Verifies that the "unparsed omitted at generation" contract holds: counts records whose
+# parsed_position is missing or null, per file and in total, across all prediction data.
+unparsed = {"per_file": {}, "total": {"unparsed": 0, "records": 0}}
+for sub in ("self_prediction", "cross_prediction"):
+    folder = os.path.join(C.DATA, sub)
+    for fn in sorted(os.listdir(folder)):
+        if not fn.endswith(".json"):
+            continue
+        d = json.load(open(os.path.join(folder, fn)))
+        bad = n = 0
+        for node in d["predictions"].values():
+            for steps in node.values():
+                for recs in steps.values():
+                    for rec in recs:
+                        n += 1
+                        bad += rec.get("parsed_position") is None
+        unparsed["per_file"][fn] = {"unparsed": bad, "records": n}
+        unparsed["total"]["unparsed"] += bad
+        unparsed["total"]["records"] += n
+RES["unparsed_records"] = unparsed
+
+
+# ============================================================
 # WRITE + CONSOLE SUMMARY
 # ============================================================
 

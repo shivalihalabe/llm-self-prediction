@@ -21,7 +21,7 @@
   "scoring": {
    "run_idx": 0,
    "match": "exact per-step position vs the target's run-0 trajectory",
-   "unparsed": "skipped",
+   "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
    "default_move": "alphabetically first legal direction (E < N < S < W)"
   }
@@ -945,6 +945,58 @@
     "gpt": 93.3,
     "glm": 93.3,
     "qwen": 93.3
+   }
+  }
+ },
+ "predictor_default_vs_atypical_pooled": {
+  "opus": {
+   "default": {
+    "acc": 52.6,
+    "n": 568
+   },
+   "atypical": {
+    "acc": 37.7,
+    "n": 398
+   }
+  },
+  "sonnet": {
+   "default": {
+    "acc": 83.4,
+    "n": 613
+   },
+   "atypical": {
+    "acc": 31.3,
+    "n": 470
+   }
+  },
+  "gpt": {
+   "default": {
+    "acc": 79.2,
+    "n": 577
+   },
+   "atypical": {
+    "acc": 22.5,
+    "n": 591
+   }
+  },
+  "glm": {
+   "default": {
+    "acc": 82.6,
+    "n": 634
+   },
+   "atypical": {
+    "acc": 33.8,
+    "n": 557
+   }
+  },
+  "qwen": {
+   "default": {
+    "acc": 71.9,
+    "n": 456
+   },
+   "atypical": {
+    "acc": 22.6,
+    "n": 592
    }
   }
  }
