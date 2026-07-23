@@ -324,6 +324,67 @@ RES["self_projection"] = {
 
 
 # ============================================================
+# PAIRWISE BEHAVIORAL SIMILARITY MATRIX
+# ============================================================
+
+# The trajectory-overlap matrix behind the self-projection correlation: traj_similarity for
+# every ordered pair (pooled per-step position match over shared consistent mazes, excluding
+# the shared start cell).
+RES["behavioral_similarity_matrix"] = {
+    a: {b: round(traj_similarity(a, b), 1) for b in MODELS if b != a} for a in MODELS
+}
+
+
+# ============================================================
+# STEP AGREEMENT ON ALL 100 MAZES AND ORACLE COMPOSITION BY MOVE TYPE
+# ============================================================
+
+# step_agreement_all_mazes: fraction of run-0 steps where two models occupy the identical
+# position, over all 100 mazes (behavioral_similarity_matrix above is the shared consistent-set
+# version). oracle_composition: what share of each model's only-self-correct cells (self right,
+# all four cross-predictors wrong, on cells every predictor answered) are atypical / default /
+# determined under the first-unvisited taxonomy.
+agree_all = {}
+for a in MODELS:
+    agree_all[a] = {}
+    for b in MODELS:
+        if a == b:
+            continue
+        n = ok = 0
+        for mz in C.TRUTH[a]:
+            ta, tb = C.TRUTH[a][mz], C.TRUTH[b][mz]
+            L = min(len(ta), len(tb))
+            for step in range(1, L):
+                n += 1
+                ok += tuple(ta[step]) == tuple(tb[step])
+        agree_all[a][b] = C.pct(ok, n)
+RES["step_agreement_all_mazes"] = agree_all
+
+composition = {}
+for t in MODELS:
+    kinds = {"atypical": 0, "default": 0, "determined": 0}
+    for mz, step in sorted(C.SELF[t]):
+        others = [C.CROSS[(p, t)].get((mz, step)) for p in MODELS if p != t]
+        if any(o is None for o in others):
+            continue
+        if not (C.SELF[t][(mz, step)] and not any(others)):
+            continue
+        if not C.is_branch(t, mz, step):
+            kinds["determined"] += 1
+        elif C.chose_first_unvisited(t, mz, step):
+            kinds["default"] += 1
+        else:
+            kinds["atypical"] += 1
+    tot = sum(kinds.values())
+    composition[t] = {
+        **kinds,
+        "n": tot,
+        "atypical_share_pct": C.pct(kinds["atypical"], tot) if tot else None,
+    }
+RES["oracle_composition_by_move_type"] = composition
+
+
+# ============================================================
 # WRITE + SUMMARY
 # ============================================================
 

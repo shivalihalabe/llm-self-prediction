@@ -23,7 +23,7 @@
    "match": "exact per-step position vs the target's run-0 trajectory",
    "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
-   "default_move": "alphabetically first legal direction (E < N < S < W)"
+   "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)"
   }
  },
  "nr_accuracy_by_step": {

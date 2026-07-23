@@ -23,7 +23,7 @@
    "match": "exact per-step position vs the target's run-0 trajectory",
    "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
-   "default_move": "alphabetically first legal direction (E < N < S < W)"
+   "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)"
   }
  },
  "forced_vs_branch_self": {
@@ -787,217 +787,328 @@
  "self_model_mismatch": {
   "opus": {
    "firstlisted_landing_test": {
-    "n_wrong": 183,
-    "on_firstlisted": 87,
-    "pct": 47.5,
-    "landed_on_legal_nonchosen": 102,
-    "expected_on_firstlisted_null": 46.2,
-    "expected_pct_null": 25.2,
+    "n_wrong": 152,
+    "on_firstlisted": 86,
+    "pct": 56.6,
+    "landed_on_unvisited_nonchosen": 87,
+    "expected_on_firstlisted_null": 74.0,
+    "expected_pct_null": 48.7,
     "perm_p": 0.0
    },
-   "n_atypical_cells": 254,
+   "n_atypical_cells": 193,
    "chosen_direction_distribution": {
-    "South": 211,
+    "South": 150,
     "North": 14,
     "West": 29
    },
    "firstlisted_direction_distribution": {
-    "North": 85,
-    "East": 169
+    "East": 147,
+    "North": 45,
+    "South": 1
    },
    "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 183,
-    "on_firstlisted": 87,
-    "pct": 47.5
-   },
-   "atypical_cell_accuracy_per_predictor": {
-    "opus": 28.0,
-    "sonnet": 16.1,
-    "gpt": 16.5,
-    "glm": 24.4,
-    "qwen": 18.9
+    "n_wrong": 152,
+    "on_firstlisted": 86,
+    "pct": 56.6
    }
   },
   "sonnet": {
    "firstlisted_landing_test": {
-    "n_wrong": 161,
-    "on_firstlisted": 69,
-    "pct": 42.9,
-    "landed_on_legal_nonchosen": 69,
-    "expected_on_firstlisted_null": 44.5,
-    "expected_pct_null": 27.6,
-    "perm_p": 0.0
+    "n_wrong": 144,
+    "on_firstlisted": 68,
+    "pct": 47.2,
+    "landed_on_unvisited_nonchosen": 68,
+    "expected_on_firstlisted_null": 62.0,
+    "expected_pct_null": 43.1,
+    "perm_p": 0.0005
    },
-   "n_atypical_cells": 182,
+   "n_atypical_cells": 147,
    "chosen_direction_distribution": {
-    "South": 153,
+    "South": 118,
     "North": 20,
     "West": 9
    },
    "firstlisted_direction_distribution": {
-    "East": 132,
-    "North": 50
+    "East": 128,
+    "North": 19
    },
    "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 161,
-    "on_firstlisted": 69,
-    "pct": 42.9
-   },
-   "atypical_cell_accuracy_per_predictor": {
-    "opus": 29.7,
-    "sonnet": 11.5,
-    "gpt": 9.9,
-    "glm": 17.6,
-    "qwen": 15.9
+    "n_wrong": 144,
+    "on_firstlisted": 68,
+    "pct": 47.2
    }
   },
   "gpt": {
    "firstlisted_landing_test": {
-    "n_wrong": 27,
-    "on_firstlisted": 16,
-    "pct": 59.3,
-    "landed_on_legal_nonchosen": 17,
-    "expected_on_firstlisted_null": 8.5,
-    "expected_pct_null": 31.5,
-    "perm_p": 0.0002
+    "n_wrong": 14,
+    "on_firstlisted": 14,
+    "pct": 100.0,
+    "landed_on_unvisited_nonchosen": 14,
+    "expected_on_firstlisted_null": 14.0,
+    "expected_pct_null": 100.0,
+    "perm_p": 1.0
    },
-   "n_atypical_cells": 61,
+   "n_atypical_cells": 15,
    "chosen_direction_distribution": {
-    "South": 61
+    "South": 15
    },
    "firstlisted_direction_distribution": {
-    "North": 56,
-    "East": 5
+    "East": 3,
+    "North": 12
    },
    "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 27,
-    "on_firstlisted": 16,
-    "pct": 59.3
-   },
-   "atypical_cell_accuracy_per_predictor": {
-    "opus": 54.1,
-    "sonnet": 54.1,
-    "gpt": 55.7,
-    "glm": 62.3,
-    "qwen": 72.1
+    "n_wrong": 14,
+    "on_firstlisted": 14,
+    "pct": 100.0
    }
   },
   "glm": {
    "firstlisted_landing_test": {
-    "n_wrong": 81,
-    "on_firstlisted": 42,
-    "pct": 51.9,
-    "landed_on_legal_nonchosen": 45,
-    "expected_on_firstlisted_null": 21.0,
-    "expected_pct_null": 25.9,
-    "perm_p": 0.0
+    "n_wrong": 66,
+    "on_firstlisted": 41,
+    "pct": 62.1,
+    "landed_on_unvisited_nonchosen": 41,
+    "expected_on_firstlisted_null": 37.0,
+    "expected_pct_null": 56.1,
+    "perm_p": 0.004
    },
-   "n_atypical_cells": 95,
+   "n_atypical_cells": 68,
    "chosen_direction_distribution": {
-    "North": 27,
-    "South": 60,
-    "West": 8
+    "South": 35,
+    "West": 8,
+    "North": 25
    },
    "firstlisted_direction_distribution": {
-    "East": 71,
-    "North": 24
+    "East": 68
    },
    "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 81,
-    "on_firstlisted": 42,
-    "pct": 51.9
-   },
-   "atypical_cell_accuracy_per_predictor": {
-    "opus": 15.8,
-    "sonnet": 17.9,
-    "gpt": 17.9,
-    "glm": 14.7,
-    "qwen": 13.7
+    "n_wrong": 66,
+    "on_firstlisted": 41,
+    "pct": 62.1
    }
   },
   "qwen": {
    "firstlisted_landing_test": {
     "n_wrong": 4,
-    "on_firstlisted": 3,
-    "pct": 75.0,
-    "landed_on_legal_nonchosen": 4,
-    "expected_on_firstlisted_null": 1.7,
-    "expected_pct_null": 41.7,
-    "perm_p": 0.1989
+    "on_firstlisted": 4,
+    "pct": 100.0,
+    "landed_on_unvisited_nonchosen": 4,
+    "expected_on_firstlisted_null": 3.0,
+    "expected_pct_null": 75.0,
+    "perm_p": 0.2502
    },
-   "n_atypical_cells": 60,
+   "n_atypical_cells": 4,
    "chosen_direction_distribution": {
-    "South": 57,
-    "North": 3
+    "South": 2,
+    "North": 2
    },
    "firstlisted_direction_distribution": {
-    "North": 54,
-    "East": 6
+    "North": 1,
+    "East": 3
    },
    "wrong_self_pred_on_firstlisted_cell": {
     "n_wrong": 4,
-    "on_firstlisted": 3,
-    "pct": 75.0
-   },
-   "atypical_cell_accuracy_per_predictor": {
-    "opus": 80.0,
-    "sonnet": 93.3,
-    "gpt": 93.3,
-    "glm": 93.3,
-    "qwen": 93.3
+    "on_firstlisted": 4,
+    "pct": 100.0
    }
   }
  },
  "predictor_default_vs_atypical_pooled": {
   "opus": {
    "default": {
-    "acc": 52.6,
-    "n": 568
+    "acc": 54.9,
+    "n": 732
    },
    "atypical": {
-    "acc": 37.7,
-    "n": 398
+    "acc": 20.1,
+    "n": 234
    }
   },
   "sonnet": {
    "default": {
-    "acc": 83.4,
-    "n": 613
+    "acc": 80.2,
+    "n": 803
    },
    "atypical": {
-    "acc": 31.3,
-    "n": 470
+    "acc": 5.0,
+    "n": 280
    }
   },
   "gpt": {
    "default": {
-    "acc": 79.2,
-    "n": 577
+    "acc": 76.9,
+    "n": 756
    },
    "atypical": {
-    "acc": 22.5,
-    "n": 591
+    "acc": 2.2,
+    "n": 412
    }
   },
   "glm": {
    "default": {
-    "acc": 82.6,
-    "n": 634
+    "acc": 80.6,
+    "n": 832
    },
    "atypical": {
-    "acc": 33.8,
-    "n": 557
+    "acc": 11.4,
+    "n": 359
    }
   },
   "qwen": {
    "default": {
-    "acc": 71.9,
-    "n": 456
+    "acc": 69.3,
+    "n": 625
    },
    "atypical": {
-    "acc": 22.6,
-    "n": 592
+    "acc": 6.9,
+    "n": 423
    }
+  }
+ },
+ "step_category_census": {
+  "opus": {
+   "forced": 71,
+   "zero_unvisited": 4,
+   "one_unvisited": 311,
+   "decision_points": 414,
+   "zero_unvisited_took_first_listed": 1
+  },
+  "sonnet": {
+   "forced": 77,
+   "zero_unvisited": 9,
+   "one_unvisited": 321,
+   "decision_points": 393,
+   "zero_unvisited_took_first_listed": 1
+  },
+  "gpt": {
+   "forced": 72,
+   "zero_unvisited": 3,
+   "one_unvisited": 325,
+   "decision_points": 400,
+   "zero_unvisited_took_first_listed": 1
+  },
+  "glm": {
+   "forced": 87,
+   "zero_unvisited": 14,
+   "one_unvisited": 333,
+   "decision_points": 366,
+   "zero_unvisited_took_first_listed": 7
+  },
+  "qwen": {
+   "forced": 80,
+   "zero_unvisited": 5,
+   "one_unvisited": 356,
+   "decision_points": 359,
+   "zero_unvisited_took_first_listed": 3
+  }
+ },
+ "no_backtracking": {
+  "opus": {
+   "dp_took_visited_direction": {
+    "count": 0,
+    "n": 414
+   },
+   "one_unvisited_took_it": {
+    "count": 311,
+    "n": 311
+   }
+  },
+  "sonnet": {
+   "dp_took_visited_direction": {
+    "count": 0,
+    "n": 393
+   },
+   "one_unvisited_took_it": {
+    "count": 321,
+    "n": 321
+   }
+  },
+  "gpt": {
+   "dp_took_visited_direction": {
+    "count": 0,
+    "n": 400
+   },
+   "one_unvisited_took_it": {
+    "count": 325,
+    "n": 325
+   }
+  },
+  "glm": {
+   "dp_took_visited_direction": {
+    "count": 0,
+    "n": 366
+   },
+   "one_unvisited_took_it": {
+    "count": 333,
+    "n": 333
+   }
+  },
+  "qwen": {
+   "dp_took_visited_direction": {
+    "count": 0,
+    "n": 359
+   },
+   "one_unvisited_took_it": {
+    "count": 356,
+    "n": 356
+   }
+  },
+  "total": {
+   "dp_took_visited_direction": {
+    "count": 0,
+    "n": 1932
+   },
+   "one_unvisited_took_it": {
+    "count": 1646,
+    "n": 1646
+   }
+  }
+ },
+ "deviation_profile": {
+  "opus": {
+   "n_mazes": 97,
+   "decision_points": 398,
+   "default": 205,
+   "atypical": 193,
+   "atypical_rate": 48.5,
+   "south_share_of_atypical": 77.7
+  },
+  "sonnet": {
+   "n_mazes": 74,
+   "decision_points": 281,
+   "default": 134,
+   "atypical": 147,
+   "atypical_rate": 52.3,
+   "south_share_of_atypical": 80.3
+  },
+  "gpt": {
+   "n_mazes": 53,
+   "decision_points": 196,
+   "default": 181,
+   "atypical": 15,
+   "atypical_rate": 7.7,
+   "south_share_of_atypical": 100.0
+  },
+  "glm": {
+   "n_mazes": 52,
+   "decision_points": 173,
+   "default": 105,
+   "atypical": 68,
+   "atypical_rate": 39.3,
+   "south_share_of_atypical": 51.5
+  },
+  "qwen": {
+   "n_mazes": 90,
+   "decision_points": 316,
+   "default": 312,
+   "atypical": 4,
+   "atypical_rate": 1.3,
+   "south_share_of_atypical": 50.0
+  },
+  "rule_likeness_vs_predictability": {
+   "pearson": 0.974,
+   "perm_p": 0.031,
+   "note": "rule-likeness = 100 - atypical rate under the first-unvisited taxonomy"
   }
  }
 }

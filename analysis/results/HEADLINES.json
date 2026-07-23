@@ -23,7 +23,7 @@
    "match": "exact per-step position vs the target's run-0 trajectory",
    "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
-   "default_move": "alphabetically first legal direction (E < N < S < W)"
+   "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)"
   }
  },
  "self_vs_best_other": {
@@ -68,31 +68,51 @@
    "p": 0.0
   }
  },
- "prior_alignment": {
+ "self_advantage_atypical": {
   "opus": {
-   "idiosyncratic_gap": 9.1,
-   "idiosyncratic_p": 0.0018,
-   "prior_aligned_gap": 1.4
+   "n": 193,
+   "self_acc": 21.2,
+   "best_other": "glm",
+   "gap_vs_best_other": 7.8,
+   "p_value": 0.0315,
+   "holm_p": 0.126,
+   "gap_vs_mean_other": 14.2
   },
   "sonnet": {
-   "idiosyncratic_gap": -18.1,
-   "idiosyncratic_p": 0.0,
-   "prior_aligned_gap": 2.0
+   "n": 147,
+   "self_acc": 2.0,
+   "best_other": "opus",
+   "gap_vs_best_other": -22.4,
+   "p_value": 0.0,
+   "holm_p": 0.0,
+   "gap_vs_mean_other": -7.7
   },
   "gpt": {
-   "idiosyncratic_gap": -16.4,
-   "idiosyncratic_p": 0.0129,
-   "prior_aligned_gap": 3.7
+   "n": 15,
+   "self_acc": 6.7,
+   "best_other": "opus",
+   "gap_vs_best_other": -46.7,
+   "p_value": 0.0391,
+   "holm_p": 0.126,
+   "gap_vs_mean_other": -23.3
   },
   "glm": {
-   "idiosyncratic_gap": -3.2,
-   "idiosyncratic_p": 0.25,
-   "prior_aligned_gap": -1.3
+   "n": 68,
+   "self_acc": 2.9,
+   "best_other": "sonnet",
+   "gap_vs_best_other": -1.5,
+   "p_value": 1.0,
+   "holm_p": 1.0,
+   "gap_vs_mean_other": -0.7
   },
   "qwen": {
-   "idiosyncratic_gap": 0.0,
-   "idiosyncratic_p": 1.0,
-   "prior_aligned_gap": -3.1
+   "n": 4,
+   "self_acc": 0.0,
+   "best_other": "opus",
+   "gap_vs_best_other": -25.0,
+   "p_value": 1.0,
+   "holm_p": 1.0,
+   "gap_vs_mean_other": -6.2
   }
  },
  "opus_midhorizon_per_step": {

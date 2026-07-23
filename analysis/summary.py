@@ -31,7 +31,13 @@ xs = load("cross_structure.json")
 mz = load("maze_structure.json")
 eg = load("error_geometry.json")
 ps = load("per_step.json")
-H = {"metadata": {**outcomes["metadata"], "experiment": "HEADLINES", "produced_by": "analysis/summary.py"}}
+H = {
+    "metadata": {
+        **outcomes["metadata"],
+        "experiment": "HEADLINES",
+        "produced_by": "analysis/summary.py",
+    }
+}
 
 # 1) privileged access in aggregate
 H["self_vs_best_other"] = {
@@ -43,14 +49,19 @@ H["self_vs_best_other"] = {
     for t, d in stats.get("self_vs_best_other_paired", {}).items()
 }
 
-# 2) where the self-advantage lives (prior-aligned vs idiosyncratic branches)
-H["prior_alignment"] = {
+# 2) where the self-advantage lives (atypical vs default decision points, first-unvisited taxonomy)
+H["self_advantage_atypical"] = {
     t: {
-        "idiosyncratic_gap": d["idiosyncratic"]["gap"],
-        "idiosyncratic_p": d["idiosyncratic"]["p_value"],
-        "prior_aligned_gap": d["prior_aligned"]["gap"],
+        "n": d["n"],
+        "self_acc": d["self_acc"],
+        "best_other": d["best_other"]["model"],
+        "gap_vs_best_other": d["best_other"]["gap_vs_best_other"],
+        "p_value": d["best_other"]["p_value"],
+        "holm_p": stats["self_advantage_by_move_type"]["atypical"]["holm_adjusted_best_other"][t],
+        "gap_vs_mean_other": d["mean_other"]["gap_vs_mean_other"],
     }
-    for t, d in stats.get("self_advantage_prior_aligned_vs_idiosyncratic", {}).items()
+    for t, d in stats["self_advantage_by_move_type"]["atypical"].items()
+    if t != "holm_adjusted_best_other"
 }
 
 # 2b) the Opus mid-horizon per-step advantage (significant where the CI excludes 0)
@@ -194,15 +205,15 @@ if __name__ == "__main__":
             )
     print("   => only Opus is positive (and borderline); others tie or lose.")
 
-    print("\n2) Where the advantage lives (branch decisions, by prior-alignment):")
+    print("\n2) Where the advantage lives (atypical decision points, first-unvisited taxonomy):")
     for t in MODELS:
-        d = H["prior_alignment"].get(t)
-        if d:
-            print(
-                f"   {t:7} idiosyncratic gap {d['idiosyncratic_gap']:+5.1f} (p={d['idiosyncratic_p']})   prior-aligned {d['prior_aligned_gap']:+.1f}"
-            )
+        d = H["self_advantage_atypical"][t]
+        print(
+            f"   {t:7} n={d['n']:3}  self {d['self_acc']:5}  vs best({d['best_other']}) "
+            f"gap {d['gap_vs_best_other']:+.1f}  p={d['p_value']}  holm={d['holm_p']}"
+        )
     print(
-        "   => Opus self-knowledge is real and localized to idiosyncratic choices; Sonnet/GPT are worse there."
+        "   => Opus beats every predictor individually on its atypical cells; Sonnet/GPT are worse there."
     )
 
     print("\n2b) Opus mid-horizon per-step advantage (self vs best-other, by step):")

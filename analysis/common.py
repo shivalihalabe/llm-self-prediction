@@ -216,7 +216,7 @@ def metadata(experiment):
             "match": "exact per-step position vs the target's run-0 trajectory",
             "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
             "branch": ">=2 unvisited legal moves at the pre-move cell",
-            "default_move": "alphabetically first legal direction (E < N < S < W)",
+            "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)",
         },
     }
 
@@ -322,6 +322,19 @@ def chose_first_listed(target, maze, step):
     if not legal:
         return None
     return direction(a, tuple(traj[step])) == legal[0]
+
+
+def chose_first_unvisited(target, maze, step):
+    """True if the actual move was the alphabetically-first UNVISITED legal direction.
+
+    The labeling predicate for the default/atypical taxonomy: across 3,578 opportunities
+    no model ever took a visited direction when an unvisited one was available, so the
+    effective choice set at a decision point is the unvisited directions.
+    """
+    traj = [tuple(p) for p in TRUTH[target][maze]]
+    pos = traj[step - 1]
+    unv = sorted(direction(pos, tuple(nb)) for nb in unvisited_moves(target, maze, step))
+    return direction(pos, traj[step]) == unv[0]
 
 
 # ============================================================

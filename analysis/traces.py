@@ -349,7 +349,7 @@ for m in MODELS:
     at = {
         (mz, s)
         for (mz, s) in C.SELF[m]
-        if C.is_branch(m, mz, s) and not C.chose_first_listed(m, mz, s)
+        if C.is_branch(m, mz, s) and not C.chose_first_unvisited(m, mz, s)
     }
     sub = TRACES[(TRACES.model == m) & ~TRACES.is_empty]
     sub = sub[[k in at for k in zip(sub.maze, sub.step)]]

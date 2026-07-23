@@ -284,7 +284,7 @@ for t in MODELS:
     cells = [
         (mz, s)
         for (mz, s) in C.SELF[t]
-        if C.is_branch(t, mz, s) and not C.chose_first_listed(t, mz, s)
+        if C.is_branch(t, mz, s) and not C.chose_first_unvisited(t, mz, s)
     ]
     chosen, firstlisted = collections.Counter(), collections.Counter()
     n_wrong = on_fl = 0
@@ -292,20 +292,12 @@ for t in MODELS:
         traj = [tuple(p) for p in C.TRUTH[t][mz]]
         a = traj[s - 1]
         chosen[direction(a, traj[s])] += 1
-        legal = {direction(a, tuple(nb)): tuple(nb) for nb in C.legal_moves(t, mz, s)}
-        fl = sorted(legal)[0]
+        unv = {direction(a, tuple(nb)): tuple(nb) for nb in C.unvisited_moves(t, mz, s)}
+        fl = sorted(unv)[0]
         firstlisted[fl] += 1
         if C.SELF[t].get((mz, s)) is False:
             n_wrong += 1
-            on_fl += tuple(C.SELF_POS[t][(mz, s)]) == legal[fl]
-    per_pred = {}
-    for p in MODELS:
-        vals = (
-            [C.SELF[t][k] for k in cells]
-            if p == t
-            else [v for v in (C.CROSS[(p, t)].get(k) for k in cells) if v is not None]
-        )
-        per_pred[p] = C.pct(sum(vals), len(vals))
+            on_fl += tuple(C.SELF_POS[t][(mz, s)]) == unv[fl]
     # Permutation baseline for the first-listed landing rate: under the null, a wrong prediction
     # that lands on a legal non-chosen move is equally likely to land on any of them, so the
     # designated "first-listed" cell is no more likely than a random alternative. (The analogous
@@ -316,23 +308,23 @@ for t in MODELS:
         if C.SELF[t].get((mz, s)) is False:
             traj = [tuple(p2) for p2 in C.TRUTH[t][mz]]
             a = traj[s - 1]
-            legal = {direction(a, tuple(nb)): tuple(nb) for nb in C.legal_moves(t, mz, s)}
-            fl_cell = legal[sorted(legal)[0]]
-            candidates = sorted(c2 for c2 in legal.values() if c2 != traj[s])
+            unv = {direction(a, tuple(nb)): tuple(nb) for nb in C.unvisited_moves(t, mz, s)}
+            fl_cell = unv[sorted(unv)[0]]
+            candidates = sorted(c2 for c2 in unv.values() if c2 != traj[s])
             wrong.append((tuple(C.SELF_POS[t][(mz, s)]), fl_cell, candidates))
-    on_legal = [w for w in wrong if w[0] in w[2]]
-    expected = sum(1.0 / len(cand) for _, _, cand in on_legal)
+    on_unv = [w for w in wrong if w[0] in w[2]]
+    expected = sum(1.0 / len(cand) for _, _, cand in on_unv)
     rng = np.random.default_rng(20260609)
     observed = sum(pred == fl for pred, fl, _ in wrong)
     draws = np.zeros(10000, dtype=int)
-    for pred, _, cand in on_legal:
+    for pred, _, cand in on_unv:
         draws += rng.integers(0, len(cand), 10000) == cand.index(pred) if pred in cand else 0
     perm_p = round(float((draws >= observed).mean()), 4)
     test = {
         "n_wrong": len(wrong),
         "on_firstlisted": observed,
         "pct": C.pct(observed, len(wrong)),
-        "landed_on_legal_nonchosen": len(on_legal),
+        "landed_on_unvisited_nonchosen": len(on_unv),
         "expected_on_firstlisted_null": round(expected, 1),
         "expected_pct_null": C.pct(expected, len(wrong)),
         "perm_p": perm_p,
@@ -347,7 +339,6 @@ for t in MODELS:
             "on_firstlisted": on_fl,
             "pct": C.pct(on_fl, n_wrong),
         },
-        "atypical_cell_accuracy_per_predictor": per_pred,
     }
 RES["self_model_mismatch"] = mismatch
 
@@ -369,10 +360,102 @@ for p in MODELS:
         for (mz, step), okv in C.CROSS[(p, t)].items():
             if not C.is_branch(t, mz, step):
                 continue
-            key = "default" if C.chose_first_listed(t, mz, step) else "atypical"
+            key = "default" if C.chose_first_unvisited(t, mz, step) else "atypical"
             buckets[key].append(okv)
     pooled[p] = {k: {"acc": C.pct(sum(v), len(v)), "n": len(v)} for k, v in buckets.items()}
 RES["predictor_default_vs_atypical_pooled"] = pooled
+
+
+# ============================================================
+# NO-BACKTRACKING UNANIMITY AND STEP-CATEGORY CENSUS (ALL 100 MAZES)
+# ============================================================
+
+
+# The empirical justification for the default/atypical taxonomy: at decision points no model
+# ever took a visited direction, and with exactly one unvisited move every model took it --
+# 3,578 opportunities, zero exceptions. The census gives the four-way breakdown of all 800
+# run-0 steps per model, over all 100 mazes.
+def _cell(t, mz, step):
+    traj = [tuple(p) for p in C.TRUTH[t][mz]]
+    pos = traj[step - 1]
+    legal = {direction(pos, tuple(nb)): tuple(nb) for nb in C.legal_moves(t, mz, step)}
+    vis = set(traj[:step])
+    unv = {d: c for d, c in legal.items() if c not in vis}
+    return legal, unv, direction(pos, traj[step])
+
+
+census = {}
+backtrack = {}
+for t in MODELS:
+    counts = {"forced": 0, "zero_unvisited": 0, "one_unvisited": 0, "decision_points": 0}
+    zero_took_first = dp_took_visited = one_took_unvisited = 0
+    for mz in C.TRUTH[t]:
+        for step in range(1, len(C.TRUTH[t][mz])):
+            legal, unv, ch = _cell(t, mz, step)
+            if len(legal) == 1:
+                counts["forced"] += 1
+            elif len(unv) == 0:
+                counts["zero_unvisited"] += 1
+                zero_took_first += ch == sorted(legal)[0]
+            elif len(unv) == 1:
+                counts["one_unvisited"] += 1
+                one_took_unvisited += ch in unv
+            else:
+                counts["decision_points"] += 1
+                dp_took_visited += ch not in unv
+    census[t] = {**counts, "zero_unvisited_took_first_listed": zero_took_first}
+    backtrack[t] = {
+        "dp_took_visited_direction": {"count": dp_took_visited, "n": counts["decision_points"]},
+        "one_unvisited_took_it": {"count": one_took_unvisited, "n": counts["one_unvisited"]},
+    }
+backtrack["total"] = {
+    k: {
+        "count": sum(backtrack[m][k]["count"] for m in MODELS),
+        "n": sum(backtrack[m][k]["n"] for m in MODELS),
+    }
+    for k in ("dp_took_visited_direction", "one_unvisited_took_it")
+}
+RES["step_category_census"] = census
+RES["no_backtracking"] = backtrack
+
+
+# ============================================================
+# DEVIATION PROFILE (NEW TAXONOMY) AND RULE-LIKENESS VS PREDICTABILITY
+# ============================================================
+
+# Within each consistent set: decision points, default vs atypical under the first-unvisited
+# rule, the atypical rate (the sharper rule-likeness measure), and the South share of atypical
+# moves. The correlation re-tests regularity -> predictability with the new measure.
+profile = {}
+for t in MODELS:
+    dp = default = 0
+    atyp_dirs = []
+    for mz in sorted(C.CONSISTENT[t]):
+        for step in range(1, len(C.TRUTH[t][mz])):
+            if not C.is_branch(t, mz, step):
+                continue
+            dp += 1
+            _, _, ch = _cell(t, mz, step)
+            if C.chose_first_unvisited(t, mz, step):
+                default += 1
+            else:
+                atyp_dirs.append(ch)
+    profile[t] = {
+        "n_mazes": len(C.CONSISTENT[t]),
+        "decision_points": dp,
+        "default": default,
+        "atypical": dp - default,
+        "atypical_rate": C.pct(dp - default, dp),
+        "south_share_of_atypical": C.pct(sum(d == "South" for d in atyp_dirs), len(atyp_dirs)),
+    }
+rates = [100.0 - profile[t]["atypical_rate"] for t in MODELS]
+preds = [RES["target_predictability"][t] for t in MODELS]
+profile["rule_likeness_vs_predictability"] = {
+    "pearson": C.pearson(rates, preds),
+    "perm_p": C.perm_corr_p(rates, preds),
+    "note": "rule-likeness = 100 - atypical rate under the first-unvisited taxonomy",
+}
+RES["deviation_profile"] = profile
 
 
 # ============================================================

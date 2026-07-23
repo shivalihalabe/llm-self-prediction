@@ -245,41 +245,6 @@ RES["baseline_sensitivity"] = baseline
 
 
 # ============================================================
-# WHERE THE SELF-ADVANTAGE LIVES
-# ============================================================
-
-# Split branch decisions by whether the TARGET took the prior (alphabetically-first) direction.
-# Genuine (if narrow) self-knowledge should surface on idiosyncratic branches, where the target
-# departs from the generic prior and an outsider has nothing but the prior to go on.
-prior_split = {}
-for t in MODELS:
-    bo = best_other_model(t)
-    if bo is None:
-        continue
-    keys = sorted(set(C.SELF[t]) & set(C.CROSS[(bo, t)]))
-    buckets = {"prior_aligned": [], "idiosyncratic": []}
-    for k in keys:
-        if not C.is_branch(t, k[0], k[1]):
-            continue
-        fl = C.chose_first_listed(t, k[0], k[1])
-        if fl is None:
-            continue
-        buckets["prior_aligned" if fl else "idiosyncratic"].append(
-            (C.SELF[t][k], C.CROSS[(bo, t)][k])
-        )
-    entry = {"best_other": bo}
-    for name, pairs in buckets.items():
-        entry[name] = {
-            "self_acc": C.pct(sum(x for x, _ in pairs), len(pairs)),
-            "other_acc": C.pct(sum(y for _, y in pairs), len(pairs)),
-            **boot_gap_ci(pairs),
-            **mcnemar(pairs),
-        }
-    prior_split[t] = entry
-RES["self_advantage_prior_aligned_vs_idiosyncratic"] = prior_split
-
-
-# ============================================================
 # IS RUN-STABILITY A WITHIN-MODEL CORRECTNESS SIGNAL?
 # ============================================================
 
@@ -320,7 +285,7 @@ RES["self_consistency_vs_accuracy"] = consistency_acc
 def _move_type(t, mz, step):
     if not C.is_branch(t, mz, step):
         return "determined"
-    return "default" if C.chose_first_listed(t, mz, step) else "atypical"
+    return "default" if C.chose_first_unvisited(t, mz, step) else "atypical"
 
 
 by_move_type = {}
@@ -338,80 +303,6 @@ RES["self_by_move_type_reasoning_vs_nr"] = by_move_type
 
 
 # ============================================================
-# ATYPICAL-CELL SENSITIVITY: PER-PREDICTOR AND ROTATING-BEST COMPARATORS
-# ============================================================
-
-
-# Robustness of the atypical-cell self-advantage to the choice of comparator. Per-predictor:
-# self vs each cross-predictor individually. Rotating-best: at each step, the opponent is the
-# cross-predictor with the highest accuracy on ALL of the target's cells at that step (a harsher,
-# selection-biased comparator), evaluated on the atypical cells only.
-def _atypical_cells(t):
-    return sorted(
-        (mz, step)
-        for (mz, step) in C.SELF[t]
-        if C.is_branch(t, mz, step) and not C.chose_first_listed(t, mz, step)
-    )
-
-
-def _step_best_opponent(t, step):
-    best, bacc = None, -1.0
-    for p in MODELS:
-        if p == t:
-            continue
-        vals = [v for (mz, st2), v in C.CROSS[(p, t)].items() if st2 == step]
-        if vals and 100.0 * sum(vals) / len(vals) > bacc:
-            bacc, best = 100.0 * sum(vals) / len(vals), p
-    return best
-
-
-atyp_sensitivity = {}
-for t in MODELS:
-    cells = _atypical_cells(t)
-    per_pred = {}
-    for p in MODELS:
-        if p == t:
-            continue
-        pairs = [(C.SELF[t][k], C.CROSS[(p, t)][k]) for k in cells if k in C.CROSS[(p, t)]]
-        mc = mcnemar(pairs)
-        per_pred[p] = {
-            "gap": C.pct(sum(x for x, _ in pairs), len(pairs))
-            - C.pct(sum(y for _, y in pairs), len(pairs)),
-            "gap_exact": round(
-                100.0 * (sum(x for x, _ in pairs) - sum(y for _, y in pairs)) / len(pairs), 1
-            ),
-            "p_value": mc["p_value"],
-            "n": len(pairs),
-        }
-    rot_pairs = []
-    opp_by_step = {}
-    for step in sorted(set(k[1] for k in cells)):
-        opp = _step_best_opponent(t, step)
-        opp_by_step[step] = opp
-        rot_pairs += [
-            (C.SELF[t][k], C.CROSS[(opp, t)][k])
-            for k in cells
-            if k[1] == step and k in C.CROSS[(opp, t)]
-        ]
-    mc = mcnemar(rot_pairs)
-    atyp_sensitivity[t] = {
-        "per_predictor": per_pred,
-        "rotating_best": {
-            "gap": round(
-                100.0
-                * (sum(x for x, _ in rot_pairs) - sum(y for _, y in rot_pairs))
-                / len(rot_pairs),
-                1,
-            ),
-            "p_value": mc["p_value"],
-            "n": len(rot_pairs),
-            "opponent_by_step": opp_by_step,
-        },
-    }
-RES["atypical_comparator_sensitivity"] = atyp_sensitivity
-
-
-# ============================================================
 # PER-STEP McNEMAR WITH HOLM CORRECTION (FIXED AND ROTATING OPPONENT)
 # ============================================================
 
@@ -425,6 +316,17 @@ def _holm(raw):
         running = max(running, min(1.0, (len(raw) - rank) * raw[k]))
         out[k] = round(running, 4)
     return out
+
+
+def _step_best_opponent(t, step):
+    best, bacc = None, -1.0
+    for p in MODELS:
+        if p == t:
+            continue
+        vals = [v for (mz, st2), v in C.CROSS[(p, t)].items() if st2 == step]
+        if vals and 100.0 * sum(vals) / len(vals) > bacc:
+            bacc, best = 100.0 * sum(vals) / len(vals), p
+    return best
 
 
 per_step_holm = {}
@@ -468,6 +370,72 @@ RES["nr_unique_info"] = nr_unique
 
 
 # ============================================================
+# ATYPICAL AND DEFAULT SELF-ADVANTAGE (PER-PREDICTOR, BEST, MEAN, HOLM)
+# ============================================================
+
+
+# A decision point has two or more unvisited legal moves; default means the target took the
+# alphabetically-first unvisited direction, atypical anything else. For each target and each
+# move type: self accuracy, the full per-predictor vector, the best single comparator and the
+# mean comparator, each with unambiguous field names. Holm-adjusted p-values are given across
+# the five per-target best-comparator tests.
+def _split_cells(t):
+    out = {"atypical": [], "default": []}
+    for mz, step in sorted(C.SELF[t]):
+        if not C.is_branch(t, mz, step):
+            continue
+        out["default" if C.chose_first_unvisited(t, mz, step) else "atypical"].append((mz, step))
+    return out
+
+
+def _advantage(t, cells):
+    self_vals = [C.SELF[t][k] for k in cells]
+    self_raw = 100.0 * sum(self_vals) / len(self_vals) if cells else 0.0
+    self_acc = round(self_raw, 1)
+    per_pred = {}
+    raw = {}
+    for p in MODELS:
+        if p == t:
+            continue
+        pairs = [(C.SELF[t][k], C.CROSS[(p, t)][k]) for k in cells if k in C.CROSS[(p, t)]]
+        raw[p] = 100.0 * sum(y for _, y in pairs) / len(pairs) if pairs else 0.0
+        per_pred[p] = {
+            "acc": round(raw[p], 1),
+            "gap": round(self_raw - raw[p], 1),
+            "p_value": mcnemar(pairs)["p_value"],
+            "n": len(pairs),
+        }
+    best = max(raw, key=raw.get)
+    mean_raw = sum(raw.values()) / len(raw)
+    return {
+        "n": len(cells),
+        "self_acc": self_acc,
+        "per_predictor": per_pred,
+        "best_other": {
+            "model": best,
+            "acc": per_pred[best]["acc"],
+            "gap_vs_best_other": per_pred[best]["gap"],
+            "p_value": per_pred[best]["p_value"],
+        },
+        "mean_other": {
+            "acc": round(mean_raw, 1),
+            "gap_vs_mean_other": round(self_raw - mean_raw, 1),
+        },
+    }
+
+
+adv = {"atypical": {}, "default": {}}
+for t in MODELS:
+    cells = _split_cells(t)
+    for kind in ("atypical", "default"):
+        adv[kind][t] = _advantage(t, cells[kind])
+for kind in ("atypical", "default"):
+    raw = {t: adv[kind][t]["best_other"]["p_value"] for t in MODELS}
+    adv[kind]["holm_adjusted_best_other"] = _holm(raw)
+RES["self_advantage_by_move_type"] = adv
+
+
+# ============================================================
 # DETERMINED-CELL SELF-ADVANTAGE
 # ============================================================
 
@@ -482,6 +450,49 @@ for t in MODELS:
     ci = boot_gap_ci(pairs)
     det[t] = {**ci, **mcnemar(pairs), "best_other": bo}
 RES["self_advantage_determined"] = det
+
+
+# ============================================================
+# ONE-UNVISITED CELLS AND THE SIMPLEST-TAXONOMY CHECK
+# ============================================================
+
+
+# Two justifications for the taxonomy, kept computable. One-unvisited cells (2+ legal moves but
+# a single unvisited one) are excluded from decision points: prediction there is far from
+# ceiling, but no model shows a positive significant self-advantage, so the cells carry no
+# model-specific signature. The simplest taxonomy (2+ legal, first-listed among all legal, no
+# unvisited filter) is the alternative a reader may expect; its atypical set is diluted by
+# exactly these non-choice cells, which is why the effect weakens under it.
+def _one_unvisited_cells(t):
+    out = []
+    for mz, step in sorted(C.SELF[t]):
+        legal = C.legal_moves(t, mz, step)
+        if len(legal) >= 2 and len(C.unvisited_moves(t, mz, step)) == 1:
+            out.append((mz, step))
+    return out
+
+
+one_unv = {}
+for t in MODELS:
+    one_unv[t] = _advantage(t, _one_unvisited_cells(t))
+RES["one_unvisited_self_advantage"] = one_unv
+
+simplest = {}
+for t in MODELS:
+    cells = []
+    n_one_unv = 0
+    for mz, step in sorted(C.SELF[t]):
+        legal = C.legal_moves(t, mz, step)
+        if len(legal) < 2 or C.chose_first_listed(t, mz, step):
+            continue
+        cells.append((mz, step))
+        n_one_unv += len(C.unvisited_moves(t, mz, step)) == 1
+    simplest[t] = {
+        **_advantage(t, cells),
+        "n_one_unvisited": n_one_unv,
+        "one_unvisited_share_pct": C.pct(n_one_unv, len(cells)),
+    }
+RES["simplest_taxonomy"] = simplest
 
 
 # ============================================================
@@ -512,13 +523,15 @@ if __name__ == "__main__":
         print(
             f"  {m:7} {d['frac_all_runs_agree']} of {d['n_validation_cells']} validation cells fully agree"
         )
-    print("\nwhere the self-advantage lives - self vs best-other at branches, by prior-alignment:")
-    for t, d in prior_split.items():
-        pa, idi = d["prior_aligned"], d["idiosyncratic"]
-        print(
-            f"  {t:7} prior-aligned gap={pa['gap']:+.1f} (self {pa['self_acc']} vs {pa['other_acc']}, n={pa['n']}, p={pa['p_value']})"
-            f"  | idiosyncratic gap={idi['gap']:+.1f} (self {idi['self_acc']} vs {idi['other_acc']}, n={idi['n']}, p={idi['p_value']})"
-        )
+    print("\nself-advantage by move type (new taxonomy, best comparator):")
+    for kind in ("atypical", "default"):
+        for t in MODELS:
+            d = RES["self_advantage_by_move_type"][kind][t]
+            b = d["best_other"]
+            print(
+                f"  {kind:8} {t:7} n={d['n']:3}  self {d['self_acc']:5}  "
+                f"best {b['model']}={b['acc']} gap {b['gap_vs_best_other']:+.1f} p={b['p_value']}"
+            )
     print("\nrun-to-run stability vs correctness (validation subsample):")
     for m, d in consistency_acc.items():
         print(

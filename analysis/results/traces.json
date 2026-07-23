@@ -23,7 +23,7 @@
    "match": "exact per-step position vs the target's run-0 trajectory",
    "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
-   "default_move": "alphabetically first legal direction (E < N < S < W)"
+   "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)"
   }
  },
  "self_traces": {
@@ -1069,43 +1069,43 @@
  },
  "atypical_cell_direction_language": {
   "opus": {
-   "n_traces": 254,
+   "n_traces": 193,
    "pct_mentioning": {
-    "north": 76.4,
+    "north": 78.2,
     "south": 100.0,
     "east": 100.0,
-    "west": 93.7
+    "west": 92.2
    }
   },
   "sonnet": {
-   "n_traces": 157,
+   "n_traces": 122,
    "pct_mentioning": {
-    "north": 62.4,
+    "north": 64.8,
     "south": 100.0,
     "east": 100.0,
-    "west": 70.1
+    "west": 63.9
    }
   },
   "gpt": {
-   "n_traces": 59,
+   "n_traces": 15,
    "pct_mentioning": {
-    "north": 88.1,
-    "south": 98.3,
-    "east": 96.6,
-    "west": 94.9
+    "north": 80.0,
+    "south": 93.3,
+    "east": 93.3,
+    "west": 93.3
    }
   },
   "glm": {
-   "n_traces": 95,
+   "n_traces": 68,
    "pct_mentioning": {
-    "north": 98.9,
+    "north": 98.5,
     "south": 100.0,
     "east": 100.0,
     "west": 100.0
    }
   },
   "qwen": {
-   "n_traces": 60,
+   "n_traces": 4,
    "pct_mentioning": {
     "north": 100.0,
     "south": 100.0,

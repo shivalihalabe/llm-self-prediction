@@ -23,7 +23,7 @@
    "match": "exact per-step position vs the target's run-0 trajectory",
    "unparsed": "omitted at generation; audited in outcomes.json -> unparsed_records",
    "branch": ">=2 unvisited legal moves at the pre-move cell",
-   "default_move": "alphabetically first legal direction (E < N < S < W)"
+   "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)"
   }
  },
  "per_target_structure": {
@@ -472,5 +472,106 @@
    }
   ],
   "note": "positive residual correlation => predictors have genuine affinity for behaviorally-similar targets (self-projection) beyond general predictability"
+ },
+ "behavioral_similarity_matrix": {
+  "opus": {
+   "sonnet": 46.2,
+   "gpt": 55.5,
+   "glm": 40.9,
+   "qwen": 56.5
+  },
+  "sonnet": {
+   "opus": 46.2,
+   "gpt": 41.8,
+   "glm": 32.7,
+   "qwen": 38.4
+  },
+  "gpt": {
+   "opus": 55.5,
+   "sonnet": 41.8,
+   "glm": 58.2,
+   "qwen": 88.6
+  },
+  "glm": {
+   "opus": 40.9,
+   "sonnet": 32.7,
+   "gpt": 58.2,
+   "qwen": 58.0
+  },
+  "qwen": {
+   "opus": 56.5,
+   "sonnet": 38.4,
+   "gpt": 88.6,
+   "glm": 58.0
+  }
+ },
+ "step_agreement_all_mazes": {
+  "opus": {
+   "sonnet": 40.8,
+   "gpt": 52.8,
+   "glm": 41.0,
+   "qwen": 54.8
+  },
+  "sonnet": {
+   "opus": 40.8,
+   "gpt": 32.9,
+   "glm": 28.1,
+   "qwen": 32.5
+  },
+  "gpt": {
+   "opus": 52.8,
+   "sonnet": 32.9,
+   "glm": 50.1,
+   "qwen": 78.9
+  },
+  "glm": {
+   "opus": 41.0,
+   "sonnet": 28.1,
+   "gpt": 50.1,
+   "qwen": 53.8
+  },
+  "qwen": {
+   "opus": 54.8,
+   "sonnet": 32.5,
+   "gpt": 78.9,
+   "glm": 53.8
+  }
+ },
+ "oracle_composition_by_move_type": {
+  "opus": {
+   "atypical": 26,
+   "default": 9,
+   "determined": 8,
+   "n": 43,
+   "atypical_share_pct": 60.5
+  },
+  "sonnet": {
+   "atypical": 1,
+   "default": 0,
+   "determined": 1,
+   "n": 2,
+   "atypical_share_pct": 50.0
+  },
+  "gpt": {
+   "atypical": 0,
+   "default": 1,
+   "determined": 0,
+   "n": 1,
+   "atypical_share_pct": 0.0
+  },
+  "glm": {
+   "atypical": 0,
+   "default": 0,
+   "determined": 0,
+   "n": 0,
+   "atypical_share_pct": null
+  },
+  "qwen": {
+   "atypical": 0,
+   "default": 0,
+   "determined": 0,
+   "n": 0,
+   "atypical_share_pct": null
+  }
  }
 }
