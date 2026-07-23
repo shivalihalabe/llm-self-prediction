@@ -151,20 +151,24 @@ RES["per_maze_self_vs_cross"] = [
 # ============================================================
 
 # Whether models differ in the structural difficulty of the mazes they navigate consistently.
-# Uses the model-independent structural measures (branch steps, BFS depth), not maze_effect,
-# which is centred per navigator and therefore circular for this comparison. The all-mazes row
-# is the baseline: a consistent set harder or easier than it reflects selection.
+# Uses purely structural measures computed from walls alone: n_junctions (cells with three or
+# more openings, the structural analogue of how many choices a maze offers) and BFS depth.
+# mean_branch_steps is deliberately not used here -- it counts decision points along the routes
+# models actually took, so it is run-dependent; it remains in per_maze for the difficulty
+# correlations, where that is appropriate. maze_effect is likewise excluded (centred per
+# navigator, so circular). The all-mazes row is the baseline: a consistent set harder or
+# easier than it reflects selection.
 cons_diff = {}
 for m in MODELS:
     mzs = sorted(C.CONSISTENT[m])
     cons_diff[m] = {
         "n_mazes": len(mzs),
-        "mean_branch_steps": round(st.mean(per_maze[mz]["mean_branch_steps"] for mz in mzs), 2),
+        "mean_n_junctions": round(st.mean(per_maze[mz]["n_junctions"] for mz in mzs), 2),
         "mean_bfs_depth": round(st.mean(per_maze[mz]["bfs_max_depth"] for mz in mzs), 2),
     }
 cons_diff["all_mazes"] = {
     "n_mazes": len(per_maze),
-    "mean_branch_steps": round(st.mean(d["mean_branch_steps"] for d in per_maze.values()), 2),
+    "mean_n_junctions": round(st.mean(d["n_junctions"] for d in per_maze.values()), 2),
     "mean_bfs_depth": round(st.mean(d["bfs_max_depth"] for d in per_maze.values()), 2),
 }
 RES["consistent_set_difficulty"] = cons_diff
