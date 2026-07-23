@@ -1846,6 +1846,381 @@
    "best_other": "gpt"
   }
  },
+ "atypical_first_vs_later": {
+  "opus": {
+   "first": {
+    "n": 80,
+    "self_acc": 32.5,
+    "per_predictor": {
+     "sonnet": {
+      "acc": 5.0,
+      "gap": 27.5,
+      "p_value": 0.0,
+      "n": 80
+     },
+     "gpt": {
+      "acc": 1.2,
+      "gap": 31.2,
+      "p_value": 0.0,
+      "n": 80
+     },
+     "glm": {
+      "acc": 17.5,
+      "gap": 15.0,
+      "p_value": 0.029,
+      "n": 80
+     },
+     "qwen": {
+      "acc": 7.5,
+      "gap": 25.0,
+      "p_value": 0.0001,
+      "n": 80
+     }
+    },
+    "best_other": {
+     "model": "glm",
+     "acc": 17.5,
+     "gap_vs_best_other": 15.0,
+     "p_value": 0.029
+    },
+    "mean_other": {
+     "acc": 7.8,
+     "gap_vs_mean_other": 24.7
+    }
+   },
+   "later": {
+    "n": 113,
+    "self_acc": 13.3,
+    "per_predictor": {
+     "sonnet": {
+      "acc": 4.4,
+      "gap": 8.8,
+      "p_value": 0.002,
+      "n": 113
+     },
+     "gpt": {
+      "acc": 4.4,
+      "gap": 8.8,
+      "p_value": 0.002,
+      "n": 113
+     },
+     "glm": {
+      "acc": 10.6,
+      "gap": 2.7,
+      "p_value": 0.6291,
+      "n": 113
+     },
+     "qwen": {
+      "acc": 6.2,
+      "gap": 7.1,
+      "p_value": 0.0215,
+      "n": 113
+     }
+    },
+    "best_other": {
+     "model": "glm",
+     "acc": 10.6,
+     "gap_vs_best_other": 2.7,
+     "p_value": 0.6291
+    },
+    "mean_other": {
+     "acc": 6.4,
+     "gap_vs_mean_other": 6.9
+    }
+   }
+  },
+  "sonnet": {
+   "first": {
+    "n": 61,
+    "self_acc": 4.9,
+    "per_predictor": {
+     "opus": {
+      "acc": 36.1,
+      "gap": -31.1,
+      "p_value": 0.0,
+      "n": 61
+     },
+     "gpt": {
+      "acc": 0.0,
+      "gap": 4.9,
+      "p_value": 0.25,
+      "n": 61
+     },
+     "glm": {
+      "acc": 14.8,
+      "gap": -9.8,
+      "p_value": 0.1094,
+      "n": 61
+     },
+     "qwen": {
+      "acc": 11.5,
+      "gap": -6.6,
+      "p_value": 0.2891,
+      "n": 61
+     }
+    },
+    "best_other": {
+     "model": "opus",
+     "acc": 36.1,
+     "gap_vs_best_other": -31.1,
+     "p_value": 0.0
+    },
+    "mean_other": {
+     "acc": 15.6,
+     "gap_vs_mean_other": -10.7
+    }
+   },
+   "later": {
+    "n": 86,
+    "self_acc": 0.0,
+    "per_predictor": {
+     "opus": {
+      "acc": 16.3,
+      "gap": -16.3,
+      "p_value": 0.0001,
+      "n": 86
+     },
+     "gpt": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 86
+     },
+     "glm": {
+      "acc": 3.5,
+      "gap": -3.5,
+      "p_value": 0.25,
+      "n": 86
+     },
+     "qwen": {
+      "acc": 2.3,
+      "gap": -2.3,
+      "p_value": 0.5,
+      "n": 86
+     }
+    },
+    "best_other": {
+     "model": "opus",
+     "acc": 16.3,
+     "gap_vs_best_other": -16.3,
+     "p_value": 0.0001
+    },
+    "mean_other": {
+     "acc": 5.5,
+     "gap_vs_mean_other": -5.5
+    }
+   }
+  },
+  "gpt": {
+   "first": {
+    "n": 14,
+    "self_acc": 0.0,
+    "per_predictor": {
+     "opus": {
+      "acc": 57.1,
+      "gap": -57.1,
+      "p_value": 0.0078,
+      "n": 14
+     },
+     "sonnet": {
+      "acc": 7.1,
+      "gap": -7.1,
+      "p_value": 1.0,
+      "n": 14
+     },
+     "glm": {
+      "acc": 14.3,
+      "gap": -14.3,
+      "p_value": 0.5,
+      "n": 14
+     },
+     "qwen": {
+      "acc": 28.6,
+      "gap": -28.6,
+      "p_value": 0.125,
+      "n": 14
+     }
+    },
+    "best_other": {
+     "model": "opus",
+     "acc": 57.1,
+     "gap_vs_best_other": -57.1,
+     "p_value": 0.0078
+    },
+    "mean_other": {
+     "acc": 26.8,
+     "gap_vs_mean_other": -26.8
+    }
+   },
+   "later": {
+    "n": 1,
+    "self_acc": 100.0,
+    "per_predictor": {
+     "opus": {
+      "acc": 0.0,
+      "gap": 100.0,
+      "p_value": 1.0,
+      "n": 1
+     },
+     "sonnet": {
+      "acc": 100.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 1
+     },
+     "glm": {
+      "acc": 100.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 1
+     },
+     "qwen": {
+      "acc": 100.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 1
+     }
+    },
+    "best_other": {
+     "model": "sonnet",
+     "acc": 100.0,
+     "gap_vs_best_other": 0.0,
+     "p_value": 1.0
+    },
+    "mean_other": {
+     "acc": 75.0,
+     "gap_vs_mean_other": 25.0
+    }
+   }
+  },
+  "glm": {
+   "first": {
+    "n": 37,
+    "self_acc": 0.0,
+    "per_predictor": {
+     "opus": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 37
+     },
+     "sonnet": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 37
+     },
+     "gpt": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 37
+     },
+     "qwen": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 37
+     }
+    },
+    "best_other": {
+     "model": "opus",
+     "acc": 0.0,
+     "gap_vs_best_other": 0.0,
+     "p_value": 1.0
+    },
+    "mean_other": {
+     "acc": 0.0,
+     "gap_vs_mean_other": 0.0
+    }
+   },
+   "later": {
+    "n": 31,
+    "self_acc": 6.5,
+    "per_predictor": {
+     "opus": {
+      "acc": 6.5,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 31
+     },
+     "sonnet": {
+      "acc": 9.7,
+      "gap": -3.2,
+      "p_value": 1.0,
+      "n": 31
+     },
+     "gpt": {
+      "acc": 9.7,
+      "gap": -3.2,
+      "p_value": 1.0,
+      "n": 31
+     },
+     "qwen": {
+      "acc": 6.5,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 31
+     }
+    },
+    "best_other": {
+     "model": "sonnet",
+     "acc": 9.7,
+     "gap_vs_best_other": -3.2,
+     "p_value": 1.0
+    },
+    "mean_other": {
+     "acc": 8.1,
+     "gap_vs_mean_other": -1.6
+    }
+   }
+  },
+  "qwen": {
+   "first": {
+    "n": 4,
+    "self_acc": 0.0,
+    "per_predictor": {
+     "opus": {
+      "acc": 25.0,
+      "gap": -25.0,
+      "p_value": 1.0,
+      "n": 4
+     },
+     "sonnet": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 4
+     },
+     "gpt": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 4
+     },
+     "glm": {
+      "acc": 0.0,
+      "gap": 0.0,
+      "p_value": 1.0,
+      "n": 4
+     }
+    },
+    "best_other": {
+     "model": "opus",
+     "acc": 25.0,
+     "gap_vs_best_other": -25.0,
+     "p_value": 1.0
+    },
+    "mean_other": {
+     "acc": 6.2,
+     "gap_vs_mean_other": -6.2
+    }
+   },
+   "later": {
+    "n": 0
+   }
+  }
+ },
  "one_unvisited_self_advantage": {
   "opus": {
    "n": 305,

@@ -453,6 +453,34 @@ RES["self_advantage_determined"] = det
 
 
 # ============================================================
+# FIRST VS LATER ATYPICAL CELLS (ACCUMULATED-ERROR CHECK)
+# ============================================================
+
+# A prediction's accuracy at step N depends on the whole reconstruction from step 1, so a cell
+# labeled atypical can be wrong because of an error several steps earlier. This splits each
+# target's atypical cells by whether the step is the first atypical move in its maze or a later
+# one (where the reconstruction had already had an opportunity to diverge). If the pooled
+# self-advantage were an artifact of accumulated error it would appear in the later group; it
+# appears in the first group only.
+first_later = {}
+for t in MODELS:
+    per_maze = {}
+    for mz, step in sorted(C.SELF[t]):
+        if C.is_branch(t, mz, step) and not C.chose_first_unvisited(t, mz, step):
+            per_maze.setdefault(mz, []).append(step)
+    first, later = [], []
+    for mz, steps in per_maze.items():
+        steps = sorted(steps)
+        first.append((mz, steps[0]))
+        later += [(mz, step) for step in steps[1:]]
+    first_later[t] = {
+        "first": _advantage(t, sorted(first)) if first else {"n": 0},
+        "later": _advantage(t, sorted(later)) if later else {"n": 0},
+    }
+RES["atypical_first_vs_later"] = first_later
+
+
+# ============================================================
 # ONE-UNVISITED CELLS AND THE SIMPLEST-TAXONOMY CHECK
 # ============================================================
 

@@ -136,6 +136,38 @@ RES["self_vs_cross_predictability_per_maze"] = {
 
 
 # ============================================================
+# DECISION-POINT POSITION IN THE RUN
+# ============================================================
+
+# Complements the parity check above: junction counts say how branchy the mazes are, not where
+# the branches sit relative to the start. Unlike junctions and BFS depth this is run-dependent
+# (it uses the routes taken), which is appropriate here -- the question is whether the models
+# actually encountered choices at different points in the run, not whether the mazes could
+# have produced that.
+position = {}
+for m in MODELS:
+    steps, firsts = [], []
+    for mz in sorted(C.CONSISTENT[m]):
+        dps = [s2 for s2 in range(1, len(C.TRUTH[m][mz])) if C.is_branch(m, mz, s2)]
+        steps += dps
+        if dps:
+            firsts.append(dps[0])
+    position[m] = {
+        "decision_points_by_step_pct": {
+            s2: round(100.0 * sum(1 for x in steps if x == s2) / len(steps)) for s2 in range(1, 9)
+        },
+        "mean_step": round(st.mean(steps), 2),
+        "median_step": float(st.median(steps)),
+        "first_decision_point": {
+            "mean": round(st.mean(firsts), 2),
+            "median": float(st.median(firsts)),
+            "n_mazes_with_decision_point": len(firsts),
+        },
+    }
+RES["decision_point_position"] = position
+
+
+# ============================================================
 # PER-MAZE SELF VS CROSS PAIRS
 # ============================================================
 
