@@ -311,26 +311,45 @@ for t in MODELS:
             unv = {direction(a, tuple(nb)): tuple(nb) for nb in C.unvisited_moves(t, mz, s)}
             fl_cell = unv[sorted(unv)[0]]
             candidates = sorted(c2 for c2 in unv.values() if c2 != traj[s])
-            wrong.append((tuple(C.SELF_POS[t][(mz, s)]), fl_cell, candidates))
-    on_unv = [w for w in wrong if w[0] in w[2]]
-    expected = sum(1.0 / len(cand) for _, _, cand in on_unv)
-    rng = np.random.default_rng(20260609)
-    observed = sum(pred == fl for pred, fl, _ in wrong)
-    draws = np.zeros(10000, dtype=int)
-    for pred, _, cand in on_unv:
-        draws += rng.integers(0, len(cand), 10000) == cand.index(pred) if pred in cand else 0
-    perm_p = round(float((draws >= observed).mean()), 4)
-    test = {
-        "n_wrong": len(wrong),
-        "on_firstlisted": observed,
-        "pct": C.pct(observed, len(wrong)),
-        "landed_on_unvisited_nonchosen": len(on_unv),
-        "expected_on_firstlisted_null": round(expected, 1),
-        "expected_pct_null": C.pct(expected, len(wrong)),
-        "perm_p": perm_p,
-    }
+            wrong.append((tuple(C.SELF_POS[t][(mz, s)]), fl_cell, candidates, len(unv)))
+
+    def _landing(records):
+        """Landing test over the given wrong-prediction records: observed hits on the
+        first-unvisited cell vs a null where a prediction landing on an unvisited
+        non-chosen alternative is uniform over the alternatives."""
+        on_alt = [w for w in records if w[0] in w[2]]
+        expected = sum(1.0 / len(cand) for _, _, cand, _ in on_alt)
+        observed = sum(pred == fl for pred, fl, _, _ in records)
+        rng = np.random.default_rng(20260609)
+        draws = np.zeros(10000, dtype=int)
+        for pred, _, cand, _ in on_alt:
+            draws += rng.integers(0, len(cand), 10000) == cand.index(pred) if pred in cand else 0
+        return {
+            "n_wrong": len(records),
+            "on_firstlisted": observed,
+            "pct": C.pct(observed, len(records)) if records else None,
+            "landed_on_unvisited_nonchosen": len(on_alt),
+            "expected_on_firstlisted_null": round(expected, 1),
+            "expected_pct_null": C.pct(expected, len(records)) if records else None,
+            "perm_p": round(float((draws >= observed).mean()), 4) if records else None,
+        }
+
+    # Pooled version kept for reference, labelled: at two-option cells the only alternative a
+    # wrong prediction can land on IS the first-listed one, so observed and null are both ~100%
+    # and those cells carry no information; pooling them understates the effect. The 3+ test is
+    # the discriminating one: the tidy-rule hypothesis predicts one specific cell while random
+    # error would spread across several.
+    test_pooled = _landing(wrong)
+    test_3plus = _landing([w for w in wrong if w[3] >= 3])
     mismatch[t] = {
-        "firstlisted_landing_test": test,
+        "firstlisted_landing_test_pooled": test_pooled,
+        "firstlisted_landing_test_3plus": test_3plus,
+        "atypical_cells_by_option_count": {
+            "two_options": sum(1 for mz, s in cells if len(C.unvisited_moves(t, mz, s)) == 2),
+            "three_plus_options": sum(
+                1 for mz, s in cells if len(C.unvisited_moves(t, mz, s)) >= 3
+            ),
+        },
         "n_atypical_cells": len(cells),
         "chosen_direction_distribution": dict(chosen),
         "firstlisted_direction_distribution": dict(firstlisted),
