@@ -119,13 +119,26 @@ ms = [m for m in MODELS if regularity[m]["direction_entropy"] is not None]
 _ent = [regularity[m]["direction_entropy"] for m in ms]
 _fl = [regularity[m]["first_listed_rate"] for m in ms]
 _pr = [predictability[m] for m in ms]
+# Rule-likeness under the corrected taxonomy: the default rate (share of decision points where
+# the model took the alphabetically-first unvisited direction). The retired first-listed rate
+# compressed the spread (35-81 vs 47.7-98.7) because refusals to backtrack counted as
+# deviations.
+_dr = []
+for m in MODELS:
+    dps = [
+        (mz, s2)
+        for mz in sorted(C.CONSISTENT[m])
+        for s2 in range(1, len(C.TRUTH[m][mz]))
+        if C.is_branch(m, mz, s2)
+    ]
+    _dr.append(C.pct(sum(C.chose_first_unvisited(m, mz, s2) for mz, s2 in dps), len(dps)))
 RES["regularity_vs_predictability"] = {
+    "pearson_default_rate_vs_predictability": pearson(_dr, _pr),
+    "perm_p_default_rate_vs_predictability": C.perm_corr_p(_dr, _pr),
     "pearson_entropy_vs_predictability": pearson(_ent, _pr),
     "perm_p_entropy_vs_predictability": C.perm_corr_p(_ent, _pr),
-    "pearson_firstlisted_vs_predictability": pearson(_fl, _pr),
-    "perm_p_firstlisted_vs_predictability": C.perm_corr_p(_fl, _pr),
     "n_models": len(ms),
-    "note": "negative entropy correlation / positive first-listed correlation => more rule-like models are more predictable; perm_p is a permutation test (n is only 5 models)",
+    "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; positive default-rate correlation / negative entropy correlation => more rule-like models are more predictable; perm p is the seeded scipy two-sided convention used throughout (exact two-sided by |r| exceedance at n=5: 2/120 = 0.0167)",
 }
 
 
@@ -467,13 +480,6 @@ for t in MODELS:
         "atypical_rate": C.pct(dp - default, dp),
         "south_share_of_atypical": C.pct(sum(d == "South" for d in atyp_dirs), len(atyp_dirs)),
     }
-rates = [100.0 - profile[t]["atypical_rate"] for t in MODELS]
-preds = [RES["target_predictability"][t] for t in MODELS]
-profile["rule_likeness_vs_predictability"] = {
-    "pearson": C.pearson(rates, preds),
-    "perm_p": C.perm_corr_p(rates, preds),
-    "note": "rule-likeness = 100 - atypical rate under the first-unvisited taxonomy",
-}
 RES["deviation_profile"] = profile
 
 
@@ -501,9 +507,9 @@ if __name__ == "__main__":
         "  corr(entropy, predictability) =",
         RES["regularity_vs_predictability"]["pearson_entropy_vs_predictability"],
         f"(perm p={RES['regularity_vs_predictability']['perm_p_entropy_vs_predictability']})",
-        "| corr(first-listed, predictability) =",
-        RES["regularity_vs_predictability"]["pearson_firstlisted_vs_predictability"],
-        f"(perm p={RES['regularity_vs_predictability']['perm_p_firstlisted_vs_predictability']})",
+        "| corr(default-rate, predictability) =",
+        RES["regularity_vs_predictability"]["pearson_default_rate_vs_predictability"],
+        f"(perm p={RES['regularity_vs_predictability']['perm_p_default_rate_vs_predictability']})",
     )
     print("\nfirst-move: frac of step-1 that is a real branch, and step-1 self-acc:")
     for t, d in firstmove.items():

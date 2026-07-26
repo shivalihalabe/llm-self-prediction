@@ -131,12 +131,12 @@
   "qwen": 90.3
  },
  "regularity_vs_predictability": {
+  "pearson_default_rate_vs_predictability": 0.974,
+  "perm_p_default_rate_vs_predictability": 0.031,
   "pearson_entropy_vs_predictability": -0.704,
   "perm_p_entropy_vs_predictability": 0.104,
-  "pearson_firstlisted_vs_predictability": 0.961,
-  "perm_p_firstlisted_vs_predictability": 0.0454,
   "n_models": 5,
-  "note": "negative entropy correlation / positive first-listed correlation => more rule-like models are more predictable; perm_p is a permutation test (n is only 5 models)"
+  "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; positive default-rate correlation / negative entropy correlation => more rule-like models are more predictable; perm p is the seeded scipy two-sided convention used throughout (exact two-sided by |r| exceedance at n=5: 2/120 = 0.0167)"
  },
  "first_move": {
   "opus": {
@@ -1169,11 +1169,6 @@
    "atypical": 4,
    "atypical_rate": 1.3,
    "south_share_of_atypical": 50.0
-  },
-  "rule_likeness_vs_predictability": {
-   "pearson": 0.974,
-   "perm_p": 0.031,
-   "note": "rule-likeness = 100 - atypical rate under the first-unvisited taxonomy"
   }
  }
 }

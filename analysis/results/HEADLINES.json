@@ -199,9 +199,9 @@
   "glm": 0.0,
   "qwen": 0.0
  },
- "mechanism_first_listed_vs_predictability": {
-  "pearson": 0.961,
-  "perm_p": 0.0454
+ "rule_likeness_vs_predictability": {
+  "pearson": 0.974,
+  "perm_p": 0.031
  },
  "maze_branch_steps_vs_predictability_intersection": {
   "pearson": -0.748,

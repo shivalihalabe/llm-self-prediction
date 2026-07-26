@@ -80,12 +80,12 @@ H["only_self_correct_pct"] = {
 }
 
 # 4) mechanism: rule-likeness -> predictability (model side and maze side)
-H["mechanism_first_listed_vs_predictability"] = {
+H["rule_likeness_vs_predictability"] = {
     "pearson": expl.get("regularity_vs_predictability", {}).get(
-        "pearson_firstlisted_vs_predictability"
+        "pearson_default_rate_vs_predictability"
     ),
     "perm_p": expl.get("regularity_vs_predictability", {}).get(
-        "perm_p_firstlisted_vs_predictability"
+        "perm_p_default_rate_vs_predictability"
     ),
 }
 H["maze_branch_steps_vs_predictability_intersection"] = mz.get(
@@ -233,10 +233,10 @@ if __name__ == "__main__":
     )
 
     print("\n4) Mechanism - rule-likeness drives predictability:")
-    fm = H["mechanism_first_listed_vs_predictability"]
+    fm = H["rule_likeness_vs_predictability"]
     bm = H["maze_branch_steps_vs_predictability_intersection"] or {}
     print(
-        f"   model side: corr(first-listed rate, predictability) r={fm['pearson']} (perm p={fm['perm_p']})"
+        f"   model side: corr(default rate, predictability) r={fm['pearson']} (perm p={fm['perm_p']})"
     )
     print(
         f"   maze side : corr(branch decisions, predictability)  r={bm.get('pearson')} (perm p={bm.get('perm_p')})"
