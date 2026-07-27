@@ -229,28 +229,8 @@ RES["unparsed_records"] = unparsed
 
 
 # ============================================================
-# WRITE + CONSOLE SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "outcomes.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("matrix (native), predictor rows -> target cols:")
-    print("        " + "".join(f"{t:>8}" for t in MODELS))
-    for p in MODELS:
-        print(f"  {p:6}" + "".join(f"{str(RES['matrix_native'][p][t]):>8}" for t in MODELS))
-    print("\nself vs best-other (native): gap_vs_best")
-    for t, d in RES["self_vs_other_native"].items():
-        print(
-            f"  {t:7} self={d['self']:5}  best_other={d['best_other']:5} ({d['best_other_model']:6})  gap={d['gap_vs_best']:+.1f}  n={d['n_self']}"
-        )
-    print("\nself accuracy by difficulty (mean over models):")
-    for k in range(1, 6):
-        print(
-            f"  {k} models consistent ({RES['self_accuracy_by_difficulty'][k]['n_mazes']:2} mazes): {RES['self_accuracy_by_difficulty'][k]['mean_self_acc']}"
-        )
-    print("\nreasoning vs no-reasoning (self):")
-    for m, d in rvn.items():
-        print(f"  {m:7} R={d['reasoning']:5}  NR={d['noreasoning']:5}  gap={d['gap']:+.1f}")
-    print("\n-> wrote results/outcomes.json")

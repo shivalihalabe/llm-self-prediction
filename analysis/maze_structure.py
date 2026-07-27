@@ -207,40 +207,8 @@ RES["consistent_set_difficulty"] = cons_diff
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "maze_structure.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print(
-        f"per-maze predictability computed for {len(per_maze)} mazes "
-        f"(model-centered maze effect; + = easier than navigator's own average)."
-    )
-    print("\nmaze effect vs structural features:")
-    print(f"  {'feature':16} {'k>=3 (n=' + str(len(k3)) + ')':>22} {'intersection19':>22}")
-    for feat in FEATURES:
-        a = RES["correlations_k3plus"][feat]
-        b = RES["correlations_intersection19"][feat]
-        print(
-            f"  {feat:16} r={str(a['pearson']):>7} (p={str(a['perm_p']):>6})   r={str(b['pearson']):>7} (p={str(b['perm_p']):>6})"
-        )
-    ranked = sorted(k3, key=lambda mz: per_maze[mz]["maze_effect"])
-    print("\nhardest (most negative maze effect):")
-    for mz in ranked[:3]:
-        d = per_maze[mz]
-        print(
-            f"  {mz:8} effect={d['maze_effect']:+.1f}  walls={d['n_walls']} junctions={d['n_junctions']} branch_steps={d['mean_branch_steps']} depth={d['bfs_max_depth']}"
-        )
-    print("easiest (most positive maze effect):")
-    for mz in ranked[-3:]:
-        d = per_maze[mz]
-        print(
-            f"  {mz:8} effect={d['maze_effect']:+.1f}  walls={d['n_walls']} junctions={d['n_junctions']} branch_steps={d['mean_branch_steps']} depth={d['bfs_max_depth']}"
-        )
-    sc = RES["self_vs_cross_predictability_per_maze"]
-    print(
-        f"\nself vs cross predictability per maze: r={sc['pearson']} (perm p={sc['perm_p']}, n={sc['n_mazes']})"
-    )
-    print("\n-> wrote results/maze_structure.json")

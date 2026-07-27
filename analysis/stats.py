@@ -524,45 +524,8 @@ RES["simplest_taxonomy"] = simplest
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "stats.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("self vs best-other (paired, native): gap [95% CI], McNemar p")
-    for t, d in sib.items():
-        o = d["overall"]
-        print(
-            f"  {t:7} vs {d['best_other']:6}: {o['gap']:+5.1f} [{o['ci_lo']:+.1f}, {o['ci_hi']:+.1f}]  p={o['p_value']}  (n={o['n']})"
-        )
-    print("\nself rank among all predictors (1 = best predictor of that target):")
-    for t, d in rank.items():
-        print(
-            f"  {t:7} rank {d['self_rank']}/{d['n_predictors']}  (self {d['self_acc']}, mean-other {d['mean_other']}, gap_vs_mean {d['gap_vs_mean']:+.1f})"
-        )
-    print("\nOpus per-step self vs best-other (CI), looking for steps excluding 0:")
-    for r in perstep["opus"]["by_step"]:
-        flag = "  <-- sig" if r["sig"] else ""
-        print(f"  step {r['step']}: {r['gap']:+5.1f} [{r['ci_lo']:+.1f}, {r['ci_hi']:+.1f}]{flag}")
-    print("\nvalidation self-consistency (temp-0 noise floor):")
-    for m, d in noise.items():
-        print(
-            f"  {m:7} {d['frac_all_runs_agree']} of {d['n_validation_cells']} validation cells fully agree"
-        )
-    print("\nself-advantage by move type (new taxonomy, best comparator):")
-    for kind in ("atypical", "default"):
-        for t in MODELS:
-            d = RES["self_advantage_by_move_type"][kind][t]
-            b = d["best_other"]
-            print(
-                f"  {kind:8} {t:7} n={d['n']:3}  self {d['self_acc']:5}  "
-                f"best {b['model']}={b['acc']} gap {b['gap_vs_best_other']:+.1f} p={b['p_value']}"
-            )
-    print("\nrun-to-run stability vs correctness (validation subsample):")
-    for m, d in consistency_acc.items():
-        print(
-            f"  {m:7} stable: {d['stable_acc']}% (n={d['n_stable']})  unstable: {str(d['unstable_acc']) + '%' if d['unstable_acc'] is not None else 'n/a'} (n={d['n_unstable']})"
-        )
-    print("\n-> wrote results/stats.json")

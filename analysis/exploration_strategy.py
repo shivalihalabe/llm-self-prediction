@@ -484,50 +484,8 @@ RES["deviation_profile"] = profile
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "exploration_strategy.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("forced vs branch self-accuracy:")
-    for t, d in forced_branch.items():
-        print(
-            f"  {t:7} forced={d['forced_self_acc']:5} (n={d['n_forced']:3})  branch={d['branch_self_acc']:5} (n={d['n_branch']:3})  drop={d['drop_at_branches']}"
-        )
-    print("\nbranch-choice regularity vs predictability:")
-    print(f"  {'model':7} {'entropy':>8} {'first%':>7} {'backtr%':>8} {'predict':>8}")
-    for t in MODELS:
-        r = regularity[t]
-        print(
-            f"  {t:7} {str(r['direction_entropy']):>8} {str(r['first_listed_rate']):>7} {str(r['backtrack_rate_at_branches']):>8} {predictability[t]:>8}"
-        )
-    print(
-        "  corr(entropy, predictability) =",
-        RES["regularity_vs_predictability"]["pearson_entropy_vs_predictability"],
-        f"(perm p={RES['regularity_vs_predictability']['perm_p_entropy_vs_predictability']})",
-        "| corr(default-rate, predictability) =",
-        RES["regularity_vs_predictability"]["pearson_default_rate_vs_predictability"],
-        f"(perm p={RES['regularity_vs_predictability']['perm_p_default_rate_vs_predictability']})",
-    )
-    print("\nfirst-move: frac of step-1 that is a real branch, and step-1 self-acc:")
-    for t, d in firstmove.items():
-        print(
-            f"  {t:7} branch={d['frac_step1_is_branch']:5}%  step1_acc={d['step1_self_acc']}  choices={d['step1_choice_distribution']}"
-        )
-    print("\ndeterminism: consistent mazes per model (multi-run):")
-    for m, d in determinism.items():
-        print(
-            f"  {m:7} {d['n_consistent']:3}/{d['n_mazes']}  first-divergence-step hist: {d['first_divergence_step_hist']}"
-        )
-    print("\nbranch density by step (% of steps that are genuine choices):")
-    for m, r in branch_rate_by_step.items():
-        print(f"  {m:7} {r}")
-    print("\nmid-horizon: Opus self-advantage vs branch density by step:")
-    for row in midh["opus"]["by_step"]:
-        print(
-            f"  step {row['step']}: gap {row['gap']:+3} | self {row['self']:3} best_other {row['best_other']:3} prior {row['prior_nr']} | branch_rate {row['branch_rate']}"
-        )
-    print(f"  corr(gap, branch_rate) across steps = {midh['opus']['corr_gap_vs_branch_rate']}")
-    print("\n-> wrote results/exploration_strategy.json")

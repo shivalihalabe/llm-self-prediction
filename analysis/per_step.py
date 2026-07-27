@@ -168,34 +168,8 @@ RES["predictability_horizon"] = horizon
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "per_step.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("self-consistency by step (fraction of validation cells whose runs agree):")
-    for m in MODELS:
-        print(
-            f"  {m:7} "
-            + " ".join(
-                f"s{s}:{RES['self_consistency_by_step'][m][s]['agree_frac']}" for s in range(1, 9)
-            )
-        )
-    print("\npredictability horizon (first step below 50% mean predictability):")
-    for t, d in horizon.items():
-        print(
-            f"  {t:7} first<50% at step {d['first_step_below_50pct']}  curve={d['predictability_by_step']}"
-        )
-    print("\nerror propagation: P(next correct | this correct) vs P(next correct | this wrong):")
-    for m, d in RES["error_propagation"].items():
-        print(
-            f"  {m:7} given-correct {d['p_correct_next_given_correct']}%  given-wrong {d['p_correct_next_given_wrong']}%  (n={d['n_consecutive_pairs']})"
-        )
-    print("\nself matches consensus vs truth, by step (opus):")
-    for r in RES["self_matches_consensus_by_step"]["opus"]:
-        print(
-            f"  step {r['step']}: truth {r['self_matches_truth_pct']}%  consensus {r['self_matches_consensus_pct']}%  (n={r['n']})"
-        )
-    print("\n-> wrote results/per_step.json")

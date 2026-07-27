@@ -385,71 +385,8 @@ RES["oracle_composition_by_move_type"] = composition
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "cross_structure.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print(
-        "per-target: convergence (spread of predictor accs), position agreement, ensemble vs best single:"
-    )
-    for t, d in struct.items():
-        print(
-            f"  {t:7} std={d['convergence']['std']:>5} range={d['convergence']['range']:>5} | "
-            f"pos-agree={d['mean_pairwise_position_agreement_pct']:>5}% | best={d['best_single_acc']:>5} ens_all={d['ensemble_all_acc']:>5} ens_others={d['ensemble_others_acc']:>5}"
-        )
-    print("\nself: matches truth vs matches consensus-of-others:")
-    for t, d in struct.items():
-        print(
-            f"  {t:7} truth={d['self_matches_truth_pct']:>5}%  consensus={d['self_matches_consensus_pct']:>5}%"
-        )
-    print(
-        "\nasymmetry vs predictability: pearson =",
-        RES["asymmetry_vs_predictability"]["pearson"],
-        f"(perm p={RES['asymmetry_vs_predictability']['perm_p']}, n={RES['asymmetry_vs_predictability']['n_pairs']} pairs)",
-    )
-    print(
-        "cross-acc vs target self-acc: pearson =",
-        RES["cross_acc_vs_target_self_acc"]["pearson"],
-        f"(perm p={RES['cross_acc_vs_target_self_acc']['perm_p']}, n={RES['cross_acc_vs_target_self_acc']['n_cells']} cells)",
-    )
-    print("\noracle ceiling (any predictor correct) and self's unique contribution:")
-    for t, d in oracle.items():
-        print(
-            f"  {t:7} best_single={d['best_single_acc']}  any-other={d['oracle_any_other_acc']}  any-incl-self={d['oracle_any_incl_self_acc']}  only-self-correct={d['items_only_self_correct_pct']}%"
-        )
-    print("\ndeveloper affinity (only opus<->sonnet is same-developer; asymmetric):")
-    print(
-        "  same-developer pairs:",
-        RES["developer_affinity"]["same_developer_pairs"],
-        "| mean",
-        RES["developer_affinity"]["mean_residual_same_developer"],
-        "vs different-developer mean",
-        RES["developer_affinity"]["mean_residual_different_developer"],
-    )
-    print(
-        "  (glm<->qwen are DIFFERENT developers, shown separately:",
-        RES["developer_affinity"]["open_weight_pair_glm_qwen"],
-        ")",
-    )
-    _top = (
-        sorted(resid.items(), key=lambda kv: kv[1], reverse=True)[:3]
-        + sorted(resid.items(), key=lambda kv: kv[1])[:3]
-    )
-    print("top predictor->target specializations (residuals):")
-    for k, v in _top:
-        print(f"  {k}: {v:+.1f}")
-    print("\nself vs other-prediction dissociation (skill at self vs at predicting others):")
-    for m, d in dissociation.items():
-        print(
-            f"  {m:7} self={d['self_acc']:5}  skill_predicting_others={d['skill_predicting_others']:5}  mean_residual_as_predictor={d['mean_residual_as_predictor']:+.2f}  (confound-free simulator skill)"
-        )
-    print("\nself-projection: behavioral similarity vs cross-accuracy:")
-    sp = RES["self_projection"]
-    print(
-        f"  raw r={sp['pearson_similarity_vs_cross_acc']} (perm p={sp['perm_p_raw']}) | "
-        f"vs residual r={sp['pearson_similarity_vs_residual']} (perm p={sp['perm_p_residual']})"
-    )
-    print("\n-> wrote results/cross_structure.json")

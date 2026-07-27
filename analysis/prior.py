@@ -214,39 +214,8 @@ RES["nr_predicted_position_grid_by_step"] = grids
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "prior.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("no-reasoning prior accuracy by step (collapses as horizon grows):")
-    print(f"  {'model':7} {'step1':>6} {'step2':>6} {'step4':>6} {'step8':>6}   {'overall':>8}")
-    for m, d in acc_step.items():
-        n = d["nr"]
-        print(
-            f"  {m:7} {str(n[0]):>6} {str(n[1]):>6} {str(n[3]):>6} {str(n[7]):>6}   {str(d['nr_overall']):>8}"
-        )
-    print("\nprior concentration - position entropy (NR vs reasoning); reasoning should be higher:")
-    for m, d in conc.items():
-        print(
-            f"  {m:7} NR={d['nr_mean_position_entropy']}  reasoning={d['reasoning_mean_position_entropy']}  lift={d['entropy_lift_from_reasoning']}"
-        )
-    print("\ncross-model agreement on the predicted cell (19-maze intersection):")
-    print(
-        f"  NR priors agree {nr_pct}%  vs  reasoned predictions agree {r_pct}%  "
-        f"-> reasoning {'individuates' if (nr_pct or 0) > (r_pct or 0) else 'does not individuate'} models"
-    )
-    print("\nreasoning vs the prior, per model:")
-    for m, d in correction.items():
-        print(
-            f"  {m:7} when right, prior was wrong {d['r_correct_nr_wrong_pct']}% (rescued)  |  "
-            f"when wrong, landed on prior cell {d['r_wrong_on_prior_cell_pct']}% (trapped)  |  R==NR {d['r_nr_prediction_agreement_pct']}%"
-        )
-    print("\nreasoned consensus vs truth vs prior, by step (opus):")
-    for r in cons_track["opus"]:
-        print(
-            f"  step {r['step']}: matches_truth {r['consensus_matches_truth_pct']}%  matches_prior {r['consensus_matches_prior_pct']}%  (n={r['n']})"
-        )
-    print("\n-> wrote results/prior.json")

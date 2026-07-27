@@ -408,54 +408,8 @@ RES["words_per_branch_terciles"] = wpb
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "traces.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("first-person 'I' correct vs wrong  - RAW count then PER-100-WORDS rate:")
-    print(f"  {'model':7} {'raw_cor':>8} {'raw_wro':>8}   {'rate_cor':>9} {'rate_wro':>9}")
-    for m, d in by_model.items():
-        x = d["lexical"]["I"]
-        print(
-            f"  {m:7} {x['raw_correct']:>8} {x['raw_wrong']:>8}   {x['per100w_correct']:>9} {x['per100w_wrong']:>9}"
-        )
-    print("\nhedging (per-100-words, correct vs wrong) - length-robust uncertainty signal:")
-    for m, d in by_model.items():
-        h = d["lexical"]["hedging"]
-        print(f"  {m:7} correct={h['per100w_correct']}  wrong={h['per100w_wrong']}")
-    print("\nunique positions (structural, correct vs wrong) + coherence:")
-    for m, d in by_model.items():
-        u = d["structural"]["unique_positions"]
-        print(
-            f"  {m:7} correct={u['correct']:>5} wrong={u['wrong']:>5}  coherence={d['trace_answer_coherence_pct']}%"
-        )
-    print("\nself vs cross 'I' - raw then per-100-words:")
-    for p, d in selfcross.items():
-        print(
-            f"  {p:7} raw self={d['self_I_raw']} cross={d['cross_I_raw']}   per100w self={d['self_I_per100w']} cross={d['cross_I_per100w']}"
-        )
-    print("\ntrace-path simulation - fraction of true path walked in order (correct vs wrong):")
-    for m, d in sim.items():
-        print(
-            f"  {m:7} correct={d['true_path_tracked_correct']}  wrong={d['true_path_tracked_wrong']}"
-        )
-    print("\nlength dose-response - accuracy by trace-length tercile:")
-    for m, d in lenacc.items():
-        if d:
-            print(
-                f"  {m:7} short={d['short']['acc']}% (n={d['short']['n']})  medium={d['medium']['acc']}%  long={d['long']['acc']}%"
-            )
-    print("\ntrace features by step (opus) - length / unique-pos / truth-never-appears%:")
-    for r in features_by_step["opus"]:
-        print(
-            f"  step {r['step']}: len={str(r['len']):>6} unique_pos={str(r['unique_pos']):>5} never_appears={str(r['truth_never_appears_pct']) + '%' if r['truth_never_appears_pct'] is not None else 'n/a'} (n_wrong={r['n_wrong']})"
-        )
-    print("\nhedging as a confidence signal - accuracy when hedging vs not:")
-    for m, d in hedging_cal.items():
-        print(
-            f"  {m:7} hedging {d['acc_when_hedging']}% (n={d['n_hedging']})  not {d['acc_when_not_hedging']}% (n={d['n_plain']})"
-        )
-    print("\n-> wrote results/traces.json")

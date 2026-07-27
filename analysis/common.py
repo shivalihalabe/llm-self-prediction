@@ -408,11 +408,3 @@ def cross_records(predictor, target):
         for stp, recs in steps.items():
             for r in recs:
                 yield mz, int(stp.split("_")[1]), r.get("run_idx"), r
-
-
-if __name__ == "__main__":
-    print("records           :", len(RECORDS), "rows")
-    print("consistent sizes  :", {m: len(CONSISTENT[m]) for m in MODELS})
-    print("5-way intersection:", len(INTERSECTION))
-    print("self-diagonal     :", {m: round(acc(SELF[m])[0], 1) for m in MODELS})
-    print("self NR           :", {m: round(acc(SELF_NR[m])[0], 1) for m in MODELS})

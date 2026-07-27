@@ -207,36 +207,8 @@ RES["geometry_by_step"] = geo_step
 
 
 # ============================================================
-# WRITE + SUMMARY
+# WRITE
 # ============================================================
 
 with open(os.path.join(OUT, "error_geometry.json"), "w") as f:
     json.dump(RES, f, indent=1)
-
-if __name__ == "__main__":
-    print("self error geometry (per model):")
-    print(
-        f"  {'model':7} {'exact':>6} {'rowAcc':>7} {'colAcc':>7} {'dist|wrong':>11} {'%reach':>7} {'wrong%onpath':>13}"
-    )
-    for t, d in geom.items():
-        print(
-            f"  {t:7} {d['exact_acc']:>6} {d['row_acc']:>7} {d['col_acc']:>7} {d['mean_dist_when_wrong']:>11} {d['frac_reachable']:>7} {d['of_wrong_frac_on_path']:>13}"
-        )
-    print(
-        "\nstep-offset of wrong-but-on-path predictions (negative=undershoot, positive=overshoot):"
-    )
-    for t, d in geom.items():
-        print(
-            f"  {t:7} {d['step_offset_hist']}  (overshoot {d['of_onpath_wrong_overshoot']} / undershoot {d['of_onpath_wrong_undershoot']})"
-        )
-    print("\nstep-8 corner: actual vs predicted (4,4):")
-    for t, d in corner.items():
-        print(
-            f"  {t:7} actual {d['actual_end_at_4_4']:2}/{d['n_mazes_with_step8']:2}  predicted {d['predicted_4_4']:2}"
-        )
-    print("\npredicted vs actual position distribution (total-variation; higher = more biased):")
-    for t, d in dist_div.items():
-        print(
-            f"  {t:7} mean_TV={d['mean_tv']}  over-predicts {d['most_overpredicted_cell'][0]} (+{d['most_overpredicted_cell'][1]})  under-predicts {d['most_underpredicted_cell'][0]} ({d['most_underpredicted_cell'][1]})"
-        )
-    print("\n-> wrote results/error_geometry.json")
