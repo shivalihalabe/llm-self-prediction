@@ -26,10 +26,10 @@ TRUTH[m][maze] -> trajectory; WALLS[maze] -> set of blocked frozensets
 Paths are resolved relative to this file, so scripts can be run from anywhere.
 """
 
-import os
-import json
-import warnings
 import collections
+import json
+import os
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -166,6 +166,7 @@ for _kind in RECORDS[RECORDS.kind.str.startswith("pilot:")].kind.unique():
 # ============================================================
 # MAZE SETS
 # ============================================================
+
 
 CONSISTENT = {
     m: set(RECORDS[(RECORDS.kind == "self") & (RECORDS.target == m)].maze.unique()) for m in MODELS

@@ -12,9 +12,9 @@ McNemar uses statsmodels' exact test; gap CIs use scipy's paired bootstrap.
 Output: analysis/results/stats.json
 """
 
+import collections
 import json
 import os
-import collections
 import statistics as st
 
 import numpy as np
@@ -94,6 +94,7 @@ def best_other_model(t):
 # SELF VS BEST-OTHER: PAIRED TEST + CI
 # ============================================================
 
+
 sib = {}
 for t in MODELS:
     bo = best_other_model(t)
@@ -114,6 +115,7 @@ RES["self_vs_best_other_paired"] = sib
 # ============================================================
 # PER-STEP SELF VS BEST-OTHER (CI per step)
 # ============================================================
+
 
 perstep = {}
 for t in MODELS:
@@ -139,6 +141,7 @@ RES["self_vs_best_other_per_step"] = perstep
 # MAX-SELECTION-BIAS FIX: SELF'S RANK
 # ============================================================
 
+
 rank = {}
 for t in MODELS:
     scores = {"self": C.acc(C.SELF[t])[0]}
@@ -162,6 +165,7 @@ RES["self_rank_among_predictors"] = rank
 # ============================================================
 # VALIDATION-RUN NOISE FLOOR (run 1,2)
 # ============================================================
+
 
 noise = {}
 for m in MODELS:
@@ -190,10 +194,10 @@ RES["validation_self_consistency"] = noise
 # ============================================================
 # BASELINE SENSITIVITY
 # ============================================================
-
-
 # For each target/step on the target's consistent set, the chance baseline under three
 # definitions, and self-accuracy's lift over each.
+
+
 def modal_baseline(t, s, mazeset):
     """Accuracy of always predicting the single most common actual step-s position."""
     actual = [tuple(C.TRUTH[t][mz][s]) for mz in mazeset if s < len(C.TRUTH[t][mz])]
@@ -248,8 +252,9 @@ RES["baseline_sensitivity"] = baseline
 # ============================================================
 # IS RUN-STABILITY A WITHIN-MODEL CORRECTNESS SIGNAL?
 # ============================================================
-
 # On the validation subsample, are predictions that are stable across runs more often correct?
+
+
 consistency_acc = {}
 for m in MODELS:
     cells = {}
@@ -279,10 +284,10 @@ RES["self_consistency_vs_accuracy"] = consistency_acc
 # ============================================================
 # SELF-ACCURACY BY MOVE TYPE, REASONING VS NO-REASONING
 # ============================================================
-
-
 # The A5 split: each model's self-accuracy on atypical / default / determined cells, with and
 # without a reasoning trace. "Determined" = non-branch cells (one unvisited move).
+
+
 def _move_type(t, mz, step):
     if not C.is_branch(t, mz, step):
         return "determined"
@@ -306,10 +311,10 @@ RES["self_by_move_type_reasoning_vs_nr"] = by_move_type
 # ============================================================
 # PER-STEP McNEMAR WITH HOLM CORRECTION (FIXED AND ROTATING OPPONENT)
 # ============================================================
-
-
 # Two versions of "is any single step significant after multiple testing": against the fixed
 # best-overall opponent, and against the per-step rotating best opponent (harsher).
+
+
 def _holm(raw):
     order = sorted(raw, key=lambda k: raw[k])
     out, running = {}, 0.0
@@ -351,10 +356,11 @@ RES["per_step_mcnemar_holm"] = per_step_holm
 # ============================================================
 # NO-REASONING UNIQUE INFORMATION
 # ============================================================
-
 # Cells where the no-reasoning self-prediction is correct while all four (reasoning)
 # cross-predictors are wrong. No-reasoning cross-predictions were not collected, so the
 # reasoning cross-predictors are the only available comparator.
+
+
 nr_unique = {}
 for t in MODELS:
     n = only = 0
@@ -373,13 +379,13 @@ RES["nr_unique_info"] = nr_unique
 # ============================================================
 # ATYPICAL AND DEFAULT SELF-ADVANTAGE (PER-PREDICTOR, BEST, MEAN, HOLM)
 # ============================================================
-
-
 # A decision point has two or more unvisited legal moves; default means the target took the
 # alphabetically-first unvisited direction, atypical anything else. For each target and each
 # move type: self accuracy, the full per-predictor vector, the best single comparator and the
 # mean comparator, each with unambiguous field names. Holm-adjusted p-values are given across
 # the five per-target best-comparator tests.
+
+
 def _split_cells(t):
     out = {"atypical": [], "default": []}
     for mz, step in sorted(C.SELF[t]):
@@ -439,9 +445,10 @@ RES["self_advantage_by_move_type"] = adv
 # ============================================================
 # DETERMINED-CELL SELF-ADVANTAGE
 # ============================================================
-
 # Completes the move-type split: the paired self-vs-best-other gap on determined (non-branch)
 # cells, same methodology as the prior-aligned / idiosyncratic split above.
+
+
 det = {}
 for t in MODELS:
     bo = best_other_model(t)
@@ -456,13 +463,14 @@ RES["self_advantage_determined"] = det
 # ============================================================
 # FIRST VS LATER ATYPICAL CELLS (ACCUMULATED-ERROR CHECK)
 # ============================================================
-
 # A prediction's accuracy at step N depends on the whole reconstruction from step 1, so a cell
 # labeled atypical can be wrong because of an error several steps earlier. This splits each
 # target's atypical cells by whether the step is the first atypical move in its maze or a later
 # one (where the reconstruction had already had an opportunity to diverge). If the pooled
 # self-advantage were an artifact of accumulated error it would appear in the later group; it
 # appears in the first group only.
+
+
 first_later = {}
 for t in MODELS:
     per_maze = {}
@@ -484,14 +492,14 @@ RES["atypical_first_vs_later"] = first_later
 # ============================================================
 # ONE-UNVISITED CELLS AND THE SIMPLEST-TAXONOMY CHECK
 # ============================================================
-
-
 # Two justifications for the taxonomy, kept computable. One-unvisited cells (2+ legal moves but
 # a single unvisited one) are excluded from decision points: prediction there is far from
 # ceiling, but no model shows a positive significant self-advantage, so the cells carry no
 # model-specific signature. The simplest taxonomy (2+ legal, first-listed among all legal, no
 # unvisited filter) is the alternative a reader may expect; its atypical set is diluted by
 # exactly these non-choice cells, which is why the effect weakens under it.
+
+
 def _one_unvisited_cells(t):
     out = []
     for mz, step in sorted(C.SELF[t]):
@@ -527,6 +535,7 @@ RES["simplest_taxonomy"] = simplest
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "stats.json"), "w") as f:
     json.dump(RES, f, indent=1)

@@ -15,9 +15,9 @@ Consolidates and extends step-by-step views that don't belong to a single themat
 Output: analysis/results/per_step.json
 """
 
+import collections
 import json
 import os
-import collections
 
 import pandas as pd
 
@@ -90,6 +90,7 @@ RES["forced_vs_branch_by_step"] = {m: _forced_vs_branch(m) for m in MODELS}
 # SELF MATCHES CONSENSUS-OF-OTHERS BY STEP
 # ============================================================
 
+
 _ORDER = {p: i for i, p in enumerate(MODELS)}
 
 
@@ -152,6 +153,7 @@ RES["error_propagation"] = {m: _propagation(m) for m in MODELS}
 # PREDICTABILITY HORIZON (first step below 50%)
 # ============================================================
 
+
 _pt = C.RECORDS[C.RECORDS.kind.isin(("self", "cross"))]
 _step_acc = _pt.groupby(["target", "predictor", "step"], sort=False)["correct"].mean().mul(100.0)
 
@@ -170,6 +172,7 @@ RES["predictability_horizon"] = horizon
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "per_step.json"), "w") as f:
     json.dump(RES, f, indent=1)

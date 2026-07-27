@@ -32,12 +32,12 @@ Reliability:
 Output: data/navigation/{MODEL}_navigation.json
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 import os
 import random
-import json
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
+import time
 
 try:
     from google.colab import userdata, files
@@ -53,6 +53,7 @@ from openai import OpenAI
 # ============================================================
 # CONFIG
 # ============================================================
+
 
 # To switch model, edit this one line:
 MODEL = "opus"   # one of: opus, sonnet, gpt, glm, qwen
@@ -92,14 +93,21 @@ OUTPUT_PATH = os.path.join(OUT_DIR, f"{MODEL}_navigation.json")
 # PROMPTS
 # ============================================================
 
-NAV_SYS = """You are exploring a grid maze. At each step, you know your current position, your full movement history, and which directions you can move. Your goal is to explore as much of the maze as possible.
 
-Respond with only one of the available directions. Provide no explanation, reasoning, or other text."""
+NAV_SYS = (
+    "You are exploring a grid maze. At each step, you know your current position, your full "
+    "movement history, and which directions you can move. Your goal is to explore as much of "
+    "the maze as possible.\n"
+    "\n"
+    "Respond with only one of the available directions. Provide no explanation, reasoning, "
+    "or other text."
+)
 
 
 # ============================================================
 # MAZE GENERATION (DFS spanning tree + extra passages for cycles)
 # ============================================================
+
 
 def generate_maze(seed, rows=ROWS, cols=COLS, n_extra_passages=N_EXTRA_PASSAGES):
     """
@@ -163,6 +171,7 @@ def get_available_directions(pos, walls, rows=ROWS, cols=COLS):
 # NAV USER MESSAGE
 # ============================================================
 
+
 def build_nav_user_msg(pos, history_positions, available_dirs, shown_order):
     """
     Format:
@@ -223,6 +232,7 @@ def parse_direction(text, available_dirs):
 # API CLIENT
 # ============================================================
 
+
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
     raise RuntimeError("Set OPENROUTER_API_KEY in env or Colab userdata.")
@@ -269,6 +279,7 @@ def call_and_parse(system_prompt, user_msg, available_dirs, ctx=""):
 # ============================================================
 # SINGLE NAV RUN
 # ============================================================
+
 
 def _do_run(maze, run_idx):
     """Single attempt at a nav run. Raises if any step's API/parse retries are exhausted."""
@@ -338,6 +349,7 @@ def run_single_nav(maze, run_idx):
 # CHECKPOINT / RESUME
 # ============================================================
 
+
 def atomic_save(results, path):
     """Atomic save: write to tmp, fsync, rename. Safe against crashes mid-write."""
     tmp = path + ".tmp"
@@ -354,6 +366,7 @@ def atomic_save(results, path):
 # ============================================================
 # MAIN
 # ============================================================
+
 
 def main():
     print(f"Model: {MODEL_ID}")

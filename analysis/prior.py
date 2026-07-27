@@ -13,17 +13,17 @@ to it:
   by tracking each maze individually.
 - cross_model_agreement: do different models' priors agree on the same cell more than their reasoned
   predictions do? If so, reasoning individuates models (each simulates its own path).
-- reasoning_correction: when reasoning is right, did it rescue a wrong prior; when reasoning is wrong,
-  did it stay trapped on the prior's cell.
+- reasoning_correction: when reasoning is right, did it rescue a wrong prior; when reasoning
+  is wrong, did it stay trapped on the prior's cell.
 
 Uses the no-reasoning scored/position dicts and reasoning dicts from common.py.
 
 Output: analysis/results/prior.json
 """
 
+import collections
 import json
 import os
-import collections
 
 import common as C
 
@@ -41,6 +41,7 @@ def _acc(scored, step=None):
 # ============================================================
 # PRIOR ACCURACY DECAYS WITH HORIZON
 # ============================================================
+
 
 acc_step = {}
 for m in MODELS:
@@ -91,7 +92,8 @@ RES["prior_concentration"] = conc
 
 
 def _cross_model_agreement(pos_dicts):
-    """pairwise agreement on the predicted cell across models, on the shared 19-maze intersection."""
+    """pairwise agreement on the predicted cell across models, on the shared 19-maze
+    intersection."""
     by_step = {}
     agree = total = 0
     for mz in C.INTERSECTION:
@@ -118,7 +120,8 @@ r_pct, r_by_step, r_n = _cross_model_agreement(C.SELF_POS)
 RES["cross_model_agreement"] = {
     "nr_pairwise_agreement_pct": nr_pct,
     "reasoning_pairwise_agreement_pct": r_pct,
-    "interpretation": "if NR agreement > reasoning agreement, reasoning individuates models (each tracks its own path)",
+    "interpretation": "if NR agreement > reasoning agreement, reasoning individuates "
+    "models (each tracks its own path)",
     "by_step_nr": nr_by_step,
     "by_step_reasoning": r_by_step,
     "n_pairs_nr": nr_n,
@@ -129,6 +132,7 @@ RES["cross_model_agreement"] = {
 # ============================================================
 # REASONING RESCUES VS GETS TRAPPED BY THE PRIOR
 # ============================================================
+
 
 correction = {}
 for m in MODELS:
@@ -161,9 +165,10 @@ RES["reasoning_correction"] = correction
 # ============================================================
 # DOES THE REASONED CONSENSUS TRACK TRUTH OR PRIOR?
 # ============================================================
-
 # For each target, the modal reasoned prediction (self + all cross-predictors) at each (maze,step),
 # compared to the target's truth and to its no-reasoning prior, by step.
+
+
 cons_track = {}
 for t in MODELS:
     rows = []
@@ -198,9 +203,10 @@ RES["reasoned_consensus_vs_truth_vs_prior"] = cons_track
 # ============================================================
 # NO-REASONING PREDICTED-POSITION GRID BY STEP
 # ============================================================
-
 # Where no-reasoning self-predictions land on the 5x5 grid, pooled across models, per step --
 # the spatial shape of the prior (concentration toward the centre / diagonal).
+
+
 grids = {}
 for step in range(1, 9):
     g = [[0] * C.COLS for _ in range(C.ROWS)]
@@ -217,6 +223,7 @@ RES["nr_predicted_position_grid_by_step"] = grids
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "prior.json"), "w") as f:
     json.dump(RES, f, indent=1)

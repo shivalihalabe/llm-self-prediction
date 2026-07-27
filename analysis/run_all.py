@@ -13,8 +13,8 @@ run so a failure is never silently skipped.
 """
 
 import os
-import sys
 import subprocess
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS = [

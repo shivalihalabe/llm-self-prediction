@@ -29,13 +29,13 @@ not reproducible on a re-run by design; the data records it via run_idx.
 Output: data/cross_prediction/{PREDICTOR}_xpred_reasoning.json
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 import os
 import random
 import re
-import json
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
+import time
 
 try:
     from google.colab import userdata, files
@@ -50,6 +50,8 @@ from openai import OpenAI
 # ============================================================
 # CONFIG  -- edit this one line
 # ============================================================
+
+
 PREDICTOR = "opus"   # one of: opus, sonnet, gpt, glm, qwen
 
 ROWS, COLS = 5, 5
@@ -83,7 +85,9 @@ assert PREDICTOR in MODEL_IDS
 MODEL_ID = MODEL_IDS[PREDICTOR]
 PROVIDER = PROVIDERS[PREDICTOR]
 TARGETS = [m for m in ALL_MODELS if m != PREDICTOR]
-ANSWER_INSTRUCTION = "Answer with only the predicted position in the format (row, col). No explanation."
+ANSWER_INSTRUCTION = (
+    "Answer with only the predicted position in the format (row, col). No explanation."
+)
 
 NAV_DIR     = os.path.join(WORKDIR, "data", "navigation")
 OUT_DIR     = os.path.join(WORKDIR, "data", "cross_prediction")
@@ -103,13 +107,17 @@ def system_prompt(target):
 # ============================================================
 # MAZE / PROMPT
 # ============================================================
+
+
 def parse_walls(wl):
     return set(frozenset([tuple(p[0]), tuple(p[1])]) for p in wl)
 
 def get_available_directions(pos, walls):
     r, c = pos
     out = {}
-    for d, (nr, nc) in {"North": (r-1, c), "South": (r+1, c), "East": (r, c+1), "West": (r, c-1)}.items():
+    for d, (nr, nc) in {
+        "North": (r-1, c), "South": (r+1, c), "East": (r, c+1), "West": (r, c-1)
+    }.items():
         if 0 <= nr < ROWS and 0 <= nc < COLS and frozenset([pos, (nr, nc)]) not in walls:
             out[d] = (nr, nc)
     return out
@@ -121,11 +129,15 @@ def describe_maze_topology(walls):
         for c in range(COLS):
             dirs = get_available_directions((r, c), walls)
             if dirs:
-                lines.append(f"  ({r},{c}): " + ", ".join(f"{n}->({a},{b})" for n, (a, b) in sorted(dirs.items())))
+                pairs = ", ".join(f"{n}->({a},{b})" for n, (a, b) in sorted(dirs.items()))
+                lines.append(f"  ({r},{c}): {pairs}")
     return "\n".join(lines)
 
 def build_user_msg(walls, n_steps):
-    return f"{describe_maze_topology(walls)}\n\nStarting at (0, 0), predict the position after {n_steps} steps."
+    return (
+        f"{describe_maze_topology(walls)}\n\n"
+        f"Starting at (0, 0), predict the position after {n_steps} steps."
+    )
 
 def parse_answer(content):
     if not content:
@@ -143,6 +155,8 @@ def n_runs_for_bucket():
 # ============================================================
 # API
 # ============================================================
+
+
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
     raise RuntimeError("Set OPENROUTER_API_KEY in env or Colab userdata.")
@@ -177,6 +191,8 @@ def call(sys_p, user_msg, ctx=""):
 # ============================================================
 # MAIN
 # ============================================================
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     target_walls = {}; target_mazes = {}
@@ -248,7 +264,8 @@ def main():
 
     def run_one(task):
         t, cell, mid, step, ri = task
-        rec = call(system_prompt(t), build_user_msg(target_walls[t][mid], step), ctx=f"{cell}|{mid}|s{step}|r{ri}")
+        rec = call(system_prompt(t), build_user_msg(target_walls[t][mid], step),
+                   ctx=f"{cell}|{mid}|s{step}|r{ri}")
         if rec is not None:
             rec["run_idx"] = ri
         return (cell, mid, step, ri, rec)
@@ -265,7 +282,8 @@ def main():
                 done[0] += 1
             if done[0] % SAVE_EVERY == 0:
                 save(); el = time.time() - start
-                print(f"  {done[0]}/{len(tasks)} ({done[0]/el:.1f}/s)" if el else f"  {done[0]}/{len(tasks)}")
+                rate = f" ({done[0]/el:.1f}/s)" if el else ""
+                print(f"  {done[0]}/{len(tasks)}{rate}")
     save()
     print(f"\nDONE -> {OUTPUT_PATH}")
     if IS_COLAB and files is not None:

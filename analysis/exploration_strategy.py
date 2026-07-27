@@ -16,14 +16,13 @@ the multi-run determinism check.
 Output: analysis/results/exploration_strategy.json
 """
 
+import collections
 import json
 import os
-import collections
 import statistics as st
 
-import pandas as pd
-
 import numpy as np
+import pandas as pd
 
 import common as C
 
@@ -44,11 +43,11 @@ def _r3(x):
 # ============================================================
 # BRANCH DECISION TABLE
 # ============================================================
-
-
 # One row per genuine choice (>=2 unvisited moves) in a run-0 trajectory: what was chosen,
 # whether it was the first-listed legal direction, whether it backtracked. Everything
 # regularity-related aggregates off this frame.
+
+
 def _branch_rows():
     rows = []
     for t in MODELS:
@@ -74,6 +73,7 @@ BRANCHES = _branch_rows()
 # FORCED VS BRANCH SELF-ACCURACY
 # ============================================================
 
+
 forced_branch = {}
 for t in MODELS:
     f = [c for (mz, s), c in C.SELF[t].items() if len(C.unvisited_moves(t, mz, s)) == 1]
@@ -93,6 +93,7 @@ RES["forced_vs_branch_self"] = forced_branch
 # ============================================================
 # BRANCH-CHOICE REGULARITY + PREDICTABILITY
 # ============================================================
+
 
 regularity = {}
 predictability = {}
@@ -139,13 +140,17 @@ RES["regularity_vs_predictability"] = {
     "pearson_entropy_vs_predictability": pearson(_ent, _pr),
     "perm_p_entropy_vs_predictability": C.perm_corr_p(_ent, _pr),
     "n_models": len(ms),
-    "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; positive default-rate correlation / negative entropy correlation => more rule-like models are more predictable; perm p is the seeded scipy two-sided convention used throughout (exact two-sided by |r| exceedance at n=5: 2/120 = 0.0167)",
+    "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; "
+    "positive default-rate correlation / negative entropy correlation => more rule-like "
+    "models are more predictable; perm p is the seeded scipy two-sided convention used "
+    "throughout (exact two-sided by |r| exceedance at n=5: 2/120 = 0.0167)",
 }
 
 
 # ============================================================
 # FIRST-MOVE ANALYSIS (the step-1 puzzle)
 # ============================================================
+
 
 firstmove = {}
 for t in MODELS:
@@ -176,6 +181,7 @@ RES["first_move"] = firstmove
 # TRAJECTORY SHAPE
 # ============================================================
 
+
 shape = {}
 for t in MODELS:
     cov, back, term = [], [], collections.Counter()
@@ -195,6 +201,7 @@ RES["trajectory_shape"] = shape
 # ============================================================
 # DETERMINISM DIAGNOSIS (multi-run)
 # ============================================================
+
 
 determinism = {}
 for m in MODELS:
@@ -227,8 +234,9 @@ RES["determinism_diagnosis"] = determinism
 # ============================================================
 # BRANCH DENSITY BY STEP + WHY THE MID-HORIZON
 # ============================================================
-
 # Where do genuine choices concentrate over the horizon, and does the self-advantage track them?
+
+
 branch_rate_by_step = {}
 for m in MODELS:
     rates = []
@@ -289,10 +297,11 @@ RES["self_advantage_vs_branch_rate"] = midh
 # ============================================================
 # SELF-MODEL MISMATCH AT ATYPICAL CELLS
 # ============================================================
-
 # Why some models predict themselves worse than others do: at atypical cells, compare what the
 # model actually chose against the first-listed move its simplified self-model would pick, where
 # wrong self-predictions land, and how every predictor scores on exactly those cells.
+
+
 mismatch = {}
 for t in MODELS:
     cells = [
@@ -379,8 +388,9 @@ RES["self_model_mismatch"] = mismatch
 # ============================================================
 # PREDICTOR ACCURACY ON DEFAULT VS ATYPICAL CELLS (POOLED CROSS)
 # ============================================================
-
 # Cross-prediction only: accuracy on the target's default vs atypical cells.
+
+
 pooled = {}
 for p in MODELS:
     buckets = {"default": [], "atypical": []}
@@ -399,12 +409,12 @@ RES["predictor_default_vs_atypical_pooled"] = pooled
 # ============================================================
 # NO-BACKTRACKING UNANIMITY AND STEP-CATEGORY CENSUS (ALL 100 MAZES)
 # ============================================================
-
-
 # The empirical justification for the default/atypical taxonomy: at decision points no model
 # ever took a visited direction, and with exactly one unvisited move every model took it --
 # 3,578 opportunities, zero exceptions. The census gives the four-way breakdown of all 800
 # run-0 steps per model, over all 100 mazes.
+
+
 def _cell(t, mz, step):
     traj = [tuple(p) for p in C.TRUTH[t][mz]]
     pos = traj[step - 1]
@@ -452,10 +462,11 @@ RES["no_backtracking"] = backtrack
 # ============================================================
 # DEVIATION PROFILE (NEW TAXONOMY) AND RULE-LIKENESS VS PREDICTABILITY
 # ============================================================
-
 # Within each consistent set: decision points, default vs atypical under the first-unvisited
 # rule, the atypical rate (the sharper rule-likeness measure), and the South share of atypical
 # moves. The correlation re-tests regularity -> predictability with the new measure.
+
+
 profile = {}
 for t in MODELS:
     dp = default = 0
@@ -484,6 +495,7 @@ RES["deviation_profile"] = profile
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "exploration_strategy.json"), "w") as f:
     json.dump(RES, f, indent=1)

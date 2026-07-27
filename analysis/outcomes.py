@@ -13,10 +13,10 @@ All accuracy is the shared scoring contract from common.py (run_idx 0, exact mat
 Output: analysis/results/outcomes.json
 """
 
+import itertools
 import json
 import os
 import statistics as st
-import itertools
 
 import pandas as pd
 
@@ -98,6 +98,7 @@ RES["self_vs_other_intersection19"] = self_vs_other(C.INTERSECTION)
 # PER-STEP SELF VS OTHER
 # ============================================================
 
+
 _step_acc = _acc_table(_PT, ["target", "predictor", "step"])
 _step_n = _PT.groupby(["target", "predictor", "step"], sort=False)["correct"].size()
 
@@ -127,8 +128,9 @@ RES["per_step_self_vs_other"] = perstep
 # ============================================================
 # PREDICTABILITY / SKILL PER STEP
 # ============================================================
-
 # mean of per-predictor accuracies (not pooled), matching the per-predictor cell definition
+
+
 RES["target_predictability_per_step"] = {
     t: [
         int(round(float(v))) if pd.notna(v) else None
@@ -151,6 +153,7 @@ RES["predictor_skill_per_step"] = {
 # PAIRWISE (on pairwise intersection)
 # ============================================================
 
+
 pairwise = {}
 for a_m, b_m in itertools.combinations(MODELS, 2):
     s = C.PAIRWISE[tuple(sorted((a_m, b_m)))]
@@ -167,8 +170,9 @@ RES["pairwise_on_intersection"] = pairwise
 # ============================================================
 # SELF ACCURACY BY MAZE DIFFICULTY
 # ============================================================
-
 # difficulty stratum k = mazes consistent for exactly k models.
+
+
 diff = {}
 for k in range(1, 6):
     strat = C.DIFFICULTY_STRATA[k]
@@ -188,6 +192,7 @@ RES["self_accuracy_by_difficulty"] = diff
 # REASONING VS NO-REASONING (self)
 # ============================================================
 
+
 rvn = {}
 for m in MODELS:
     common_keys = set(C.SELF[m]) & set(C.SELF_NR[m])
@@ -206,9 +211,10 @@ RES["reasoning_vs_nr_self"] = rvn
 # ============================================================
 # UNPARSED-RECORD AUDIT
 # ============================================================
-
 # Verifies that the "unparsed omitted at generation" contract holds: counts records whose
 # parsed_position is missing or null, per file and in total, across all prediction data.
+
+
 unparsed = {"per_file": {}, "total": {"unparsed": 0, "records": 0}}
 for sub in ("self_prediction", "cross_prediction"):
     folder = os.path.join(C.DATA, sub)
@@ -232,6 +238,7 @@ RES["unparsed_records"] = unparsed
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "outcomes.json"), "w") as f:
     json.dump(RES, f, indent=1)

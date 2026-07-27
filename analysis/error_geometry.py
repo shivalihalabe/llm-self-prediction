@@ -13,9 +13,9 @@ corner attractor. Computed for self-prediction (each model predicting itself).
 Output: analysis/results/error_geometry.json
 """
 
+import collections
 import json
 import os
-import collections
 
 import pandas as pd
 
@@ -28,7 +28,8 @@ RES = {"metadata": C.metadata("error_geometry")}
 
 
 def _offset(t, maze, s, pred):
-    """Signed step-offset for an on-path prediction (None if off-path): predicted index - true step."""
+    """Signed step-offset for an on-path prediction (None if off-path):
+    predicted index - true step."""
     idxs = [j for j, p in enumerate(C.TRUTH[t][maze]) if list(p) == list(pred)]
     if not idxs:
         return None
@@ -65,6 +66,7 @@ FRAMES = {t: _self_frame(t) for t in MODELS}
 # PER-TARGET GEOMETRY OF ERRORS
 # ============================================================
 
+
 geom = {}
 for t in MODELS:
     df = FRAMES[t]
@@ -91,8 +93,9 @@ RES["self_error_geometry"] = geom
 # ============================================================
 # ACCURACY STRATIFIED BY TRUE ENDPOINT ROW
 # ============================================================
-
 # Does the model do better when the truth sits where its prior expects (e.g. top rows)?
+
+
 endpoint = {}
 for t in MODELS:
     df = FRAMES[t]
@@ -109,6 +112,7 @@ RES["accuracy_by_true_row"] = endpoint
 # ============================================================
 # STEP-8 CORNER ATTRACTOR
 # ============================================================
+
 
 corner = {}
 for t in MODELS:
@@ -132,8 +136,9 @@ RES["corner_attractor_step8"] = corner
 # ============================================================
 # PREDICTED VS ACTUAL POSITION DISTRIBUTION
 # ============================================================
-
 # Are predictions systematically biased toward certain cells (beyond the step-8 corner)?
+
+
 dist_div = {}
 for t in MODELS:
     per_step, pred_tot, act_tot = [], collections.Counter(), collections.Counter()
@@ -170,6 +175,7 @@ RES["prediction_distribution_divergence"] = dist_div
 # ROW / COLUMN CONFUSION (actual -> predicted)
 # ============================================================
 
+
 row_conf, col_conf = {}, {}
 for t in MODELS:
     df = FRAMES[t]
@@ -184,6 +190,7 @@ RES["col_confusion_actual_to_predicted"] = col_conf
 # ============================================================
 # ERROR GEOMETRY BY STEP (horizon-resolved)
 # ============================================================
+
 
 geo_step = {}
 for t in MODELS:
@@ -209,6 +216,7 @@ RES["geometry_by_step"] = geo_step
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "error_geometry.json"), "w") as f:
     json.dump(RES, f, indent=1)

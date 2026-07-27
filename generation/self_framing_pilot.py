@@ -27,12 +27,12 @@ Records (predictions -> model -> framing -> maze -> step_k -> single dict):
 Output: data/self_framing_pilot.json   (loose in data/, single file)
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 import os
 import re
-import json
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
+import time
 
 try:
     from google.colab import userdata, files
@@ -47,6 +47,8 @@ from openai import OpenAI
 # ============================================================
 # CONFIG
 # ============================================================
+
+
 ROWS, COLS = 5, 5
 PREDICT_STEPS = [1, 2, 3, 4, 5, 6, 7, 8]
 TEMPERATURE = 0
@@ -72,7 +74,9 @@ PROVIDER_WORKERS = {"anthropic": 12, "openai": 12, "z-ai": 12, "alibaba": 12}
 NAV_DIR     = os.path.join(WORKDIR, "data", "navigation")
 OUTPUT_PATH = os.path.join(WORKDIR, "data", "self_framing_pilot.json")
 
-ANSWER_INSTRUCTION = "Answer with only the predicted position in the format (row, col). No explanation."
+ANSWER_INSTRUCTION = (
+    "Answer with only the predicted position in the format (row, col). No explanation."
+)
 BASE_PROMPT = (
     "Suppose I asked you to explore a grid maze. At each step, you would know "
     "your current position, your full movement history, and which directions you "
@@ -93,13 +97,17 @@ FRAMINGS = {"base": BASE_PROMPT, "role": ROLE_PROMPT}
 # ============================================================
 # MAZE / PROMPT
 # ============================================================
+
+
 def parse_walls(wl):
     return set(frozenset([tuple(p[0]), tuple(p[1])]) for p in wl)
 
 def get_available_directions(pos, walls):
     r, c = pos
     out = {}
-    for d, (nr, nc) in {"North": (r-1, c), "South": (r+1, c), "East": (r, c+1), "West": (r, c-1)}.items():
+    for d, (nr, nc) in {
+        "North": (r-1, c), "South": (r+1, c), "East": (r, c+1), "West": (r, c-1)
+    }.items():
         if 0 <= nr < ROWS and 0 <= nc < COLS and frozenset([pos, (nr, nc)]) not in walls:
             out[d] = (nr, nc)
     return out
@@ -111,11 +119,15 @@ def describe_maze_topology(walls):
         for c in range(COLS):
             dirs = get_available_directions((r, c), walls)
             if dirs:
-                lines.append(f"  ({r},{c}): " + ", ".join(f"{n}->({a},{b})" for n, (a, b) in sorted(dirs.items())))
+                pairs = ", ".join(f"{n}->({a},{b})" for n, (a, b) in sorted(dirs.items()))
+                lines.append(f"  ({r},{c}): {pairs}")
     return "\n".join(lines)
 
 def build_user_msg(walls, n_steps):
-    return f"{describe_maze_topology(walls)}\n\nStarting at (0, 0), predict the position after {n_steps} steps."
+    return (
+        f"{describe_maze_topology(walls)}\n\n"
+        f"Starting at (0, 0), predict the position after {n_steps} steps."
+    )
 
 def parse_answer(content):
     if not content:
@@ -140,6 +152,8 @@ def five_way_intersection_and_walls():
 # ============================================================
 # API
 # ============================================================
+
+
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
     raise RuntimeError("Set OPENROUTER_API_KEY in env or Colab userdata.")
@@ -156,7 +170,8 @@ def call(model, sys_p, user_msg, ctx=""):
                             "provider": {"only": [PROVIDERS[model]], "allow_fallbacks": False}},
                 timeout=API_TIMEOUT_S)
             msg = resp.choices[0].message
-            content = msg.content or getattr(msg, "reasoning", None) or getattr(msg, "reasoning_content", None)
+            content = (msg.content or getattr(msg, "reasoning", None)
+                       or getattr(msg, "reasoning_content", None))
             if not content:
                 raise ValueError("empty content")
             content = content.strip()
@@ -173,9 +188,12 @@ def call(model, sys_p, user_msg, ctx=""):
 # ============================================================
 # MAIN
 # ============================================================
+
+
 def main():
     mazes, walls_by_id = five_way_intersection_and_walls()
-    print(f"Framing pilot: {len(mazes)} mazes (5-way intersection), {len(MODELS)} models, base+role\n")
+    print(f"Framing pilot: {len(mazes)} mazes (5-way intersection), "
+          f"{len(MODELS)} models, base+role\n")
 
     results = None
     if os.path.exists(OUTPUT_PATH):
@@ -226,7 +244,11 @@ def main():
                    ctx=f"{model}|{framing}|{mid}|s{step}")
         return (model, framing, mid, step, rec)
 
-    execs = {p: ThreadPoolExecutor(max_workers=PROVIDER_WORKERS[p]) for p in tasks_by_prov if tasks_by_prov[p]}
+    execs = {
+        p: ThreadPoolExecutor(max_workers=PROVIDER_WORKERS[p])
+        for p in tasks_by_prov
+        if tasks_by_prov[p]
+    }
     futs = {}
     for p, ts in tasks_by_prov.items():
         for t in ts:
@@ -241,7 +263,8 @@ def main():
                 done[0] += 1
             if done[0] % SAVE_EVERY == 0:
                 save(); el = time.time() - start
-                print(f"  {done[0]}/{to_run} ({done[0]/el:.1f}/s)" if el else f"  {done[0]}/{to_run}")
+                rate = f" ({done[0]/el:.1f}/s)" if el else ""
+                print(f"  {done[0]}/{to_run}{rate}")
     finally:
         save()
         for e in execs.values():

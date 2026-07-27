@@ -16,9 +16,9 @@ Uses the predicted-coordinate dicts (common.SELF_POS / CROSS_POS).
 Output: analysis/results/cross_structure.json
 """
 
+import collections
 import json
 import os
-import collections
 import statistics as st
 
 import pandas as pd
@@ -55,6 +55,7 @@ def wide_positions(t):
 # ============================================================
 # PER-TARGET STRUCTURE
 # ============================================================
+
 
 struct = {}
 for t in MODELS:
@@ -111,8 +112,9 @@ RES["per_target_structure"] = struct
 # ============================================================
 # ASYMMETRY TRACKS PREDICTABILITY
 # ============================================================
-
 # For each unordered pair, (A->B minus B->A) should track (predictability_B minus predictability_A).
+
+
 predictability = {}
 for t in MODELS:
     vals = [C.acc(C.SELF[t])[0]] + [
@@ -154,6 +156,7 @@ RES["asymmetry_vs_predictability"] = {
 # CROSS-ACCURACY TRACKS TARGET SELF-ACCURACY
 # ============================================================
 
+
 xs, ys = [], []
 for p in MODELS:
     for t in MODELS:
@@ -167,7 +170,8 @@ for p in MODELS:
 RES["cross_acc_vs_target_self_acc"] = {
     "pearson": pearson(xs, ys),
     "perm_p": C.perm_corr_p(xs, ys),
-    "note": "high => predicting a model is governed by that model's own predictability (simulation, not self-knowledge)",
+    "note": "high => predicting a model is governed by that model's own predictability "
+    "(simulation, not self-knowledge)",
     "n_cells": len(xs),
 }
 
@@ -175,6 +179,7 @@ RES["cross_acc_vs_target_self_acc"] = {
 # ============================================================
 # ORACLE CEILING + SELF'S UNIQUE CONTRIBUTION
 # ============================================================
+
 
 oracle = {}
 for t in MODELS:
@@ -197,8 +202,9 @@ RES["oracle_ceiling"] = oracle
 # ============================================================
 # PREDICTOR X TARGET SPECIALIZATION
 # ============================================================
-
 # Residual of each cross cell after an additive predictor-skill + target-predictability model.
+
+
 cells = {
     (p, t): C.acc(C.CROSS[(p, t)])[0]
     for p in MODELS
@@ -214,18 +220,20 @@ RES["predictor_target_specialization"] = {
     "predictor_skill": {p: round(v, 1) for p, v in skill.items()},
     "target_predictability": {t: round(v, 1) for t, v in tpred.items()},
     "residuals": resid,
-    "note": "residual = cross_acc - (predictor_skill + target_predictability - grand_mean); + => affinity beyond main effects",
+    "note": "residual = cross_acc - (predictor_skill + target_predictability - grand_mean); "
+    "+ => affinity beyond main effects",
 }
 
 
 # ============================================================
 # DEVELOPER AFFINITY (same developer vs different)
 # ============================================================
-
 # Correct developers: GLM is Zhipu, Qwen is Alibaba -- DIFFERENT companies. The only same-developer
 # pair in the lineup is opus<->sonnet (Anthropic), so a same-developer affinity test is underpowered
 # and the opus<->sonnet relationship is asymmetric. The glm<->qwen pair (both open-weight, but
 # different developers) is reported separately rather than miscounted as same-developer.
+
+
 DEVELOPER = {
     "opus": "anthropic",
     "sonnet": "anthropic",
@@ -246,15 +254,20 @@ RES["developer_affinity"] = {
     "open_weight_pair_glm_qwen": {
         k: resid[k] for k in resid if set(k.split("->")) == {"glm", "qwen"}
     },
-    "note": "developers: anthropic={opus,sonnet}, openai={gpt}, zhipu={glm}, alibaba={qwen}. Only opus<->sonnet is same-developer (n=2, asymmetric: opus->sonnet +12.5 vs sonnet->opus -9.7) so this is underpowered. GLM and Qwen are DIFFERENT developers; their pair is listed separately, not as same-developer.",
+    "note": "developers: anthropic={opus,sonnet}, openai={gpt}, zhipu={glm}, alibaba={qwen}. "
+    "Only opus<->sonnet is same-developer (n=2, asymmetric: opus->sonnet +12.5 vs "
+    "sonnet->opus -9.7) so this is underpowered. GLM and Qwen are DIFFERENT developers; "
+    "their pair is listed separately, not as same-developer.",
 }
 
 
 # ============================================================
 # SELF VS OTHER-PREDICTION DISSOCIATION
 # ============================================================
+# Is a model good at predicting itself, at predicting others, both, or neither?
+# (Opus vs Sonnet differ sharply.)
 
-# Is a model good at predicting itself, at predicting others, both, or neither? (Opus vs Sonnet differ sharply.)
+
 dissociation = {}
 for m in MODELS:
     self_acc = C.acc(C.SELF[m])[0]
@@ -278,9 +291,9 @@ RES["self_vs_other_prediction_dissociation"] = dissociation
 # ============================================================
 # IS CROSS-PREDICTION SELF-PROJECTION?
 # ============================================================
-
-
 # Does a predictor predict a target better when the target actually behaves like the predictor?
+
+
 def traj_similarity(p, t):
     shared = C.CONSISTENT[p] & C.CONSISTENT[t]
     n = agree = 0
@@ -320,17 +333,19 @@ RES["self_projection"] = {
     ),  # controls for target/predictor main effects
     "perm_p_residual": C.perm_corr_p(sims, resids),
     "pairs": sorted(dump, key=lambda d: d["residual"], reverse=True),
-    "note": "positive residual correlation => predictors have genuine affinity for behaviorally-similar targets (self-projection) beyond general predictability",
+    "note": "positive residual correlation => predictors have genuine affinity for "
+    "behaviorally-similar targets (self-projection) beyond general predictability",
 }
 
 
 # ============================================================
 # PAIRWISE BEHAVIORAL SIMILARITY MATRIX
 # ============================================================
-
 # The trajectory-overlap matrix behind the self-projection correlation: traj_similarity for
 # every ordered pair (pooled per-step position match over shared consistent mazes, excluding
 # the shared start cell).
+
+
 RES["behavioral_similarity_matrix"] = {
     a: {b: round(traj_similarity(a, b), 1) for b in MODELS if b != a} for a in MODELS
 }
@@ -339,12 +354,13 @@ RES["behavioral_similarity_matrix"] = {
 # ============================================================
 # STEP AGREEMENT ON ALL 100 MAZES AND ORACLE COMPOSITION BY MOVE TYPE
 # ============================================================
-
 # step_agreement_all_mazes: fraction of run-0 steps where two models occupy the identical
 # position, over all 100 mazes (behavioral_similarity_matrix above is the shared consistent-set
 # version). oracle_composition: what share of each model's only-self-correct cells (self right,
 # all four cross-predictors wrong, on cells every predictor answered) are atypical / default /
 # determined under the first-unvisited taxonomy.
+
+
 agree_all = {}
 for a in MODELS:
     agree_all[a] = {}
@@ -388,6 +404,7 @@ RES["oracle_composition_by_move_type"] = composition
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "cross_structure.json"), "w") as f:
     json.dump(RES, f, indent=1)

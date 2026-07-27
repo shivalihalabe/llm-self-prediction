@@ -124,7 +124,8 @@ H["validation_self_consistency"] = {
     m: d["frac_all_runs_agree"] for m, d in stats.get("validation_self_consistency", {}).items()
 }
 
-# 9) developer affinity (corrected: only opus<->sonnet is same-developer; glm/qwen are different developers)
+# 9) developer affinity (corrected: only opus<->sonnet is same-developer; glm/qwen are
+#    different developers)
 H["developer_affinity"] = {
     "same_developer_pairs": xs.get("developer_affinity", {}).get("same_developer_pairs"),
     "mean_residual_same_developer": xs.get("developer_affinity", {}).get(
@@ -151,7 +152,8 @@ H["midhorizon_explanation"] = {
     for t, v in expl.get("self_advantage_vs_branch_rate", {}).items()
 }
 
-# 13) per-step cross-model convergence (NR prior vs reasoned), and late-horizon below-baseline caveat
+# 13) per-step cross-model convergence (NR prior vs reasoned), and late-horizon
+#     below-baseline caveat
 H["cross_model_agreement_by_step"] = {
     "nr": prior.get("cross_model_agreement", {}).get("by_step_nr"),
     "reasoning": prior.get("cross_model_agreement", {}).get("by_step_reasoning"),
@@ -165,7 +167,8 @@ H["opus_step8_lift_vs_modal_baseline"] = next(
     None,
 )
 
-# 14) error propagation, predictability horizon, hedging calibration, self-projection, maze-difficulty-is-shared
+# 14) error propagation, predictability horizon, hedging calibration, self-projection,
+#     maze-difficulty-is-shared
 H["error_propagation"] = ps.get("error_propagation", {})
 H["predictability_horizon"] = {
     t: d.get("first_step_below_50pct") for t, d in ps.get("predictability_horizon", {}).items()
@@ -202,7 +205,8 @@ if __name__ == "__main__":
         d = H["self_vs_best_other"].get(t)
         if d:
             print(
-                f"   {t:7} gap {d['gap']:+5.1f}  CI[{d['ci'][0]:+.1f},{d['ci'][1]:+.1f}]  p={d['p']}"
+                f"   {t:7} gap {d['gap']:+5.1f}  "
+                f"CI[{d['ci'][0]:+.1f},{d['ci'][1]:+.1f}]  p={d['p']}"
             )
     print("   => only Opus is positive (and borderline); others tie or lose.")
 
@@ -214,7 +218,8 @@ if __name__ == "__main__":
             f"gap {d['gap_vs_best_other']:+.1f}  p={d['p_value']}  holm={d['holm_p']}"
         )
     print(
-        "   => Opus beats every predictor individually on its atypical cells; Sonnet/GPT are worse there."
+        "   => Opus beats every predictor individually on its atypical cells; "
+        "Sonnet/GPT are worse there."
     )
 
     print("\n2b) Opus mid-horizon per-step advantage (self vs best-other, by step):")
@@ -224,7 +229,8 @@ if __name__ == "__main__":
             f"   step {r['step']}: {r['gap']:+5.1f}  CI[{r['ci'][0]:+.1f},{r['ci'][1]:+.1f}]{flag}"
         )
     print(
-        "   => Opus is the only model with a positive mid-horizon spike (peak step 5 +11.3); others flat-to-negative."
+        "   => Opus is the only model with a positive mid-horizon spike (peak step 5 +11.3); "
+        "others flat-to-negative."
     )
 
     print("\n3) Oracle: % of items only self predicts correctly:")
@@ -237,10 +243,12 @@ if __name__ == "__main__":
     fm = H["rule_likeness_vs_predictability"]
     bm = H["maze_branch_steps_vs_predictability_intersection"] or {}
     print(
-        f"   model side: corr(default rate, predictability) r={fm['pearson']} (perm p={fm['perm_p']})"
+        f"   model side: corr(default rate, predictability) r={fm['pearson']} "
+        f"(perm p={fm['perm_p']})"
     )
     print(
-        f"   maze side : corr(branch decisions, predictability)  r={bm.get('pearson')} (perm p={bm.get('perm_p')})"
+        f"   maze side : corr(branch decisions, predictability)  r={bm.get('pearson')} "
+        f"(perm p={bm.get('perm_p')})"
     )
 
     print("\n5) Two reasoning architectures (truth never appears in wrong traces):")
@@ -252,13 +260,15 @@ if __name__ == "__main__":
         )
     )
     print(
-        "   => Opus/Sonnet/GPT selectively branch (truth never considered); GLM/Qwen enumerate then reject it."
+        "   => Opus/Sonnet/GPT selectively branch (truth never considered); "
+        "GLM/Qwen enumerate then reject it."
     )
 
     print("\n6) The prior and reasoning:")
     ag = H["nr_vs_reasoning_cross_model_agreement"]
     print(
-        f"   cross-model agreement: NR priors {ag['nr']}%  vs  reasoned {ag['reasoning']}%  => reasoning CONVERGES models"
+        f"   cross-model agreement: NR priors {ag['nr']}%  vs  reasoned {ag['reasoning']}%  "
+        f"=> reasoning CONVERGES models"
     )
     print(
         "   reasoning - no-reasoning self gap: "
@@ -277,30 +287,37 @@ if __name__ == "__main__":
     da = H["developer_affinity"]
     print("\n9) Developer affinity (only opus<->sonnet is same-developer, and asymmetric):")
     print(
-        f"   same-developer pairs {da['same_developer_pairs']}  (mean {da['mean_residual_same_developer']})"
+        f"   same-developer pairs {da['same_developer_pairs']}  "
+        f"(mean {da['mean_residual_same_developer']})"
     )
     print(
-        f"   glm<->qwen are DIFFERENT developers (Zhipu vs Alibaba), shown separately: {da['open_weight_pair_glm_qwen']}"
+        f"   glm<->qwen are DIFFERENT developers (Zhipu vs Alibaba), shown separately: "
+        f"{da['open_weight_pair_glm_qwen']}"
     )
     print(
-        "   => no clean same-developer affinity with this lineup; opus->sonnet (+12.5) is a one-directional specialization."
+        "   => no clean same-developer affinity with this lineup; opus->sonnet (+12.5) is a "
+        "one-directional specialization."
     )
 
     print(
-        "\n10) Self vs OTHER prediction (raw other-skill is target-difficulty-confounded; residual controls for it):"
+        "\n10) Self vs OTHER prediction (raw other-skill is target-difficulty-confounded; "
+        "residual controls for it):"
     )
     for m in MODELS:
         d = H["self_vs_other_prediction_dissociation"].get(m, {})
         rp = d.get("mean_residual_as_predictor")
         rpt = f"{rp:+.2f}" if rp is not None else "NA"
         print(
-            f"   {m:7} self {d.get('self_acc')}  raw-other {d.get('skill_predicting_others')}  residual-as-predictor {rpt}"
+            f"   {m:7} self {d.get('self_acc')}  raw-other {d.get('skill_predicting_others')}  "
+            f"residual-as-predictor {rpt}"
         )
     print(
-        "   => Opus: ~average simulator (resid -2.2) but the ONLY privileged self-access -> introspector."
+        "   => Opus: ~average simulator (resid -2.2) but the ONLY privileged self-access "
+        "-> introspector."
     )
     print(
-        "      Qwen/GPT: best simulators (resid +6.4/+4.5). Sonnet: weakest at BOTH self and simulation (its high"
+        "      Qwen/GPT: best simulators (resid +6.4/+4.5). Sonnet: weakest at BOTH self and "
+        "simulation (its high"
     )
     print("      raw-other 72.3 is just an artifact of predicting the easy targets gpt/qwen).")
 
@@ -308,32 +325,38 @@ if __name__ == "__main__":
     for t in MODELS:
         print(f"   {t:7} {H['target_predictability_per_step'].get(t)}")
     print(
-        "   => Opus/GLM cliff mid-horizon; GPT/Qwen decay gently and plateau (predictable throughout)."
+        "   => Opus/GLM cliff mid-horizon; GPT/Qwen decay gently and plateau "
+        "(predictable throughout)."
     )
 
     print("\n12) Why the Opus mid-horizon window:")
     mh = H["midhorizon_explanation"].get("opus", {})
     print(
-        f"   opus corr(gap, branch_rate)={mh.get('corr_gap_vs_branch_rate')}  corr(gap, prior_acc)={mh.get('corr_gap_vs_prior_nr')}"
+        f"   opus corr(gap, branch_rate)={mh.get('corr_gap_vs_branch_rate')}  "
+        f"corr(gap, prior_acc)={mh.get('corr_gap_vs_prior_nr')}"
     )
     print(
-        "   advantage opens at step 4 where the prior dies (57%->10%) and closes by step 6 as self-prediction also decays to noise."
+        "   advantage opens at step 4 where the prior dies (57%->10%) and closes by step 6 "
+        "as self-prediction also decays to noise."
     )
 
     print("\n13) Per-step cross-model convergence (NR prior vs reasoned):")
     print(f"   NR : {H['cross_model_agreement_by_step']['nr']}")
     print(f"   R  : {H['cross_model_agreement_by_step']['reasoning']}")
     print(
-        f"   caveat: at step 8 Opus self-prediction falls BELOW the modal baseline (lift {H['opus_step8_lift_vs_modal_baseline']})."
+        f"   caveat: at step 8 Opus self-prediction falls BELOW the modal baseline "
+        f"(lift {H['opus_step8_lift_vs_modal_baseline']})."
     )
 
     print(
-        "\n14) Error propagation P(next correct | this correct vs wrong) - errors are sticky except Qwen:"
+        "\n14) Error propagation P(next correct | this correct vs wrong) - errors are sticky "
+        "except Qwen:"
     )
     for m in MODELS:
         d = H["error_propagation"].get(m, {})
         print(
-            f"   {m:7} given-correct {d.get('p_correct_next_given_correct')}%  given-wrong {d.get('p_correct_next_given_wrong')}%"
+            f"   {m:7} given-correct {d.get('p_correct_next_given_correct')}%  "
+            f"given-wrong {d.get('p_correct_next_given_wrong')}%"
         )
 
     print("\n15) Hedging is a real confidence signal (accuracy when hedging vs not):")

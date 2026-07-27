@@ -61,6 +61,7 @@ def maze_features(mz):
 # PER-MAZE PREDICTABILITY + FEATURES
 # ============================================================
 
+
 overall = {m: C.acc(C.SELF[m])[0] for m in MODELS}
 per_maze = {}
 for mz in sorted(set().union(*C.CONSISTENT.values())):
@@ -112,8 +113,10 @@ RES["correlations_k3plus"] = correlate(k3)
 # ============================================================
 # IS A SELF-PREDICTABLE MAZE ALSO CROSS-PREDICTABLE?
 # ============================================================
+# Per maze (on the 5-way intersection): mean self-accuracy across models vs mean
+# cross-accuracy across pairs.
 
-# Per maze (on the 5-way intersection): mean self-accuracy across models vs mean cross-accuracy across pairs.
+
 self_cross = []
 for mz in inter:
     self_vals = [C.acc(C.SELF[m], {mz})[0] for m in MODELS if mz in C.CONSISTENT[m]]
@@ -131,19 +134,21 @@ RES["self_vs_cross_predictability_per_maze"] = {
     "n_mazes": len(self_cross),
     "pearson": C.pearson([x for x, _ in self_cross], [y for _, y in self_cross]),
     "perm_p": C.perm_corr_p([x for x, _ in self_cross], [y for _, y in self_cross]),
-    "note": "high => the same mazes are easy/hard whether a model predicts itself or another model predicts it",
+    "note": "high => the same mazes are easy/hard whether a model predicts itself or "
+    "another model predicts it",
 }
 
 
 # ============================================================
 # DECISION-POINT POSITION IN THE RUN
 # ============================================================
-
 # Complements the parity check above: junction counts say how branchy the mazes are, not where
 # the branches sit relative to the start. Unlike junctions and BFS depth this is run-dependent
 # (it uses the routes taken), which is appropriate here -- the question is whether the models
 # actually encountered choices at different points in the run, not whether the mazes could
 # have produced that.
+
+
 position = {}
 for m in MODELS:
     steps, firsts = [], []
@@ -170,9 +175,10 @@ RES["decision_point_position"] = position
 # ============================================================
 # PER-MAZE SELF VS CROSS PAIRS
 # ============================================================
-
 # The per-maze points behind the self-vs-cross correlation above: mean self-accuracy across the
 # models consistent on the maze vs mean cross-accuracy across all ordered pairs, intersection set.
+
+
 RES["per_maze_self_vs_cross"] = [
     {"maze": mz, "self": x, "cross": y} for mz, (x, y) in zip(inter, self_cross)
 ]
@@ -181,10 +187,11 @@ RES["per_maze_self_vs_cross"] = [
 # ============================================================
 # CONSISTENT-SET STRUCTURAL DIFFICULTY
 # ============================================================
-
 # Whether models differ in the structural difficulty of the mazes they navigate consistently.
 # Structural measures only, computed from walls. Route-dependent features (mean_branch_steps)
 # and navigator-centred ones (maze_effect) are excluded here; both remain in per_maze.
+
+
 cons_diff = {}
 for m in MODELS:
     mzs = sorted(C.CONSISTENT[m])
@@ -204,6 +211,7 @@ RES["consistent_set_difficulty"] = cons_diff
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "maze_structure.json"), "w") as f:
     json.dump(RES, f, indent=1)

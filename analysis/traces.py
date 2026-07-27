@@ -24,10 +24,10 @@ trace_text().
 Output: analysis/results/traces.json
 """
 
+import collections
 import json
 import os
 import re
-import collections
 import statistics as st
 
 import pandas as pd
@@ -175,6 +175,7 @@ for _col in ("is_empty", "valid", "correct", "coherent", "hedges"):
 # PER-MODEL: FEATURES BY CORRECTNESS
 # ============================================================
 
+
 by_model = {}
 for m in MODELS:
     sub = TRACES[(TRACES.model == m) & ~TRACES.is_empty]
@@ -258,9 +259,10 @@ RES["self_vs_cross_depersonalization"] = selfcross
 # ============================================================
 # TRACE-PATH SIMULATION + LENGTH DOSE-RESPONSE
 # ============================================================
-
 # Does the trace actually walk the true trajectory (reason-like-you-navigate), and does accuracy
 # depend on how long the model reasons?
+
+
 sim, lenacc = {}, {}
 for m in MODELS:
     sub = TRACES[(TRACES.model == m) & ~TRACES.is_empty & TRACES.valid]
@@ -296,6 +298,7 @@ RES["length_accuracy"] = lenacc
 # TRACE FEATURES BY STEP (horizon-resolved)
 # ============================================================
 
+
 features_by_step = {}
 for m in MODELS:
     sub = TRACES[(TRACES.model == m) & ~TRACES.is_empty & TRACES.step.between(1, 8)]
@@ -323,8 +326,9 @@ RES["features_by_step"] = features_by_step
 # ============================================================
 # IS HEDGING A USABLE CONFIDENCE SIGNAL?
 # ============================================================
-
 # Within each model, split run-0 traces by whether they contain any hedging word; compare accuracy.
+
+
 hedging_cal = {}
 for m in MODELS:
     sub = TRACES[(TRACES.model == m) & ~TRACES.is_empty & TRACES.valid]
@@ -341,9 +345,10 @@ RES["hedging_calibration"] = hedging_cal
 # ============================================================
 # DIRECTION LANGUAGE AT ATYPICAL CELLS
 # ============================================================
-
 # Which compass words a model's reasoning uses on its own atypical cells -- a lexical view of the
 # self-model (e.g. a model whose atypical moves are southward while its traces talk about "east").
+
+
 _DIRWORDS = {d: re.compile(rf"\b{d}\b", re.I) for d in ("north", "south", "east", "west")}
 dirlang = {}
 for m in MODELS:
@@ -371,10 +376,11 @@ RES["atypical_cell_direction_language"] = dirlang
 # ============================================================
 # WORDS PER BRANCH POINT VS ACCURACY
 # ============================================================
-
 # Reasoning length normalised by difficulty: words in the trace divided by the number of genuine
 # branch decisions in the predicted path (cells with >=1 branch). Terciles replace the raw
 # character-length split, whose gradient is a difficulty confound.
+
+
 wpb = {}
 for m in MODELS:
     rows = []
@@ -411,6 +417,7 @@ RES["words_per_branch_terciles"] = wpb
 # ============================================================
 # WRITE
 # ============================================================
+
 
 with open(os.path.join(OUT, "traces.json"), "w") as f:
     json.dump(RES, f, indent=1)
