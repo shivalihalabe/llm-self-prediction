@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """
 Navigation-side mechanism
-=========================
-What each model's exploration looks like, and why some
-models are more predictable than others.
+---
 
-Covers determined vs branch self-accuracy, branch-choice regularity
-(direction entropy + default rate) correlated with target predictability, the
-first-move puzzle, trajectory shape, and a determinism diagnosis (where the 3 nav runs
-diverge for non-consistent mazes).
+Describes what each model's exploration looks like and relates it to how predictable the
+model is. Reads the run-0 trajectories, common.TRUTH, plus the raw navigation files.
 
-Operates on the run-0 navigation trajectories (common.TRUTH) plus the raw nav files for
-the multi-run determinism check.
+Measures:
+- determined against branch self-accuracy
+- branch-choice regularity, by direction entropy and default rate, against predictability
+- the first move, and overall trajectory shape
+- a determinism diagnosis of where the three navigation runs diverge
+- the no-backtracking census that justifies the default/atypical taxonomy
+- where wrong self-predictions land at atypical cells
+- pooled cross-accuracy on default against atypical cells
 
 Output: analysis/results/exploration_strategy.json
 """
@@ -40,14 +42,12 @@ def _r3(x):
     return round(x, 3) if x is not None else None
 
 
-# ============================================================
-# BRANCH DECISION TABLE
-# ============================================================
+# Branch decision table
 # One row per genuine choice (>=2 unvisited moves) in a run-0 trajectory: what was chosen and
 # whether it backtracked. Everything regularity-related aggregates off this frame.
 
-
 def _branch_rows():
+    """One row per decision point: the chosen direction and whether it backtracked."""
     rows = []
     for t in MODELS:
         for mz in sorted(C.CONSISTENT[t]):
@@ -64,12 +64,9 @@ def _branch_rows():
 BRANCHES = _branch_rows()
 
 
-# ============================================================
-# DETERMINED VS BRANCH SELF-ACCURACY
-# ============================================================
+# Determined vs branch self-accuracy
 # Determined = two or more legal moves with exactly one unvisited (a forced step, by contrast,
 # has a single legal move and is executed without an API call).
-
 
 det_branch = {}
 for t in MODELS:
@@ -89,10 +86,7 @@ for t in MODELS:
 RES["determined_vs_branch_self"] = det_branch
 
 
-# ============================================================
-# BRANCH-CHOICE REGULARITY + PREDICTABILITY
-# ============================================================
-
+# Branch-choice regularity + predictability
 
 regularity = {}
 predictability = {}
@@ -113,6 +107,7 @@ for t in MODELS:
     predictability[t] = round(st.mean([v for v in preds if v is not None]), 1)
 RES["branch_choice_regularity"] = regularity
 RES["target_predictability"] = predictability
+
 
 # correlation across the 5 models: does branch regularity predict predictability?
 ms = [m for m in MODELS if regularity[m]["direction_entropy"] is not None]
@@ -144,10 +139,7 @@ RES["regularity_vs_predictability"] = {
 }
 
 
-# ============================================================
-# FIRST-MOVE ANALYSIS (the step-1 puzzle)
-# ============================================================
-
+# First-move analysis
 
 firstmove = {}
 for t in MODELS:
@@ -174,10 +166,7 @@ for t in MODELS:
 RES["first_move"] = firstmove
 
 
-# ============================================================
-# TRAJECTORY SHAPE
-# ============================================================
-
+# Trajectory shape
 
 shape = {}
 for t in MODELS:
@@ -195,10 +184,7 @@ for t in MODELS:
 RES["trajectory_shape"] = shape
 
 
-# ============================================================
-# DETERMINISM DIAGNOSIS (multi-run)
-# ============================================================
-
+# Determinism diagnosis (multi-run)
 
 determinism = {}
 for m in MODELS:
@@ -228,11 +214,8 @@ for m in MODELS:
 RES["determinism_diagnosis"] = determinism
 
 
-# ============================================================
-# BRANCH DENSITY BY STEP + WHY THE MID-HORIZON
-# ============================================================
+# Branch density by step + why the mid-horizon
 # Where do genuine choices concentrate over the horizon, and does the self-advantage track them?
-
 
 branch_rate_by_step = {}
 for m in MODELS:
@@ -292,13 +275,10 @@ for t in MODELS:
 RES["self_advantage_vs_branch_rate"] = midh
 
 
-# ============================================================
-# SELF-MODEL MISMATCH AT ATYPICAL CELLS
-# ============================================================
+# Self-model mismatch at atypical cells
 # Why some models predict themselves worse than others do: at atypical cells, compare what the
-# model actually chose against the first-listed move its simplified self-model would pick, where
-# wrong self-predictions land, and how every predictor scores on exactly those cells.
-
+# model chose against the first-listed move its simplified self-model would pick, where
+# wrong self-predictions land, and how every predictor scores on those cells.
 
 mismatch = {}
 for t in MODELS:
@@ -317,7 +297,7 @@ for t in MODELS:
     # Permutation baseline for the first-listed landing rate: under the null, a wrong prediction
     # that lands on a legal non-chosen move is equally likely to land on any of them, so the
     # designated "first-listed" cell is no more likely than a random alternative. (The analogous
-    # default-cell comparison is degenerate: there the first-listed cell IS the true cell, so a
+    # default-cell comparison is degenerate: there the first-listed cell is the true cell, so a
     # wrong prediction can never land on it.)
     wrong = []
     for mz, s in cells:
@@ -353,7 +333,7 @@ for t in MODELS:
         }
 
     # Only cells with three or more unvisited options are informative: at two-option cells the
-    # single alternative a wrong prediction can land on IS the first-listed one, so observed
+    # single alternative a wrong prediction can land on is the first-listed one, so observed
     # and null are both ~100%. The tidy-rule hypothesis predicts one specific cell while random
     # error would spread across several.
     test_3plus = _landing([w for w in wrong if w[3] >= 3])
@@ -372,11 +352,8 @@ for t in MODELS:
 RES["self_model_mismatch"] = mismatch
 
 
-# ============================================================
-# PREDICTOR ACCURACY ON DEFAULT VS ATYPICAL CELLS (POOLED CROSS)
-# ============================================================
+# Predictor accuracy on default vs atypical cells (pooled cross)
 # Cross-prediction only: accuracy on the target's default vs atypical cells.
-
 
 pooled = {}
 for p in MODELS:
@@ -393,16 +370,14 @@ for p in MODELS:
 RES["predictor_default_vs_atypical_pooled"] = pooled
 
 
-# ============================================================
-# NO-BACKTRACKING UNANIMITY AND STEP-CATEGORY CENSUS (ALL 100 MAZES)
-# ============================================================
+# No-backtracking unanimity and step-category census (all 100 mazes)
 # The empirical justification for the default/atypical taxonomy: at decision points no model
 # ever took a visited direction, and with exactly one unvisited move every model took it --
 # 3,578 opportunities, zero exceptions. The census gives the four-way breakdown of all 800
 # run-0 steps per model, over all 100 mazes.
 
-
 def _cell(t, mz, step):
+    """(legal, unvisited, chosen) at one step, keyed by compass direction."""
     traj = [tuple(p) for p in C.TRUTH[t][mz]]
     pos = traj[step - 1]
     legal = {direction(pos, tuple(nb)): tuple(nb) for nb in C.legal_moves(t, mz, step)}
@@ -446,13 +421,10 @@ RES["step_category_census"] = census
 RES["no_backtracking"] = backtrack
 
 
-# ============================================================
-# DEVIATION PROFILE (NEW TAXONOMY) AND RULE-LIKENESS VS PREDICTABILITY
-# ============================================================
+# Deviation profile and rule-likeness vs predictability
 # Within each consistent set: decision points, default vs atypical under the first-unvisited
 # rule, the atypical rate (the sharper rule-likeness measure), and the South share of atypical
-# moves. The correlation re-tests regularity -> predictability with the new measure.
-
+# moves. The correlation re-tests regularity -> predictability with the atypical rate.
 
 profile = {}
 for t in MODELS:
@@ -479,10 +451,7 @@ for t in MODELS:
 RES["deviation_profile"] = profile
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "exploration_strategy.json"), "w") as f:
     json.dump(RES, f, indent=1)

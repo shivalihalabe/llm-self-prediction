@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
 Fixture test for the shared generation helpers
-==============================================
+---
 
-The expected values in test_fixtures.json were captured from the per-script helper copies
-before they were consolidated into common.py, on mazes from data/navigation and raw
-responses from the committed prediction files (at least one per model, both answer modes).
-A refactor that changes prompt construction or answer parsing fails here rather than
-surfacing only if data were ever re-collected.
+Pins the output of every helper in common.py against fixtures captured before they were
+consolidated, so a refactor that changes prompt construction or answer parsing fails here
+rather than surfacing only if data were re-collected. Run with python3
+generation/test_helpers.py.
 
-Run: python3 generation/test_helpers.py
+Fixtures:
+- describe_maze_topology and build_user_msg on three mazes from data/navigation
+- get_available_directions on every cell of those mazes
+- parse_answer on raw responses from the committed prediction files, at least one per model
+  and covering both answer modes
 """
 
 import json

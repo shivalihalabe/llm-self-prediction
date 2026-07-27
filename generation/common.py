@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
 Shared maze and prompt helpers for the generation scripts
-=========================================================
+---
 
-The maze-topology description, the prediction user message, and the answer parser are part
-of the experimental protocol: every generation script must build byte-identical prompts and
-parse answers identically. They are defined once here; test_helpers.py pins their outputs
-against fixtures captured from the collected data.
+Defines the maze-topology description, the prediction user message and the answer parser
+once, so every generation script builds byte-identical prompts and parses answers the same
+way.
+
+Notes:
+- these helpers are part of the experimental protocol, not conveniences
+- test_helpers.py pins their outputs against fixtures captured from the collected data
 """
 
 import json

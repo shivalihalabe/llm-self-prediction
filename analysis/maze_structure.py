@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 """
-Maze-structural drivers of predictability (the maze-side complement)
-====================================================================
+Maze-structural drivers of predictability
+---
 
-The model-side analysis showed predictability is largely a model property (rule-like branch
-choices). This asks the complementary question: net of which model is navigating, what makes a
-maze easy or hard to predict?
+Asks which maze features make a maze predictable, net of which model is navigating.
+Predictability per maze is the model-centered self-accuracy.
 
-Predictability per maze is the model-CENTERED self-accuracy: each model's per-maze accuracy
-minus its own overall self-accuracy, averaged over the models consistent on that maze. Centering
-removes the dominant "Qwen always high / Sonnet always low" effect so the residual reflects the
-maze, not the navigator. That maze effect is correlated (Pearson + permutation p) with intrinsic
-features (interior walls, reachable area, BFS depth, branchiness, junctions) and a behavioral
-feature (mean number of genuine branch decisions the models faced on the maze).
+Method:
+- take each model's per-maze accuracy minus its own overall self-accuracy, then average over
+  the models consistent on that maze
+- centering removes the per-model level, so the residual reflects the maze
+- correlate that maze effect (Pearson and permutation p) with BFS depth, junction count, and
+  the mean number of branch decisions the models faced
+
+Measures:
+- per-maze predictability and features, on two maze sets
+- whether a self-predictable maze is also cross-predictable
+- where decision points sit in the run
+- whether the consistent sets differ in structural difficulty
 
 Output: analysis/results/maze_structure.json
 """
@@ -30,6 +35,7 @@ os.makedirs(OUT, exist_ok=True)
 MODELS = C.MODELS
 RES = {"metadata": C.metadata("maze_structure")}
 
+
 # n_walls, mean_open_degree and n_reachable are constant across all 100 mazes (10 walls,
 # degree 2.4, 25 reachable), so they stay in the per_maze dump but not in the correlations.
 FEATURES = [
@@ -40,6 +46,7 @@ FEATURES = [
 
 
 def maze_features(mz):
+    """Structural features of a maze, computed from its walls alone."""
     d = C.bfs_dist(mz)
     degs, junctions = [], 0
     for c in d:
@@ -56,10 +63,7 @@ def maze_features(mz):
     }
 
 
-# ============================================================
-# PER-MAZE PREDICTABILITY + FEATURES
-# ============================================================
-
+# Per-maze predictability + features
 
 overall = {m: C.acc(C.SELF[m])[0] for m in MODELS}
 per_maze = {}
@@ -88,12 +92,10 @@ RES["per_maze"] = per_maze
 _pm = pd.DataFrame.from_dict(per_maze, orient="index")
 
 
-# ============================================================
-# CORRELATIONS (two maze sets)
-# ============================================================
-
+# Correlations (two maze sets)
 
 def correlate(mazes):
+    """Pearson r and permutation p for each feature against the maze effect."""
     sub = _pm.loc[mazes]
     eff = sub["maze_effect"].tolist()
     out = {"n": len(mazes)}
@@ -109,12 +111,9 @@ RES["correlations_intersection19"] = correlate(inter)
 RES["correlations_k3plus"] = correlate(k3)
 
 
-# ============================================================
-# IS A SELF-PREDICTABLE MAZE ALSO CROSS-PREDICTABLE?
-# ============================================================
+# Self-predictable vs cross-predictable mazes
 # Per maze (on the 5-way intersection): mean self-accuracy across models vs mean
 # cross-accuracy across pairs.
-
 
 self_cross = []
 for mz in inter:
@@ -136,15 +135,12 @@ RES["self_vs_cross_predictability_per_maze"] = {
 }
 
 
-# ============================================================
-# DECISION-POINT POSITION IN THE RUN
-# ============================================================
+# Decision-point position in the run
 # Complements the parity check above: junction counts say how branchy the mazes are, not where
 # the branches sit relative to the start. Unlike junctions and BFS depth this is run-dependent
-# (it uses the routes taken), which is appropriate here -- the question is whether the models
-# actually encountered choices at different points in the run, not whether the mazes could
+# (it uses the routes taken), which is appropriate here: the question is whether the models
+# encountered choices at different points in the run, not whether the mazes could
 # have produced that.
-
 
 position = {}
 for m in MODELS:
@@ -169,25 +165,19 @@ for m in MODELS:
 RES["decision_point_position"] = position
 
 
-# ============================================================
-# PER-MAZE SELF VS CROSS PAIRS
-# ============================================================
+# Per-maze self vs cross pairs
 # The per-maze points behind the self-vs-cross correlation above: mean self-accuracy across the
 # models consistent on the maze vs mean cross-accuracy across all ordered pairs, intersection set.
-
 
 RES["per_maze_self_vs_cross"] = [
     {"maze": mz, "self": x, "cross": y} for mz, (x, y) in zip(inter, self_cross)
 ]
 
 
-# ============================================================
-# CONSISTENT-SET STRUCTURAL DIFFICULTY
-# ============================================================
+# Consistent-set structural difficulty
 # Whether models differ in the structural difficulty of the mazes they navigate consistently.
 # Structural measures only, computed from walls. Route-dependent features (mean_branch_steps)
 # and navigator-centred ones (maze_effect) are excluded here; both remain in per_maze.
-
 
 cons_diff = {}
 for m in MODELS:
@@ -205,10 +195,7 @@ cons_diff["all_mazes"] = {
 RES["consistent_set_difficulty"] = cons_diff
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "maze_structure.json"), "w") as f:
     json.dump(RES, f, indent=1)

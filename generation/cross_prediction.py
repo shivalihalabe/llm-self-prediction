@@ -1,30 +1,26 @@
 #!/usr/bin/env python3
 """
 Cross-prediction
-================
-A PREDICTOR model predicts a TARGET model's maze-navigation position after N
-steps. The predictor sees the full maze topology and is asked, in role framing
-that names the target, where the target would be after each of steps 1..8. One
-file per predictor, with a cell for each of the other four targets. Each target
-is predicted on THAT target's consistent navigation set, so cell sizes differ.
+---
 
-Run with --predictor. Output filename, model id, and metadata derive from it.
+Has a predictor model predict a target model's maze-navigation position after N steps, in
+role framing that names the target. Run with --predictor.
 
-Mode note: cross-prediction is run with reasoning ON only. Without reasoning the
-task collapses to a near-constant prior, so there is no no-reasoning cross
-matrix; the no-reasoning baseline is self-prediction only. (The _reasoning
-suffix is kept on the file and cells so they read in parallel with the self
-files, not because a noreasoning counterpart exists.)
+Design:
+- the predictor sees the full maze topology and is asked about each of steps 1..8
+- one file per predictor, holding a cell for each of the other four targets
+- each target is predicted on that target's own consistent set, so cell sizes differ
+- reasoning is on; without it the task collapses to a near-constant prior, so there's no
+  no-reasoning cross matrix and the _reasoning suffix only parallels the self files
 
-Records (per cell -> maze -> step_k -> list):
-  raw_response, reasoning, parsed_position, run_idx
-  - reasoning is the predictor's separate reasoning trace.
-  - A prediction is recorded only if it parses; unparsed/failed attempts are
-    omitted (not recorded).
+Records, per cell, maze and step_k, as a list:
+- raw_response, reasoning, parsed_position, run_idx
+- reasoning is the predictor's separate trace
+- a prediction is recorded only if it parses; unparsed and failed attempts are omitted
 
-Validation: a random ~20% of (cell, maze, step) buckets are run 3x
-(run_idx 0,1,2); the rest run once. Stochastic, unseeded -- the subset is
-not reproducible on a re-run by design; the data records it via run_idx.
+Validation:
+- a random ~20% of (cell, maze, step) buckets run 3x, the rest once
+- unseeded, so the subset isn't reproducible; the file records it via run_idx
 
 Output: data/cross_prediction/{PREDICTOR}_xpred_reasoning.json
 """
@@ -41,10 +37,8 @@ from openai import OpenAI
 
 from common import build_user_msg, parse_answer, parse_walls
 
-# ============================================================
-# CONFIG
-# ============================================================
 
+# Config
 
 PREDICT_STEPS = [1, 2, 3, 4, 5, 6, 7, 8]
 TEMPERATURE = 0
@@ -88,6 +82,7 @@ OUT_DIR     = os.path.join(WORKDIR, "data", "cross_prediction")
 OUTPUT_PATH = os.path.join(OUT_DIR, f"{PREDICTOR}_xpred_reasoning.json")
 
 def system_prompt(target):
+    """Role-framed system prompt naming the target model."""
     name = DISPLAY[target]
     return (
         "You are participating in a prediction task about maze navigation. "
@@ -98,18 +93,15 @@ def system_prompt(target):
         f"given number of steps. " + ANSWER_INSTRUCTION
     )
 
-# ============================================================
-# RUN PLAN
-# ============================================================
 
+# Run plan
 
 def n_runs_for_bucket():
+    """Runs for one bucket: the validation count with probability VALIDATION_FRACTION."""
     return N_PRED_RUNS_VALIDATION if random.random() < VALIDATION_FRACTION else N_PRED_RUNS_MAIN
 
-# ============================================================
-# API
-# ============================================================
 
+# API
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
@@ -117,6 +109,7 @@ if not api_key:
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
 def call(sys_p, user_msg, ctx=""):
+    """One prediction call with retries; the record, or None if attempts are exhausted."""
     for a in range(MAX_API_RETRIES):
         try:
             resp = client.chat.completions.create(model=MODEL_ID,
@@ -142,12 +135,11 @@ def call(sys_p, user_msg, ctx=""):
                 time.sleep(min(60, 5 * (a + 1)))
     return None  # all attempts exhausted; omit (not recorded)
 
-# ============================================================
-# MAIN
-# ============================================================
 
+# Main
 
 def main():
+    """Collect predictions for every target, resuming from any existing output."""
     os.makedirs(OUT_DIR, exist_ok=True)
     target_walls = {}; target_mazes = {}
     for t in TARGETS:
@@ -189,12 +181,14 @@ def main():
 
     lock = Lock()
     def save():
+        """Atomically write the results file."""
         with lock:
             tmp = OUTPUT_PATH + ".tmp"
             json.dump(results, open(tmp, "w"), indent=1, default=str)
             os.replace(tmp, OUTPUT_PATH)
 
     def have(cell, mid, step, ri):
+        """True if a record for this run index already exists."""
         try:
             return any(r.get("run_idx") == ri
                        for r in results["predictions"][cell][mid][f"step_{step}"])
@@ -217,6 +211,7 @@ def main():
         print("Nothing to do."); return
 
     def run_one(task):
+        """Worker: run one (target, maze, step, run) task."""
         t, cell, mid, step, ri = task
         rec = call(system_prompt(t), build_user_msg(target_walls[t][mid], step),
                    ctx=f"{cell}|{mid}|s{step}|r{ri}")

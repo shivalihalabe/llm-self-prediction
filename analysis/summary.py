@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
 Headline digest
-===============
+---
 
-Reads every results/*.json the analysis scripts wrote and pulls the headline numbers into one
-artifact (results/HEADLINES.json) plus a readable console digest. Pure aggregation: it computes
-nothing new, so it always reflects whatever the analysis scripts last produced. run_all.py runs
-this last.
+Pulls the headline numbers out of the results files into one artifact and prints a console
+digest. It computes nothing new, so it reflects whatever the analysis scripts last produced.
+
+Notes:
+- run_all.py runs this last, once every other script has written its file
+- a missing or partial results file degrades to absent keys rather than raising
+- the roster is kept local, so this script never imports common and never loads the dataset
 
 Output: analysis/results/HEADLINES.json
 """
@@ -15,12 +18,13 @@ import json
 import os
 
 R = os.path.join(os.path.dirname(__file__), "results")
-# Deliberately does not import common: this is a pure aggregation over the results files and
-# should not load the dataset. Keep the roster local.
+# Deliberately doesn't import common: this is a pure aggregation over the results files and
+# shouldn't load the dataset. Keep the roster local.
 MODELS = ["opus", "sonnet", "gpt", "glm", "qwen"]
 
 
 def load(name):
+    """Parsed results file, or an empty dict if it doesn't exist."""
     p = os.path.join(R, name)
     return json.load(open(p)) if os.path.exists(p) else {}
 
@@ -32,7 +36,6 @@ prior = load("prior.json")
 expl = load("exploration_strategy.json")
 xs = load("cross_structure.json")
 mz = load("maze_structure.json")
-eg = load("error_geometry.json")
 ps = load("per_step.json")
 H = {
     "metadata": {
@@ -41,6 +44,7 @@ H = {
         "produced_by": "analysis/summary.py",
     }
 }
+
 
 # 1) privileged access in aggregate
 H["self_vs_best_other"] = {
@@ -51,6 +55,7 @@ H["self_vs_best_other"] = {
     }
     for t, d in stats.get("self_vs_best_other_paired", {}).items()
 }
+
 
 # 2) where the self-advantage lives (atypical vs default decision points, first-unvisited taxonomy)
 _atyp = stats.get("self_advantage_by_move_type", {}).get("atypical", {})
@@ -68,10 +73,12 @@ H["self_advantage_atypical"] = {
     if t != "holm_adjusted_best_other"
 }
 
+
 # 3) oracle: items only self gets right
 H["only_self_correct_pct"] = {
     t: d["items_only_self_correct_pct"] for t, d in xs.get("oracle_ceiling", {}).items()
 }
+
 
 # 4) mechanism: rule-likeness -> predictability (model side and maze side)
 H["rule_likeness_vs_predictability"] = {
@@ -86,6 +93,7 @@ H["maze_branch_steps_vs_predictability_intersection"] = mz.get(
     "correlations_intersection19", {}
 ).get("mean_branch_steps")
 
+
 # 5) two reasoning architectures (chronology of the truth when wrong)
 chrono = {}
 for t, d in traces.get("self_traces", {}).items():
@@ -97,6 +105,7 @@ for t, d in traces.get("self_traces", {}).items():
     }
 H["chronology_when_wrong"] = chrono
 
+
 # 6) the prior, and reasoning's relation to it
 H["nr_vs_reasoning_cross_model_agreement"] = {
     "nr": prior.get("cross_model_agreement", {}).get("nr_pairwise_agreement_pct"),
@@ -106,16 +115,19 @@ H["reasoning_vs_nr_gap"] = {
     m: d["gap"] for m, d in outcomes.get("reasoning_vs_nr_self", {}).items()
 }
 
+
 # 7) self looks like the consensus, not the truth
 H["self_matches_truth_vs_consensus"] = {
     t: {"truth": d["self_matches_truth_pct"], "consensus": d["self_matches_consensus_pct"]}
     for t, d in xs.get("per_target_structure", {}).items()
 }
 
+
 # 8) noise floor
 H["validation_self_consistency"] = {
     m: d["frac_all_runs_agree"] for m, d in stats.get("validation_self_consistency", {}).items()
 }
+
 
 # 9) developer affinity (only opus<->sonnet is same-developer; underpowered at n=2)
 H["developer_affinity"] = {
@@ -128,13 +140,16 @@ H["developer_affinity"] = {
     ),
 }
 
+
 # 10) self vs other-prediction dissociation, with the joint-fit predictor effects as the
 #     difficulty-controlled simulator-skill measure
 H["self_vs_other_prediction_dissociation"] = xs.get("self_vs_other_prediction_dissociation", {})
 H["predictor_effects"] = xs.get("predictor_target_specialization", {}).get("predictor_effect")
 
+
 # 11) predictability decay shape per step (where each target cliffs)
 H["target_predictability_per_step"] = outcomes.get("target_predictability_per_step", {})
+
 
 # 12) why the mid-horizon window: gap tracks prior collapse, not branch density
 H["midhorizon_explanation"] = {
@@ -144,6 +159,7 @@ H["midhorizon_explanation"] = {
     }
     for t, v in expl.get("self_advantage_vs_branch_rate", {}).items()
 }
+
 
 # 13) per-step cross-model convergence (NR prior vs reasoned), and late-horizon
 #     below-baseline caveat
@@ -174,10 +190,6 @@ with open(os.path.join(R, "HEADLINES.json"), "w") as f:
 
 
 if __name__ == "__main__":
-
-    def g(d, t, k, default="?"):
-        return d.get(t, {}).get(k, default)
-
     print("HEADLINE FINDINGS DIGEST")
     print("=" * 70)
     print("\n1) Self vs best-other in aggregate (paired):")

@@ -1,32 +1,26 @@
 #!/usr/bin/env python3
 """
 Self-prediction
-===============
-A model predicts its OWN maze-navigation position after N steps. The model is
-shown the full maze topology (every cell and its available directions) and
-asked, in role framing, where it would be after each of steps 1..8.
+---
 
-Run with --model and --mode. Output filename, model id, and metadata are derived
-from them.
+Has a model predict its own maze-navigation position after N steps, in role framing. Run
+with --model and --mode.
 
-Modes:
-  reasoning    reasoning ON,  max_tokens 8000, free-text "(row, col)" answer
-  noreasoning  reasoning OFF, max_tokens 30,   JSON-schema {"row","col"} answer
+Design:
+- the model sees the full maze topology and is asked about each of steps 1..8
+- reasoning mode: reasoning on, max_tokens 8000, free-text "(row, col)" answer
+- noreasoning mode: reasoning off, max_tokens 30, JSON-schema {"row","col"} answer
+- scored downstream against the model's own consistent navigation set
 
-Records (per cell -> maze -> step_k -> list):
-  raw_response, reasoning, parsed_position, run_idx
-  - reasoning is the model's separate reasoning trace (null in noreasoning).
-  - A prediction is recorded only if it parses; unparsed/failed attempts are
-    omitted (not recorded). Each step is independent.
+Records, per cell, maze and step_k, as a list:
+- raw_response, reasoning, parsed_position, run_idx
+- reasoning is the model's separate trace, and null in noreasoning
+- a prediction is recorded only if it parses, and each step is independent
 
-Validation: a random ~20% of (maze, step) buckets are run 3x (run_idx
-0,1,2) to measure run-to-run agreement; the rest run once (run_idx 0). The
-subset is chosen stochastically at runtime with no fixed seed, so re-running
-selects a different subset by design -- the data file records what was actually
-run via run_idx; it is not expected to match a re-run.
-
-Scored downstream against the model's own consistent navigation set
-(data/navigation/{model}_navigation.json, field consistent).
+Validation:
+- a random ~20% of (maze, step) buckets run 3x, to measure run-to-run agreement
+- unseeded, so a re-run selects a different subset; the file records what was actually run
+  via run_idx and isn't expected to match a re-run
 
 Output: data/self_prediction/{MODEL}_self_{MODE}.json
 """
@@ -43,10 +37,8 @@ from openai import OpenAI
 
 from common import build_user_msg, parse_answer, parse_walls
 
-# ============================================================
-# CONFIG
-# ============================================================
 
+# Config
 
 PREDICT_STEPS = [1, 2, 3, 4, 5, 6, 7, 8]
 TEMPERATURE = 0
@@ -111,19 +103,16 @@ SYSTEM_PROMPT = (
     "after a given number of steps. " + ANSWER_INSTRUCTION
 )
 
-# ============================================================
-# RUN PLAN
-# ============================================================
 
+# Run plan
 
 def n_runs_for_bucket():
     # Unseeded: roughly VALIDATION_FRACTION of buckets get the validation run count.
+    """Runs for one bucket: the validation count with probability VALIDATION_FRACTION."""
     return N_PRED_RUNS_VALIDATION if random.random() < VALIDATION_FRACTION else N_PRED_RUNS_MAIN
 
-# ============================================================
-# API
-# ============================================================
 
+# API
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
@@ -131,6 +120,7 @@ if not api_key:
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
 def call(user_msg, ctx=""):
+    """One prediction call with retries; the record, or None if attempts are exhausted."""
     kw = dict(model=MODEL_ID,
               messages=[{"role": "system", "content": SYSTEM_PROMPT},
                         {"role": "user", "content": user_msg}],
@@ -162,12 +152,11 @@ def call(user_msg, ctx=""):
                 time.sleep(min(60, 5 * (a + 1)))
     return None  # all attempts exhausted; omit (not recorded)
 
-# ============================================================
-# MAIN
-# ============================================================
 
+# Main
 
 def main():
+    """Collect self-predictions over the consistent set, resuming from any existing output."""
     os.makedirs(OUT_DIR, exist_ok=True)
     nav = json.load(open(NAV_FILE))
     walls_by_id = {m["id"]: parse_walls(m["walls"]) for m in nav["mazes"]}
@@ -199,12 +188,14 @@ def main():
 
     lock = Lock()
     def save():
+        """Atomically write the results file."""
         with lock:
             tmp = OUTPUT_PATH + ".tmp"
             json.dump(results, open(tmp, "w"), indent=1, default=str)
             os.replace(tmp, OUTPUT_PATH)
 
     def have(mid, step, ri):
+        """True if a record for this run index already exists."""
         try:
             return any(r.get("run_idx") == ri for r in cell[mid][f"step_{step}"])
         except (KeyError, TypeError):
@@ -223,6 +214,7 @@ def main():
         print("Nothing to do."); return
 
     def run_one(t):
+        """Worker: run one (maze, step, run) task."""
         mid, step, ri = t
         rec = call(build_user_msg(walls_by_id[mid], step), ctx=f"{mid}|s{step}|r{ri}")
         if rec is not None:

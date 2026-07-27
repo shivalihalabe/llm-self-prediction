@@ -1,33 +1,25 @@
 #!/usr/bin/env python3
 """
-Maze navigation (consolidated, all models)
-==========================================
-Generates 100 cyclic 5x5 mazes (seeded, identical set across models), then has
-the selected MODEL navigate each one. Output is a per-model JSON of trajectories
-that downstream prediction code reads.
+Maze navigation
+---
 
-Run with --model. Everything else (model id, output filename, metadata
-experiment field) is derived from it.
+Generates 100 cyclic 5x5 mazes, the same set for every model, then has the selected model
+navigate each one. Run with --model.
 
 Design:
-  - Maze generator: DFS spanning tree + N_EXTRA_PASSAGES extra walls removed,
-    producing cyclic mazes with real branching.
-  - Direction order at branch points: sorted alphabetical (E, N, S, W where
-    applicable). Deterministic at temperature 0.
-  - Forced-move shortcut: when only one topological direction is available at a
-    step, no API call is made (the choice is mechanical).
-
-Run config:
-  - 100 mazes, seeds 42 + i*7
-  - 3 runs per maze, 8 steps each, temperature 0, no reasoning
+- maze generator: DFS spanning tree plus N_EXTRA_PASSAGES further walls removed, giving
+  cycles and real branching
+- direction order at branch points: sorted alphabetical, deterministic at temperature 0
+- forced-move shortcut: with only one direction available, no API call is made
+- 100 mazes on seeds 42 + i*7, 3 runs each, 8 steps, temperature 0, no reasoning
 
 Consistency:
-  - A maze is consistent iff all 3 runs complete and agree through step 8.
+- a maze is consistent iff all 3 runs complete and agree through step 8
 
 Reliability:
-  - 8 API retries per call, 2 run-level retries on persistent failures.
-  - A run is recorded only if it completes; failed/aborted attempts are omitted.
-  - Parallel execution via ThreadPoolExecutor, atomic checkpointing.
+- 8 API retries per call, and 2 run-level retries on persistent failures
+- a run is recorded only if it completes; failed and aborted attempts are omitted
+- parallel execution via ThreadPoolExecutor, with atomic checkpointing
 
 Output: data/navigation/{MODEL}_navigation.json
 """
@@ -45,10 +37,7 @@ from openai import OpenAI
 from common import get_available_directions
 
 
-# ============================================================
-# CONFIG
-# ============================================================
-
+# Config
 
 MODEL_IDS = {
     "opus":   "anthropic/claude-opus-4-6",
@@ -84,10 +73,7 @@ OUT_DIR     = os.path.join(WORKDIR, "data", "navigation")
 OUTPUT_PATH = os.path.join(OUT_DIR, f"{MODEL}_navigation.json")
 
 
-# ============================================================
-# PROMPTS
-# ============================================================
-
+# Prompts
 
 NAV_SYS = (
     "You are exploring a grid maze. At each step, you know your current position, your full "
@@ -99,10 +85,7 @@ NAV_SYS = (
 )
 
 
-# ============================================================
-# MAZE GENERATION (DFS spanning tree + extra passages for cycles)
-# ============================================================
-
+# Maze generation (DFS spanning tree + extra passages for cycles)
 
 def generate_maze(seed, rows=ROWS, cols=COLS, n_extra_passages=N_EXTRA_PASSAGES):
     """
@@ -146,10 +129,7 @@ def generate_maze(seed, rows=ROWS, cols=COLS, n_extra_passages=N_EXTRA_PASSAGES)
     return walls
 
 
-# ============================================================
-# NAV USER MESSAGE
-# ============================================================
-
+# Nav user message
 
 def build_nav_user_msg(pos, history_positions, available_dirs, shown_order):
     """
@@ -207,10 +187,7 @@ def parse_direction(text, available_dirs):
     return None
 
 
-# ============================================================
-# API CLIENT
-# ============================================================
-
+# API client
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
@@ -222,7 +199,7 @@ client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 def call_and_parse(system_prompt, user_msg, available_dirs, ctx=""):
     """
     Call the model and parse the result. Up to MAX_API_RETRIES attempts with
-    the same prompt content. OpenRouter at temp 0 is not strictly deterministic,
+    the same prompt content. OpenRouter at temp 0 isn't strictly deterministic,
     so a fresh call may yield a different answer; if all attempts fail to
     parse, the run is restarted at the run level.
     """
@@ -255,10 +232,7 @@ def call_and_parse(system_prompt, user_msg, available_dirs, ctx=""):
     raise RuntimeError(f"{ctx} exhausted {MAX_API_RETRIES} retries; last error: {last_err}")
 
 
-# ============================================================
-# SINGLE NAV RUN
-# ============================================================
-
+# Single nav run
 
 def _do_run(maze, run_idx):
     """Single attempt at a nav run. Raises if any step's API/parse retries are exhausted."""
@@ -324,10 +298,7 @@ def run_single_nav(maze, run_idx):
     return None
 
 
-# ============================================================
-# CHECKPOINT / RESUME
-# ============================================================
-
+# Checkpoint / resume
 
 def atomic_save(results, path):
     """Atomic save: write to tmp, fsync, rename. Safe against crashes mid-write."""
@@ -342,12 +313,10 @@ def atomic_save(results, path):
     os.replace(tmp, path)
 
 
-# ============================================================
-# MAIN
-# ============================================================
-
+# Main
 
 def main():
+    """Generate the maze set, run every navigation task, and record consistency."""
     print(f"Model: {MODEL_ID}")
     print(f"Mazes: {N_MAZES}, runs/maze: {N_NAV_RUNS}, steps: {N_NAV_STEPS}")
     print(f"Workers: {N_WORKERS}, save every: {SAVE_EVERY}")

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-Horizon-resolved analyses (the per-step lens)
-=============================================
+Horizon-resolved analyses
+---
 
-Consolidates and extends step-by-step views that don't belong to a single thematic script:
-- self_consistency_by_step: where over the horizon do a model's runs stop agreeing (is Opus's
-  temp-0 instability concentrated mid-horizon, exactly where its self-advantage lives?).
-- determined_vs_branch_by_step: self-accuracy on determined vs branch steps, per step.
-- self_matches_consensus_by_step: does self track the consensus-of-others more as the horizon grows?
-- error_propagation: P(correct at k+1 | correct at k) vs P(correct at k+1 | wrong at k) -- are
-  steps independent or does getting one right carry forward.
-- predictability_horizon: the first step at which each target drops below 50% mean predictability.
+Collects the step-by-step views that don't belong to a single thematic script.
+
+Measures:
+- self_consistency_by_step: where over the horizon a model's runs stop agreeing
+- determined_vs_branch_by_step: self-accuracy on determined against branch steps, per step
+- self_matches_consensus_by_step: how far self tracks the consensus-of-others by step
+- error_propagation: P(correct at k+1 | correct at k) against P(correct at k+1 | wrong at k)
+- transition_legality: whether consecutive predicted positions form a legal walk
+- predictability_horizon: the first step at which each target drops below 50%
 
 Output: analysis/results/per_step.json
 """
@@ -29,12 +30,10 @@ MODELS = C.MODELS
 RES = {"metadata": C.metadata("per_step")}
 
 
-# ============================================================
-# SELF-CONSISTENCY BY STEP
-# ============================================================
-
+# Self-consistency by step
 
 def _consistency(m):
+    """Per step, the fraction of validation cells whose runs all agree."""
     rows = [
         (mz, s, ri, tuple(rec["parsed_position"]))
         for mz, s, ri, rec in C.self_records(m, "reasoning")
@@ -57,14 +56,12 @@ def _consistency(m):
 RES["self_consistency_by_step"] = {m: _consistency(m) for m in MODELS}
 
 
-# ============================================================
-# DETERMINED VS BRANCH ACCURACY BY STEP
-# ============================================================
+# Determined vs branch accuracy by step
 # Determined = two or more legal moves with exactly one unvisited (a forced step, by contrast,
 # has a single legal move and is executed without an API call).
 
-
 def _determined_vs_branch(m):
+    """Per step, self-accuracy split into determined and branch cells."""
     df = pd.DataFrame(
         [(mz, s, c, len(C.unvisited_moves(m, mz, s))) for (mz, s), c in C.SELF[m].items()],
         columns=["maze", "step", "correct", "n_unvisited"],
@@ -88,10 +85,7 @@ def _determined_vs_branch(m):
 RES["determined_vs_branch_by_step"] = {m: _determined_vs_branch(m) for m in MODELS}
 
 
-# ============================================================
-# SELF MATCHES CONSENSUS-OF-OTHERS BY STEP
-# ============================================================
-
+# Self matches consensus-of-others by step
 
 _ORDER = {p: i for i, p in enumerate(MODELS)}
 
@@ -102,6 +96,7 @@ def _consensus(votes):
 
 
 def consensus_by_step(t):
+    """Per step, how often self matches the truth and the consensus of others."""
     cross = C.RECORDS[(C.RECORDS.kind == "cross") & (C.RECORDS.target == t)].copy()
     cross["ord"] = cross.predictor.map(_ORDER)
     cons = cross.sort_values("ord").groupby(["maze", "step"])["pred"].agg(_consensus)
@@ -127,12 +122,10 @@ def consensus_by_step(t):
 RES["self_matches_consensus_by_step"] = {t: consensus_by_step(t) for t in MODELS}
 
 
-# ============================================================
-# ERROR PROPAGATION ALONG THE TRAJECTORY
-# ============================================================
-
+# Error propagation along the trajectory
 
 def _propagation(m):
+    """P(correct at k+1) conditioned on correctness at k, over consecutive steps."""
     df = pd.DataFrame(
         [(mz, s, c) for (mz, s), c in C.SELF[m].items()], columns=["maze", "step", "correct"]
     )
@@ -151,9 +144,7 @@ def _propagation(m):
 RES["error_propagation"] = {m: _propagation(m) for m in MODELS}
 
 
-# ============================================================
-# TRANSITION LEGALITY (ROUTE CONTINUITY)
-# ============================================================
+# Transition legality (route continuity)
 # Do consecutive predicted positions chain into a legal walk? For each maze the sequence is
 # (0,0) followed by the parsed run-0 predictions for steps 1-8; a pair is legal iff the two
 # cells are Manhattan-adjacent with no wall between them. The null for the pair spanning
@@ -161,12 +152,13 @@ RES["error_propagation"] = {m: _propagation(m) for m in MODELS}
 # moves, the fraction of ordered pairs in R_k x R_{k+1} that are legal, averaged over mazes
 # and then over pairs.
 
-
 def _pair_legal(mz, a, b):
+    """True if two cells are adjacent with no wall between them."""
     return C.manhattan(a, b) == 1 and frozenset([a, b]) not in C.WALLS[mz]
 
 
 def _legality(pos_dict, target):
+    """Legal-transition rates over a predictor's position sequences, overall and per step."""
     truth = C.TRUTH[target]
     n_pairs = n_legal = 0
     n_wrong = n_wrong_legal = n_corr = n_corr_legal = 0
@@ -204,6 +196,7 @@ def _legality(pos_dict, target):
 
 
 def _null_by_step(mazeset):
+    """Exact chance legality for each step pair, averaged over a maze set."""
     per_step = []
     for k in range(8):
         fracs = []
@@ -218,7 +211,7 @@ def _null_by_step(mazeset):
 
 legality = {"per_model": {}, "legality_matrix": {}}
 # The scalar null averages over the model's own consistent set, like every accuracy in the
-# repo; the by-step vector is over all 100 mazes, where it is a pure property of the maze
+# repo; the by-step vector is over all 100 mazes, where it's a pure property of the maze
 # set and identical for every model.
 null_steps_all = _null_by_step(C.WALLS)
 for m in MODELS:
@@ -242,10 +235,7 @@ for p2 in MODELS:
 RES["transition_legality"] = legality
 
 
-# ============================================================
-# PREDICTABILITY HORIZON (first step below 50%)
-# ============================================================
-
+# Predictability horizon (first step below 50%)
 
 _pt = C.RECORDS[C.RECORDS.kind.isin(("self", "cross"))]
 _step_acc = _pt.groupby(["target", "predictor", "step"], sort=False)["correct"].mean().mul(100.0)
@@ -262,10 +252,7 @@ for t in MODELS:
 RES["predictability_horizon"] = horizon
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "per_step.json"), "w") as f:
     json.dump(RES, f, indent=1)

@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """
 Outcome analyses
-================
-Who predicts whom, and how well.
+---
 
-Covers the predictor x target accuracy matrix (native + 5-way-intersection), self-vs-other gaps,
-per-step horizon decay, target-predictability vs predictor-skill, pairwise comparisons,
-self-accuracy by maze difficulty, and the reasoning vs no-reasoning self contrast.
+Reports who predicts whom and how well. All accuracy uses the scoring contract from
+common.py: run_idx 0, exact position match.
 
-All accuracy is the shared scoring contract from common.py (run_idx 0, exact match).
+Measures:
+- the predictor by target accuracy matrix, native and on the 5-way intersection
+- self against the mean, median and best cross-predictor
+- per-step horizon decay
+- target predictability against predictor skill, per step
+- pairwise comparisons on each pair's shared mazes
+- self-accuracy by maze difficulty
+- reasoning against no-reasoning self-prediction
+- an audit that unparsed records were omitted at generation
 
 Output: analysis/results/outcomes.json
 """
@@ -28,7 +34,8 @@ os.makedirs(OUT, exist_ok=True)
 MODELS = C.MODELS
 RES = {"metadata": C.metadata("outcomes")}
 
-# per-(predictor, target[, step]) accuracy tables, straight off the tidy record frame
+
+# per-(predictor, target[, step]) accuracy tables, straight off the record frame
 _PT = C.RECORDS[C.RECORDS.kind.isin(("self", "cross"))]
 
 
@@ -43,12 +50,10 @@ def acc_or_none(scored, mazeset=None, step=None):
     return round(v, 1) if v is not None else None
 
 
-# ============================================================
-# MATRIX
-# ============================================================
-
+# Matrix
 
 def matrix(mazeset):
+    """Predictor x target accuracy table as nested dicts."""
     tab = C.accuracy_matrix(mazeset=mazeset).round(1)
     return {
         p: {t: (None if pd.isna(tab.loc[p, t]) else float(tab.loc[p, t])) for t in MODELS}
@@ -60,12 +65,10 @@ RES["matrix_native"] = matrix(None)  # each cell on the target's consistent set
 RES["matrix_intersection19"] = matrix(C.INTERSECTION)  # all cells on the same 19 mazes
 
 
-# ============================================================
-# SELF VS OTHER
-# ============================================================
-
+# Self vs other
 
 def self_vs_other(mazeset):
+    """Per target: self accuracy against the mean, median and best cross-predictor."""
     df = _PT if mazeset is None else _PT[_PT.maze.isin(mazeset)]
     acc = _acc_table(df, ["predictor", "target"])
     out = {}
@@ -94,10 +97,7 @@ RES["self_vs_other_native"] = self_vs_other(None)
 RES["self_vs_other_intersection19"] = self_vs_other(C.INTERSECTION)
 
 
-# ============================================================
-# PER-STEP SELF VS OTHER
-# ============================================================
-
+# Per-step self vs other
 
 _step_acc = _acc_table(_PT, ["target", "predictor", "step"])
 _step_n = _PT.groupby(["target", "predictor", "step"], sort=False)["correct"].size()
@@ -125,11 +125,8 @@ for t in MODELS:
 RES["per_step_self_vs_other"] = perstep
 
 
-# ============================================================
-# PREDICTABILITY / SKILL PER STEP
-# ============================================================
+# Predictability / skill per step
 # mean of per-predictor accuracies (not pooled), matching the per-predictor cell definition
-
 
 RES["target_predictability_per_step"] = {
     t: [
@@ -149,10 +146,7 @@ RES["predictor_skill_per_step"] = {
 }
 
 
-# ============================================================
-# PAIRWISE (on pairwise intersection)
-# ============================================================
-
+# Pairwise (on pairwise intersection)
 
 pairwise = {}
 for a_m, b_m in itertools.combinations(MODELS, 2):
@@ -167,11 +161,8 @@ for a_m, b_m in itertools.combinations(MODELS, 2):
 RES["pairwise_on_intersection"] = pairwise
 
 
-# ============================================================
-# SELF ACCURACY BY MAZE DIFFICULTY
-# ============================================================
+# Self accuracy by maze difficulty
 # difficulty stratum k = mazes consistent for exactly k models.
-
 
 diff = {}
 for k in range(1, 6):
@@ -188,10 +179,7 @@ for k in range(1, 6):
 RES["self_accuracy_by_difficulty"] = diff
 
 
-# ============================================================
-# REASONING VS NO-REASONING (self)
-# ============================================================
-
+# Reasoning vs no-reasoning (self)
 
 rvn = {}
 for m in MODELS:
@@ -208,12 +196,9 @@ for m in MODELS:
 RES["reasoning_vs_nr_self"] = rvn
 
 
-# ============================================================
-# UNPARSED-RECORD AUDIT
-# ============================================================
+# Unparsed-record audit
 # Verifies that the "unparsed omitted at generation" contract holds: counts records whose
 # parsed_position is missing or null, per file and in total, across all prediction data.
-
 
 unparsed = {"per_file": {}, "total": {"unparsed": 0, "records": 0}}
 for sub in ("self_prediction", "cross_prediction"):
@@ -235,10 +220,7 @@ for sub in ("self_prediction", "cross_prediction"):
 RES["unparsed_records"] = unparsed
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "outcomes.json"), "w") as f:
     json.dump(RES, f, indent=1)

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
 Run the full analysis pipeline
-==============================
+---
 
-Executes every analysis script in order; each imports common.py (the single source of the
-scoring contract) and writes its own results/<name>.json. Run from anywhere:
+Executes each analysis script in order and stops at the first non-zero exit, so a failure is
+never silently skipped. Run it from anywhere with python3 analysis/run_all.py.
 
-    python3 analysis/run_all.py
-
-Each script also prints a short console summary. A non-zero exit from any script stops the
-run so a failure is never silently skipped.
+Order:
+- common.py runs first, as every other script imports it
+- the thematic scripts each write their own results/<name>.json
+- summary.py runs last, reading the files the others wrote
 """
 
 import os
@@ -22,11 +22,11 @@ SCRIPTS = [
     "prior.py",  # the no-reasoning prior: concentration, individuation, rescue/trap
     "stats.py",  # paired tests, CIs, noise floor, baselines, prior-alignment split
     "error_geometry.py",  # distance / off-by-step / reachability / distribution / corner
-    "exploration_strategy.py",  # forced-vs-branch, regularity->predictability, determinism
+    "exploration_strategy.py",  # determined-vs-branch, regularity->predictability, determinism
     "maze_structure.py",  # maze-side: what makes a maze predictable, net of navigator
     "traces.py",  # trace features raw+normalized, chronology, path-simulation, length
     "cross_structure.py",  # convergence, ensembles, oracle, specialization, dissociation
-    "per_step.py",  # horizon-resolved: consistency/forced-branch/consensus by step, propagation
+    "per_step.py",  # horizon-resolved: consistency/determined-branch/consensus by step, propagation
 ]
 # run last: reads every results/*.json and writes a consolidated headline digest
 FINAL = "summary.py"
@@ -34,6 +34,7 @@ FINAL = "summary.py"
 
 def main():
     # sanity-check the foundation first
+    """Run each analysis script in order, stopping at the first failure."""
     print("=" * 70 + "\ncommon.py (foundation)\n" + "=" * 70)
     if subprocess.run([sys.executable, os.path.join(HERE, "common.py")]).returncode != 0:
         sys.exit("FAILED: common.py")

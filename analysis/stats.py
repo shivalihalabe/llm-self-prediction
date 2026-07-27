@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 """
-Statistical rigor for the headline claims
-=========================================
+Statistical tests
+---
 
-Covers the paired tests, bootstrap CIs, noise floor, max-selection-bias fix, baseline
-sensitivity, and the conditional self-advantage at branch steps -- the inferential backbone
-for the self-vs-other and Opus mid-horizon claims.
+Provides the paired tests, intervals and baselines behind the self-against-other
+comparisons. Cells within a maze are one reconstruction rather than independent trials, so
+every paired test clusters at the maze level.
 
-Cells within a maze are one reconstruction, not independent trials, so every paired test
-clusters at the maze level: gap CIs come from a cluster bootstrap over mazes, and paired
-p-values from a maze-level sign-flip permutation of the signed discordance.
+Method:
+- gap CIs from a cluster bootstrap that resamples mazes with replacement
+- paired p-values from a maze-level sign-flip permutation of the signed discordance
+- Holm adjustment across the five per-target tests
+
+Measures:
+- self against best-other, overall and per step
+- self's rank among all five predictors
+- the validation-run noise floor, and whether run-stability predicts correctness
+- chance baselines under three definitions
+- self-advantage by move type, and on determined and one-unvisited cells
+- unique information, reasoning dependence, and run-to-run consistency by move type
 
 Output: analysis/results/stats.json
 """
@@ -27,15 +36,12 @@ OUT = os.path.join(os.path.dirname(__file__), "results")
 os.makedirs(OUT, exist_ok=True)
 B = 2000  # bootstrap resamples
 N_PERM = 10000  # sign-flip / label-shuffle permutation draws
-SEED = 20260609  # a fresh generator is constructed per call, so test order cannot matter
+SEED = 20260609  # a fresh generator is constructed per call, so test order can't matter
 MODELS = C.MODELS
 RES = {"metadata": C.metadata("stats")}
 
 
-# ============================================================
-# PAIRED HELPERS
-# ============================================================
-
+# Paired helpers
 
 def paired(sa, sb, restrict=None):
     """Aligned (maze, self_bool, other_bool) over shared (maze, step) keys.
@@ -116,10 +122,7 @@ def boot_gap_ci(pairs):
 best_other_model = C.best_other_model  # defined once in common.py
 
 
-# ============================================================
-# SELF VS BEST-OTHER: PAIRED TEST + CI
-# ============================================================
-
+# Self vs best-other: paired test + CI
 
 sib = {}
 for t in MODELS:
@@ -138,13 +141,10 @@ for t in MODELS:
 RES["self_vs_best_other_paired"] = sib
 
 
-# ============================================================
-# PER-STEP SELF VS BEST-OTHER (CI per step)
-# ============================================================
+# Per-step self vs best-other (CI per step)
 # Every per-step cell has exactly one observation per maze, so the maze-level cluster
 # bootstrap is the same method as the plain paired bootstrap here; the shared code path is
-# used anyway so there is one set of test functions, not two.
-
+# used anyway so there's one set of test functions, not two.
 
 perstep = {}
 for t in MODELS:
@@ -168,10 +168,7 @@ for t in MODELS:
 RES["self_vs_best_other_per_step"] = perstep
 
 
-# ============================================================
-# MAX-SELECTION-BIAS FIX: SELF'S RANK
-# ============================================================
-
+# Max-selection-bias fix: self's rank
 
 rank = {}
 for t in MODELS:
@@ -193,10 +190,7 @@ for t in MODELS:
 RES["self_rank_among_predictors"] = rank
 
 
-# ============================================================
-# VALIDATION-RUN NOISE FLOOR (run 1,2)
-# ============================================================
-
+# Validation-run noise floor (run 1,2)
 
 noise = {}
 for m in MODELS:
@@ -222,12 +216,9 @@ for m in MODELS:
 RES["validation_self_consistency"] = noise
 
 
-# ============================================================
-# BASELINE SENSITIVITY
-# ============================================================
+# Baseline sensitivity
 # For each target/step on the target's consistent set, the chance baseline under three
 # definitions, and self-accuracy's lift over each.
-
 
 def modal_baseline(t, s, mazeset):
     """Accuracy of always predicting the single most common actual step-s position."""
@@ -280,11 +271,8 @@ for t in MODELS:
 RES["baseline_sensitivity"] = baseline
 
 
-# ============================================================
-# IS RUN-STABILITY A WITHIN-MODEL CORRECTNESS SIGNAL?
-# ============================================================
+# Run-stability as a correctness signal
 # On the validation subsample, are predictions that are stable across runs more often correct?
-
 
 consistency_acc = {}
 for m in MODELS:
@@ -312,14 +300,12 @@ for m in MODELS:
 RES["self_consistency_vs_accuracy"] = consistency_acc
 
 
-# ============================================================
-# SELF-ACCURACY BY MOVE TYPE, REASONING VS NO-REASONING
-# ============================================================
+# Self-accuracy by move type, reasoning vs no-reasoning
 # The A5 split: each model's self-accuracy on atypical / default / determined cells, with and
 # without a reasoning trace. "Determined" = non-branch cells (one unvisited move).
 
-
 def _move_type(t, mz, step):
+    """Classify a cell as determined, default, or atypical."""
     if not C.is_branch(t, mz, step):
         return "determined"
     return "default" if C.chose_first_unvisited(t, mz, step) else "atypical"
@@ -340,15 +326,13 @@ for t in MODELS:
 RES["self_by_move_type_reasoning_vs_nr"] = by_move_type
 
 
-# ============================================================
-# PER-STEP McNEMAR WITH HOLM CORRECTION (FIXED AND ROTATING OPPONENT)
-# ============================================================
+# Per-step McNemar with Holm correction (fixed and rotating opponent)
 # Two versions of "is any single step significant after multiple testing": against the fixed
 # best-overall opponent, and against the per-step rotating best opponent (harsher). One cell
 # per maze at each step, so the maze-level sign-flip is the plain sign-flip here.
 
-
 def _holm(raw):
+    """Holm step-down adjustment of a {key: p-value} mapping."""
     order = sorted(raw, key=lambda k: raw[k])
     out, running = {}, 0.0
     for rank_i, k in enumerate(order):
@@ -358,6 +342,7 @@ def _holm(raw):
 
 
 def _step_best_opponent(t, step):
+    """The cross-predictor with the highest accuracy on a target at one step."""
     best, bacc = None, -1.0
     for p in MODELS:
         if p == t:
@@ -395,13 +380,10 @@ for t in MODELS:
 RES["per_step_mcnemar_holm"] = per_step_holm
 
 
-# ============================================================
-# NO-REASONING UNIQUE INFORMATION
-# ============================================================
+# No-reasoning unique information
 # Cells where the no-reasoning self-prediction is correct while all four (reasoning)
 # cross-predictors are wrong. No-reasoning cross-predictions were not collected, so the
 # reasoning cross-predictors are the only available comparator.
-
 
 nr_unique = {}
 for t in MODELS:
@@ -418,9 +400,7 @@ for t in MODELS:
 RES["nr_unique_info"] = nr_unique
 
 
-# ============================================================
-# ATYPICAL AND DEFAULT SELF-ADVANTAGE (PER-PREDICTOR, BEST, MEAN, HOLM)
-# ============================================================
+# Atypical and default self-advantage (per-predictor, best, mean, Holm)
 # A decision point has two or more unvisited legal moves; default means the target took the
 # alphabetically-first unvisited direction, atypical anything else. For each target and each
 # move type: self accuracy, the full per-predictor vector, the best single comparator and the
@@ -428,8 +408,8 @@ RES["nr_unique_info"] = nr_unique
 # the five per-target best-comparator tests. Correct/total counts accompany every accuracy so
 # the gaps (computed unrounded) are checkable against the emitted figures.
 
-
 def _split_cells(t):
+    """A target's decision points, split into default and atypical."""
     out = {"atypical": [], "default": []}
     for mz, step in sorted(C.SELF[t]):
         if not C.is_branch(t, mz, step):
@@ -439,6 +419,7 @@ def _split_cells(t):
 
 
 def _advantage(t, cells):
+    """Self accuracy on a cell set against every cross-predictor, with clustered tests."""
     self_vals = [C.SELF[t][k] for k in cells]
     n_self_correct = sum(self_vals)
     self_raw = 100.0 * n_self_correct / len(self_vals) if cells else 0.0
@@ -497,12 +478,9 @@ for kind in ("atypical", "default"):
 RES["self_advantage_by_move_type"] = adv
 
 
-# ============================================================
-# DETERMINED-CELL SELF-ADVANTAGE
-# ============================================================
+# Determined-cell self-advantage
 # Completes the move-type split: the paired self-vs-best-other gap on determined (non-branch)
 # cells, same methodology as the prior-aligned / idiosyncratic split above.
-
 
 det = {}
 for t in MODELS:
@@ -515,9 +493,7 @@ for t in MODELS:
 RES["self_advantage_determined"] = det
 
 
-# ============================================================
-# FIRST VS LATER ATYPICAL CELLS (ACCUMULATED-ERROR CHECK)
-# ============================================================
+# First vs later atypical cells (accumulated-error check)
 # A prediction's accuracy at step N depends on the whole reconstruction from step 1, so a cell
 # labeled atypical can be wrong because of an error several steps earlier. This splits each
 # target's atypical cells by whether the step is the first atypical move in its maze or a later
@@ -525,7 +501,6 @@ RES["self_advantage_determined"] = det
 # self-advantage were an artifact of accumulated error it would appear in the later group; it
 # appears in the first group only. The first bucket has one cell per maze by construction; it runs
 # through the same clustered code path for consistency.
-
 
 first_later = {}
 for t in MODELS:
@@ -547,15 +522,13 @@ for t in MODELS:
 RES["atypical_first_vs_later"] = first_later
 
 
-# ============================================================
-# ONE-UNVISITED CELLS
-# ============================================================
+# One-unvisited cells
 # One-unvisited cells (2+ legal moves but a single unvisited one) are excluded from decision
 # points: prediction there is far from ceiling, but no model shows a positive significant
-# self-advantage, so the cells carry no model-specific signature.
-
+# self-advantage, so the cells don't separate the models.
 
 def _one_unvisited_cells(t):
+    """Cells with two or more legal moves but exactly one unvisited."""
     out = []
     for mz, step in sorted(C.SELF[t]):
         legal = C.legal_moves(t, mz, step)
@@ -571,16 +544,13 @@ for t in MODELS:
 RES["one_unvisited_self_advantage"] = one_unv
 
 
-# ============================================================
-# UNIQUE INFORMATION (A3)
-# ============================================================
+# Unique information (A3)
 # On the cells every predictor of a target answered, the cells where exactly one of the five
 # predictors (self plus four cross) is correct and the other four are wrong. Self is compared
 # against each cross-predictor with the maze-level sign-flip permutation; "self beats every
 # predictor" is an intersection-union claim, so the maximum p is valid without multiplicity
 # adjustment across the four comparators. The bootstrap CI is on the unique-correct count
 # difference against the strongest cross-predictor, clustered by maze.
-
 
 def _boot_count_diff_ci(pairs):
     """Cluster-bootstrap 95% CI on sum(x) - sum(y) over mazes (counts, not percentages)."""
@@ -634,15 +604,12 @@ for t in MODELS:
 RES["unique_information"] = unique_info
 
 
-# ============================================================
-# ATYPICAL REASONING DEPENDENCE (A5)
-# ============================================================
+# Atypical reasoning dependence (A5)
 # On each target's atypical cells, the with-reasoning self-prediction paired against the
 # no-reasoning one, clustered by maze. No-reasoning cross-predictions were never collected,
 # so this measures the collapse of self-accuracy rather than of the advantage directly; the
 # advantage claim follows by comparing the no-reasoning accuracy against what the best
 # cross-predictor achieves on the same cells.
-
 
 reasoning_dep = {}
 for t in MODELS:
@@ -663,14 +630,11 @@ for t in MODELS:
 RES["atypical_reasoning_dependence"] = reasoning_dep
 
 
-# ============================================================
-# RUN-TO-RUN CONSISTENCY BY MOVE TYPE (D4)
-# ============================================================
+# Run-to-run consistency by move type (D4)
 # On the validation subsample, does run-to-run instability concentrate on atypical cells?
 # Label-shuffle permutation of the atypical/other split against the per-cell agreement flag.
 # Every row here is underpowered (single-digit unstable-cell counts); the emitted counts are
-# the point -- the validation subsample cannot resolve the question for any model.
-
+# the point, because the validation subsample can't resolve the question for any model.
 
 consistency_mt = {}
 for m in MODELS:
@@ -711,10 +675,7 @@ for m in MODELS:
 RES["consistency_by_move_type"] = consistency_mt
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "stats.json"), "w") as f:
     json.dump(RES, f, indent=1)

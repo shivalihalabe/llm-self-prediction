@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 """
-Self-framing pilot (base vs role)
-=================================
-Methods pilot justifying the prompt framing used in the main experiment. All
-five models self-predict under TWO framings, on the 19 mazes every model
-navigates consistently (the five-way intersection of the per-model consistent
-navigation sets). Single run per (model, framing, maze, step), reasoning ON, no
-validation.
+Self-framing pilot
+---
 
-  base : addresses the model directly        ("Suppose I asked you to explore...")
-  role : task-role wrapper used in the main run ("You are participating in a
-         prediction task... Suppose you are a language model asked to explore...")
+Checks the prompt framing used in the main experiment by having all five models self-predict
+under two framings. Takes no arguments, since it iterates every model.
 
-The main experiment uses role framing throughout; this pilot checks that choice
-was not disadvantageous. The two framing prompts are the pilot's experimental
-variable, so they are recorded in metadata.prompts.
+Framings:
+- base addresses the model directly: "Suppose I asked you to explore..."
+- role wraps the task as in the main run: "You are participating in a prediction task...
+  Suppose you are a language model asked to explore..."
 
-Records (predictions -> model -> framing -> maze -> step_k -> single dict):
-  raw_response, parsed_position
-  - One record per step (single run; no run_idx, no validation). A step is
-    recorded only if it parses; unparsed/failed attempts are omitted.
-  - reasoning was ON, but only answers were needed to compare framings, so the
-    trace was not stored separately; raw_response is kept verbatim (it can be a
-    long worked-out response or a short "(row, col)").
+Design:
+- the 19 mazes every model navigates consistently, the five-way intersection of the
+  per-model consistent sets
+- a single run per (model, framing, maze, step), reasoning on, no validation
+- the two prompts are the experimental variable, so they're recorded in metadata.prompts
 
-Output: data/self_framing_pilot.json   (loose in data/, single file)
+Records, per model, framing, maze and step_k, as a single dict:
+- raw_response, parsed_position
+- one record per step, recorded only if it parses
+- reasoning was on, but only answers were needed, so no separate trace was stored and
+  raw_response is kept verbatim
+
+Output: data/self_framing_pilot.json
 """
 
 import argparse
@@ -38,10 +37,8 @@ from openai import OpenAI
 
 from common import build_user_msg, parse_answer, parse_walls
 
-# ============================================================
-# CONFIG
-# ============================================================
 
+# Config
 
 argparse.ArgumentParser(description="Framing pilot: all five models, no arguments.").parse_args()
 
@@ -89,12 +86,11 @@ ROLE_PROMPT = (
 )
 FRAMINGS = {"base": BASE_PROMPT, "role": ROLE_PROMPT}
 
-# ============================================================
-# MAZE SET
-# ============================================================
 
+# Maze set
 
 def five_way_intersection_and_walls():
+    """The mazes every model navigates consistently, plus the wall sets."""
     sets = []; walls_by_id = None
     for m in MODELS:
         nav = json.load(open(os.path.join(NAV_DIR, f"{m}_navigation.json")))
@@ -104,10 +100,8 @@ def five_way_intersection_and_walls():
     mazes = sorted(set.intersection(*sets), key=lambda x: int(x.split("_")[1]))
     return mazes, walls_by_id
 
-# ============================================================
-# API
-# ============================================================
 
+# API
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
@@ -115,6 +109,7 @@ if not api_key:
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
 def call(model, sys_p, user_msg, ctx=""):
+    """One prediction call with retries; the record, or None if attempts are exhausted."""
     for a in range(MAX_API_RETRIES):
         try:
             resp = client.chat.completions.create(model=MODEL_IDS[model],
@@ -140,12 +135,11 @@ def call(model, sys_p, user_msg, ctx=""):
                 time.sleep(min(60, 5 * (a + 1)))
     return None  # all attempts exhausted; omit (not recorded)
 
-# ============================================================
-# MAIN
-# ============================================================
 
+# Main
 
 def main():
+    """Collect both framings for every model, resuming from any existing output."""
     mazes, walls_by_id = five_way_intersection_and_walls()
     print(f"Framing pilot: {len(mazes)} mazes (5-way intersection), "
           f"{len(MODELS)} models, base+role\n")
@@ -169,12 +163,14 @@ def main():
 
     lock = Lock()
     def save():
+        """Atomically write the results file."""
         with lock:
             tmp = OUTPUT_PATH + ".tmp"
             json.dump(results, open(tmp, "w"), indent=1, default=str)
             os.replace(tmp, OUTPUT_PATH)
 
     def have(model, framing, mid, step):
+        """True if this (model, framing, maze, step) already has a parsed record."""
         try:
             return "parsed_position" in results["predictions"][model][framing][mid][f"step_{step}"]
         except (KeyError, AttributeError, TypeError):
@@ -194,6 +190,7 @@ def main():
         print("Nothing to do."); return
 
     def run_one(t):
+        """Worker: run one (model, framing, maze, step) task."""
         model, framing, mid, step = t
         rec = call(model, FRAMINGS[framing], build_user_msg(walls_by_id[mid], step),
                    ctx=f"{model}|{framing}|{mid}|s{step}")

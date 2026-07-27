@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """
 Error geometry
-==============
-When a self-prediction is wrong, how it is wrong.
+---
 
-Goes beyond binary exact-match using the predicted coordinate
-(common.SELF_POS) vs the true trajectory: Manhattan distance, off-by-k-step errors
-(right path / wrong count), on-path vs off-path, over/under-shoot, geometric reachability,
-marginal row/column accuracy, accuracy stratified by the true endpoint, and the step-8
-corner attractor. Computed for self-prediction (each model predicting itself).
+Describes where wrong self-predictions land relative to the true trajectory, using the
+predicted coordinate rather than the binary correct flag. Self-prediction only.
+
+Measures:
+- Manhattan distance from the true cell
+- off-by-k-step errors, meaning the right path with the wrong count
+- on-path against off-path, and over- against under-shoot
+- geometric reachability of the predicted cell
+- marginal row and column accuracy
+- accuracy stratified by the true endpoint row
+- the step-8 corner attractor: how often step 8 actually ends at (4, 4), and how often it
+  is predicted there
 
 Output: analysis/results/error_geometry.json
 """
@@ -62,10 +68,7 @@ def _self_frame(t):
 FRAMES = {t: _self_frame(t) for t in MODELS}
 
 
-# ============================================================
-# PER-TARGET GEOMETRY OF ERRORS
-# ============================================================
-
+# Per-target geometry of errors
 
 geom = {}
 for t in MODELS:
@@ -90,11 +93,8 @@ for t in MODELS:
 RES["self_error_geometry"] = geom
 
 
-# ============================================================
-# ACCURACY STRATIFIED BY TRUE ENDPOINT ROW
-# ============================================================
+# Accuracy stratified by true endpoint row
 # Does the model do better when the truth sits where its prior expects (e.g. top rows)?
-
 
 endpoint = {}
 for t in MODELS:
@@ -109,10 +109,7 @@ for t in MODELS:
 RES["accuracy_by_true_row"] = endpoint
 
 
-# ============================================================
-# STEP-8 CORNER ATTRACTOR
-# ============================================================
-
+# Step-8 corner attractor
 
 corner = {}
 for t in MODELS:
@@ -133,11 +130,8 @@ for t in MODELS:
 RES["corner_attractor_step8"] = corner
 
 
-# ============================================================
-# PREDICTED VS ACTUAL POSITION DISTRIBUTION
-# ============================================================
+# Predicted vs actual position distribution
 # Are predictions systematically biased toward certain cells (beyond the step-8 corner)?
-
 
 dist_div = {}
 for t in MODELS:
@@ -171,10 +165,7 @@ for t in MODELS:
 RES["prediction_distribution_divergence"] = dist_div
 
 
-# ============================================================
-# ROW / COLUMN CONFUSION (actual -> predicted)
-# ============================================================
-
+# Row / column confusion (actual -> predicted)
 
 row_conf, col_conf = {}, {}
 for t in MODELS:
@@ -187,10 +178,7 @@ RES["row_confusion_actual_to_predicted"] = row_conf
 RES["col_confusion_actual_to_predicted"] = col_conf
 
 
-# ============================================================
-# ERROR GEOMETRY BY STEP (horizon-resolved)
-# ============================================================
-
+# Error geometry by step (horizon-resolved)
 
 geo_step = {}
 for t in MODELS:
@@ -213,10 +201,7 @@ for t in MODELS:
 RES["geometry_by_step"] = geo_step
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "error_geometry.json"), "w") as f:
     json.dump(RES, f, indent=1)

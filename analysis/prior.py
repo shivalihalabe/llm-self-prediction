@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 """
 The no-reasoning prior
-======================
+---
 
-The no-reasoning predictions are each model's prior: where it guesses the navigator ends up
-without working through the maze. This script characterizes that prior and how reasoning relates
-to it:
+Characterizes where each model guesses the navigator ends up without working through the
+maze, and how its reasoned predictions relate to that guess.
 
-- nr_accuracy_by_step: the prior is fine at step 1 (few options) and collapses as the horizon grows.
-- prior_concentration: entropy of the predicted-position distribution across mazes. A low-entropy
-  prior predicts nearly the same cell every maze (a fixed template); reasoning should raise entropy
-  by tracking each maze individually.
-- cross_model_agreement: do different models' priors agree on the same cell more than their reasoned
-  predictions do? If so, reasoning individuates models (each simulates its own path).
-- reasoning_correction: when reasoning is right, did it rescue a wrong prior; when reasoning
-  is wrong, did it stay trapped on the prior's cell.
-
-Uses the no-reasoning scored/position dicts and reasoning dicts from common.py.
+Measures:
+- nr_accuracy_by_step: prior accuracy at step 1, and its decay over the horizon
+- prior_concentration: entropy of the predicted-position distribution across mazes, where a
+  low-entropy prior names nearly the same cell every maze
+- cross_model_agreement: whether priors agree on a cell more than reasoned predictions do
+- reasoning_correction: whether reasoning rescues a wrong prior, and whether a wrong
+  reasoned answer lands on the prior's cell
+- reasoned_consensus_vs_truth_vs_prior: whether the modal reasoned prediction tracks the
+  truth or the prior
+- nr_predicted_position_grid_by_step: where the prior lands on the grid
 
 Output: analysis/results/prior.json
 """
@@ -34,14 +33,12 @@ RES = {"metadata": C.metadata("prior")}
 
 
 def _acc(scored, step=None):
+    """Accuracy as a rounded float, or None."""
     v = C.acc(scored, None, step)[0]
     return round(v, 1) if v is not None else None
 
 
-# ============================================================
-# PRIOR ACCURACY DECAYS WITH HORIZON
-# ============================================================
-
+# Prior accuracy decays with horizon
 
 acc_step = {}
 for m in MODELS:
@@ -54,10 +51,7 @@ for m in MODELS:
 RES["nr_accuracy_by_step"] = acc_step
 
 
-# ============================================================
-# HOW FIXED IS THE PRIOR (position entropy)
-# ============================================================
-
+# Prior concentration (position entropy)
 
 def _step_position_entropy(pos_dict):
     """mean over steps of the entropy of predicted positions across mazes (None-safe)."""
@@ -86,10 +80,7 @@ for m in MODELS:
 RES["prior_concentration"] = conc
 
 
-# ============================================================
-# DOES REASONING INDIVIDUATE MODELS?
-# ============================================================
-
+# Cross-model agreement, prior vs reasoned
 
 def _cross_model_agreement(pos_dicts):
     """pairwise agreement on the predicted cell across models, on the shared 19-maze
@@ -127,10 +118,7 @@ RES["cross_model_agreement"] = {
 }
 
 
-# ============================================================
-# REASONING RESCUES VS GETS TRAPPED BY THE PRIOR
-# ============================================================
-
+# Reasoning rescues vs gets trapped by the prior
 
 correction = {}
 for m in MODELS:
@@ -160,14 +148,11 @@ for m in MODELS:
 RES["reasoning_correction"] = correction
 
 
-# ============================================================
-# DOES THE REASONED CONSENSUS TRACK TRUTH OR PRIOR?
-# ============================================================
+# Reasoned consensus against truth and prior
 # For each target, the modal reasoned prediction (self + all cross-predictors) at each (maze,step),
 # compared to the target's truth and to its no-reasoning prior, by step. The self-prediction is
 # first in the vote list and Counter.most_common preserves first-seen order, so a tied vote would
 # resolve in favour of self; tied cells are excluded from both counts and reported as n_tied.
-
 
 cons_track = {}
 for t in MODELS:
@@ -205,12 +190,9 @@ for t in MODELS:
 RES["reasoned_consensus_vs_truth_vs_prior"] = cons_track
 
 
-# ============================================================
-# NO-REASONING PREDICTED-POSITION GRID BY STEP
-# ============================================================
-# Where no-reasoning self-predictions land on the 5x5 grid, pooled across models, per step --
+# No-reasoning predicted-position grid by step
+# Where no-reasoning self-predictions land on the 5x5 grid, pooled across models, per step:
 # the spatial shape of the prior (concentration toward the centre / diagonal).
-
 
 grids = {}
 for step in range(1, 9):
@@ -225,10 +207,7 @@ for step in range(1, 9):
 RES["nr_predicted_position_grid_by_step"] = grids
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "prior.json"), "w") as f:
     json.dump(RES, f, indent=1)

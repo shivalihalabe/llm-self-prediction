@@ -1,33 +1,33 @@
 #!/usr/bin/env python3
 """
 Reasoning-trace analysis
-========================
+---
 
-Processes the reasoning field of each run-0 prediction, correlating trace features with
-correctness per model. Lexical markers are reported BOTH raw (absolute count per trace) and
-length-normalized (per 100 words), because raw counts track trace length: a model whose wrong
-traces are simply longer will show more of every marker. The per-100-word rate isolates whether
-a marker is genuinely enriched in wrong (vs correct) traces independent of length.
+Correlates features of each run-0 reasoning trace with whether the prediction was correct.
+Markers are reported both raw and per 100 words, since raw counts track trace length.
 
-Each trace is featurized once into a tidy per-trace frame (lexical counts, structural features,
-coordinate chronology, true-path prefix); every analysis below is an aggregation over that frame.
+Features:
+- lexical markers: first-person "I", "we", LLM-framing, hedging, reconsidering,
+  decisiveness, search mentions, determinism mentions, step-by-step markers
+- structural: length, word count, arrow density, digit/letter ratio, unique grid positions
+- chronology of the truth in wrong traces, lock-in point, trace-answer coherence
+- a self-against-cross depersonalization comparison
 
-Markers: first-person "I", "we", LLM-framing, hedging, reconsidering, decisiveness, search
-mentions, determinism mentions, step-by-step markers. Structural features (length, word count,
-arrow density, digit/letter ratio, unique grid positions referenced) are reported as-is.
-Also: chronology of the truth in wrong traces, lock-in point, trace-answer coherence, and a
-self-vs-cross depersonalization comparison (both raw and normalized).
+Measures:
+- trace-path simulation: whether the trace walks the true trajectory, and whether accuracy
+  tracks raw trace length
+- direction language: which compass words traces use at the model's own atypical cells
+- words per branch decision: accuracy by tercile, with each tercile's mean branch count
 
-The reasoning field is a string, a list of {"text": ...} dicts, or None -- handled by
-trace_text().
-
-Not every cell has a trace; cells without one carry a valid parsed answer and are correctly
-excluded here (the model answered without reasoning). Three coverage patterns, quantified in
-trace_coverage: Opus and Sonnet never produce a trace at step 1, in self-prediction or in any
-cross cell, so their trace-based figures begin at step 2. GLM and Qwen always reason. GPT
-skips sporadically at every step, and its skipping is target-dependent rather than random
-(33 of its 776 predictions of Opus carry a trace against 546 of its 592 predictions of
-Sonnet; see trace_coverage.cross_per_cell).
+Trace coverage:
+- the reasoning field is a string, a list of {"text": ...} dicts, or None, and trace_text()
+  flattens all three
+- cells without a trace carry a valid parsed answer and are excluded, since the model
+  answered without reasoning
+- Opus and Sonnet never reason at step 1, so their trace figures begin at step 2
+- GLM and Qwen always reason
+- GPT skips at every step, and target-dependently: 33 of its 776 predictions of Opus carry a
+  trace, against 546 of its 592 predictions of Sonnet
 
 Output: analysis/results/traces.json
 """
@@ -64,6 +64,7 @@ STRUCT = ["len", "word_count", "arrow_per_1000c", "digit_letter_ratio", "unique_
 
 
 def trace_text(rec):
+    """Flatten the reasoning field to a single string."""
     r = rec.get("reasoning")
     if r is None:
         return ""
@@ -98,6 +99,7 @@ def longest_true_prefix(coords, true_path):
 
 
 def _mean(vals):
+    """Mean rounded to 2 dp, or None if empty."""
     vals = list(vals)
     return round(st.mean(vals), 2) if vals else None
 
@@ -106,12 +108,10 @@ def _rate_per_100w(count, words):
     return (100.0 * count / words) if words else 0.0
 
 
-# ============================================================
-# FEATURIZE THE RUN-0 SELF TRACES
-# ============================================================
-
+# Featurize the run-0 self traces
 
 def _featurize(m, mz, s, rec):
+    """Lexical, structural and chronology features for one trace."""
     text = trace_text(rec)
     if not text.strip():
         return {"model": m, "maze": mz, "step": s, "is_empty": True}
@@ -179,10 +179,7 @@ for _col in ("is_empty", "valid", "correct", "coherent", "hedges"):
     TRACES[_col] = TRACES[_col].fillna(False).astype(bool)
 
 
-# ============================================================
-# PER-MODEL: FEATURES BY CORRECTNESS
-# ============================================================
-
+# Per-model: features by correctness
 
 by_model = {}
 for m in MODELS:
@@ -211,12 +208,10 @@ for m in MODELS:
 RES["self_traces"] = by_model
 
 
-# ============================================================
-# SELF VS CROSS: DEPERSONALIZATION (raw + normalized)
-# ============================================================
-
+# Self vs cross: depersonalization (raw + normalized)
 
 def _collect(record_iter):
+    """First-person and LLM-framing counts, raw and per 100 words, over a record iterator."""
     I_raw, I_rate, llm_raw, llm_rate, n = [], [], [], [], 0
     for mz, s, ri, rec in record_iter:
         if ri != 0:
@@ -264,12 +259,9 @@ for p in MODELS:
 RES["self_vs_cross_depersonalization"] = selfcross
 
 
-# ============================================================
-# TRACE-PATH SIMULATION + LENGTH DOSE-RESPONSE
-# ============================================================
-# Does the trace actually walk the true trajectory (reason-like-you-navigate), and does accuracy
+# Trace-path simulation + length dose-response
+# Does the trace walk the true trajectory, and does accuracy
 # depend on how long the model reasons?
-
 
 sim, lenacc = {}, {}
 for m in MODELS:
@@ -278,7 +270,7 @@ for m in MODELS:
         "true_path_tracked_correct": _mean(sub[sub.correct].prefix_frac),
         "true_path_tracked_wrong": _mean(sub[~sub.correct].prefix_frac),
     }
-    # sort on the predictor value only, tie-broken by (maze, step) -- never by the outcome
+    # sort on the predictor value only, tie-broken by (maze, step), never by the outcome
     ld = (
         sub[["len", "correct", "maze", "step"]]
         .sort_values(["len", "maze", "step"], kind="stable")
@@ -303,10 +295,7 @@ RES["trace_path_simulation"] = sim
 RES["length_accuracy"] = lenacc
 
 
-# ============================================================
-# TRACE FEATURES BY STEP (horizon-resolved)
-# ============================================================
-
+# Trace features by step (horizon-resolved)
 
 features_by_step = {}
 for m in MODELS:
@@ -332,11 +321,8 @@ for m in MODELS:
 RES["features_by_step"] = features_by_step
 
 
-# ============================================================
-# IS HEDGING A USABLE CONFIDENCE SIGNAL?
-# ============================================================
+# Hedging as a confidence signal
 # Within each model, split run-0 traces by whether they contain any hedging word; compare accuracy.
-
 
 hedging_cal = {}
 for m in MODELS:
@@ -351,12 +337,9 @@ for m in MODELS:
 RES["hedging_calibration"] = hedging_cal
 
 
-# ============================================================
-# DIRECTION LANGUAGE AT ATYPICAL CELLS
-# ============================================================
-# Which compass words a model's reasoning uses on its own atypical cells -- a lexical view of the
+# Direction language at atypical cells
+# Which compass words a model's reasoning uses on its own atypical cells: a lexical view of the
 # self-model (e.g. a model whose atypical moves are southward while its traces talk about "east").
-
 
 _DIRWORDS = {d: re.compile(rf"\b{d}\b", re.I) for d in ("north", "south", "east", "west")}
 dirlang = {}
@@ -382,9 +365,7 @@ for m in MODELS:
 RES["atypical_cell_direction_language"] = dirlang
 
 
-# ============================================================
-# WORDS PER BRANCH POINT VS ACCURACY
-# ============================================================
+# Words per branch point vs accuracy
 # Reasoning length normalised by difficulty: words in the trace divided by the number of genuine
 # branch decisions in the predicted path (cells with >=1 branch). Terciles replace the raw
 # character-length split, whose gradient is a difficulty confound.
@@ -407,7 +388,7 @@ for m in MODELS:
             continue
         okv = tuple(rec["parsed_position"]) == tuple(C.TRUTH[m][mz][s])
         rows.append((len(txt.split()) / nb, okv, nb, mz, s))
-    # sort on the predictor value only, tie-broken by (maze, step) -- never by the outcome
+    # sort on the predictor value only, tie-broken by (maze, step), never by the outcome
     rows.sort(key=lambda x: (x[0], x[3], x[4]))
     n = len(rows)
     terc = {}
@@ -429,12 +410,9 @@ for m in MODELS:
 RES["words_per_branch_terciles"] = wpb
 
 
-# ============================================================
-# TRACE COVERAGE (WHEN EACH MODEL PRODUCES A TRACE)
-# ============================================================
+# Trace coverage (when each model produces a trace)
 # Run-0 parsed records only. self_per_step counts traced/total per step; cross_per_cell counts
 # traced/total per predictor->target cell, where GPT's target-dependent skipping shows up.
-
 
 def _has_trace(rec):
     return bool(trace_text(rec).strip())
@@ -473,10 +451,7 @@ for p2 in MODELS:
 RES["trace_coverage"] = coverage
 
 
-# ============================================================
-# WRITE
-# ============================================================
-
+# Write
 
 with open(os.path.join(OUT, "traces.json"), "w") as f:
     json.dump(RES, f, indent=1)

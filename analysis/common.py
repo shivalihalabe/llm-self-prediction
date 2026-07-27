@@ -1,29 +1,26 @@
 #!/usr/bin/env python3
 """
-Shared foundation for all maze self-prediction analyses
-=======================================================
+Shared scoring contract and record table
+---
 
-Locks the scoring contract in one place. Everything downstream reads the tidy record
-table (RECORDS) and the derived views built here, so "correct", "predicted position",
-and "which mazes" mean the same thing in every script.
+Loads every prediction and navigation file once and exposes the scored records plus the
+derived views the analysis scripts read. Paths resolve relative to this file, so scripts can
+be run from anywhere.
 
-Scoring contract
------------------
-- run_idx == 0 records only (runs 1, 2 are reserved for the noise-floor analysis).
-- per-step EXACT position match against the target's run-0 navigation trajectory.
-- unparsed records (parsed_position is None) are skipped.
-- maze-set treatments: native (target's consistent set), 5-way intersection, pairwise.
+Scoring contract:
+- run_idx == 0 records only; runs 1 and 2 are reserved for the noise-floor analysis
+- per-step exact position match against the target's run-0 navigation trajectory
+- unparsed records, where parsed_position is None, are skipped
+- maze-set treatments: native (the target's consistent set), 5-way intersection, pairwise
 
-Core objects
-------------
-RECORDS : tidy DataFrame, one row per scored run-0 prediction
-          [kind, predictor, target, maze, step, pred, truth, correct]
-SELF[m], SELF_NR[m], CROSS[(p, t)]  -> {(maze, step): correct}
-SELF_POS / CROSS_POS / ...          -> {(maze, step): [r, c]}
-CONSISTENT[m], INTERSECTION, PAIRWISE[(a, b)], MAZE_DIFFICULTY, DIFFICULTY_STRATA
-TRUTH[m][maze] -> trajectory; WALLS[maze] -> set of blocked frozensets
-
-Paths are resolved relative to this file, so scripts can be run from anywhere.
+Core objects:
+- RECORDS: one row per scored run-0 prediction, with columns kind, predictor, target, maze,
+  step, pred, truth, correct
+- SELF[m], SELF_NR[m], CROSS[(p, t)]: {(maze, step): correct}
+- SELF_POS[m], SELF_NR_POS[m], CROSS_POS[(p, t)]: {(maze, step): [row, col]}
+- CONSISTENT[m], INTERSECTION, PAIRWISE[(a, b)], MAZE_DIFFICULTY, DIFFICULTY_STRATA
+- TRUTH[m][maze]: the run-0 trajectory
+- WALLS[maze]: the blocked cell pairs
 """
 
 import collections
@@ -42,12 +39,10 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(_HERE, "..", "data")  # analysis/ sits at the repo root next to data/
 
 
-# ============================================================
-# NAVIGATION GROUND TRUTH
-# ============================================================
-
+# Navigation ground truth
 
 def _nav(model):
+    """Parsed navigation file for a model."""
     return json.load(open(os.path.join(DATA, "navigation", f"{model}_navigation.json")))
 
 
@@ -68,10 +63,7 @@ for _m in MODELS[1:]:
 del _w
 
 
-# ============================================================
-# BUILD THE TIDY RECORD TABLE
-# ============================================================
-
+# Build the record table
 
 def _iter_scored(node, target):
     """Yield (maze, step, pred_tuple, correct) for run-0 parsed records under a prediction node."""
@@ -91,10 +83,12 @@ def _iter_scored(node, target):
 
 
 def _load_predictions(path):
+    """The predictions block of a prediction file."""
     return json.load(open(path))["predictions"]
 
 
 def _records():
+    """Build the record rows for the self, no-reasoning and cross cells."""
     rows = []
     for m in MODELS:
         for mode, kind in [("reasoning", "self"), ("noreasoning", "self_nr")]:
@@ -121,12 +115,10 @@ def _records():
 RECORDS = _records()
 
 
-# ============================================================
-# DICT VIEWS
-# ============================================================
-
+# Dict views
 
 def _as_dicts(frame):
+    """Split a record frame into (correct-by-cell, predicted-position-by-cell)."""
     scored = {(mz, s): bool(c) for mz, s, c in zip(frame.maze, frame.step, frame.correct)}
     pos = {(mz, s): list(p) for mz, s, p in zip(frame.maze, frame.step, frame.pred)}
     return scored, pos
@@ -153,10 +145,7 @@ for _row in (
     CROSS[(_row.predictor, _row.target)], CROSS_POS[(_row.predictor, _row.target)] = _as_dicts(_sub)
 
 
-# ============================================================
-# MAZE SETS
-# ============================================================
-
+# Maze sets
 
 CONSISTENT = {
     m: set(RECORDS[(RECORDS.kind == "self") & (RECORDS.target == m)].maze.unique()) for m in MODELS
@@ -185,10 +174,7 @@ MAZE_DIFFICULTY = {mz: sum(mz in CONSISTENT[m] for m in MODELS) for mz in _ALL}
 DIFFICULTY_STRATA = {k: {mz for mz, c in MAZE_DIFFICULTY.items() if c == k} for k in range(1, 6)}
 
 
-# ============================================================
-# ACCURACY
-# ============================================================
-
+# Accuracy
 
 def acc(scored, mazeset=None, step=None):
     """(% correct, n) over a scored dict, optionally restricted to a maze set and/or step."""
@@ -243,16 +229,14 @@ def accuracy_matrix(kinds=("self", "cross"), mazeset=None):
     return tab.unstack("target").reindex(index=MODELS, columns=MODELS)
 
 
-# ============================================================
-# MAZE GEOMETRY
-# ============================================================
-
+# Maze geometry
 
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def neighbors(pos):
+    """In-bounds grid neighbours of pos, ignoring walls."""
     r, c = pos
     return [
         (nr, nc)
@@ -275,7 +259,7 @@ def bfs_dist(maze_id):
 
 
 def reachable_shortest(maze_id, n):
-    """Cells whose shortest-path distance from (0,0) is exactly n."""
+    """Cells whose shortest-path distance from (0,0) is n."""
     return {c for c, d in bfs_dist(maze_id).items() if d == n}
 
 
@@ -316,7 +300,7 @@ def direction(a, b):
 
 
 def chose_first_unvisited(target, maze, step):
-    """True if the actual move was the alphabetically-first UNVISITED legal direction.
+    """True if the actual move was the alphabetically-first unvisited legal direction.
 
     The canonical predicate defining the default/atypical split: across 3,578 opportunities
     no model ever took a visited direction when an unvisited one was available, so the
@@ -332,10 +316,7 @@ def chose_first_unvisited(target, maze, step):
     return direction(pos, traj[step]) == unv[0]
 
 
-# ============================================================
-# STATISTICS
-# ============================================================
-
+# Statistics
 
 def entropy(counter):
     """Shannon entropy in bits of a Counter/dict of counts (None if empty)."""
@@ -390,10 +371,7 @@ def fmt_p(p):
     return "<1e-6" if r == 0.0 else r
 
 
-# ============================================================
-# RAW RECORD ACCESS
-# ============================================================
-
+# Raw record access
 
 def self_records(model, mode="reasoning"):
     """yield (maze, step, run_idx, record) for a model's self cell."""
