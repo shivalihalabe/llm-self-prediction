@@ -153,7 +153,7 @@ RES["asymmetry_vs_predictability"] = {
 # CROSS-ACCURACY TRACKS TARGET SELF-ACCURACY
 # ============================================================
 
-xs, ys, dump = [], [], []
+xs, ys = [], []
 for p in MODELS:
     for t in MODELS:
         if t == p or (p, t) not in C.CROSS:

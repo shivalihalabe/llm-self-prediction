@@ -34,7 +34,6 @@ Output: data/navigation/{MODEL}_navigation.json
 
 import os
 import random
-import re
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed

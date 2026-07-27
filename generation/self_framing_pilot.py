@@ -146,7 +146,6 @@ if not api_key:
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
 def call(model, sys_p, user_msg, ctx=""):
-    last = None
     for a in range(MAX_API_RETRIES):
         try:
             resp = client.chat.completions.create(model=MODEL_IDS[model],
@@ -166,7 +165,7 @@ def call(model, sys_p, user_msg, ctx=""):
                 raise ValueError("unparsed answer")
             return {"raw_response": content, "parsed_position": pos}
         except Exception as e:
-            last = e; print(f"    {ctx} {a+1}/{MAX_API_RETRIES}: {str(e)[:120]}")
+            print(f"    {ctx} {a+1}/{MAX_API_RETRIES}: {str(e)[:120]}")
             if a < MAX_API_RETRIES - 1:
                 time.sleep(min(60, 5 * (a + 1)))
     return None  # all attempts exhausted; omit (not recorded)
