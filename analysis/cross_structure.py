@@ -125,6 +125,34 @@ RES["per_target_structure"] = struct
 
 
 # ============================================================
+# PER-TARGET PREDICTOR RANGES (LEAVE-ONE-OUT)
+# ============================================================
+# For each target, the spread of the five predictor accuracies and the spread recomputed with
+# each predictor removed in turn, so the predictor accounting for a wide row is identified by
+# the data rather than assumed.
+
+
+ranges = {}
+for t in MODELS:
+    accs = {
+        (t if nm == "self" else nm): v for nm, v in struct[t]["per_predictor_acc"].items()
+    }
+    ranges[t] = {
+        "all_predictors": accs,
+        "range_all": round(max(accs.values()) - min(accs.values()), 1),
+        "range_without": {
+            m: round(
+                max(v for nm, v in accs.items() if nm != m)
+                - min(v for nm, v in accs.items() if nm != m),
+                1,
+            )
+            for m in accs
+        },
+    }
+RES["per_target_predictor_ranges"] = ranges
+
+
+# ============================================================
 # ASYMMETRY TRACKS PREDICTABILITY
 # ============================================================
 # For each unordered pair, (A->B minus B->A) should track (predictability_B minus

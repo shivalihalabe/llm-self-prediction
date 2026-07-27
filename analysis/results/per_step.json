@@ -769,6 +769,262 @@
    "n_consecutive_pairs": 630
   }
  },
+ "transition_legality": {
+  "per_model": {
+   "opus": {
+    "pct_legal": 86.9,
+    "n_pairs": 776,
+    "pct_legal_wrong_pairs": 71.6,
+    "n_wrong_pairs": 359,
+    "pct_legal_correct_pairs": 100.0,
+    "pct_legal_by_step": [
+     100.0,
+     100.0,
+     95.9,
+     92.8,
+     83.5,
+     82.5,
+     73.2,
+     67.0
+    ],
+    "null_pct": 49.4,
+    "null_pct_by_step": [
+     100.0,
+     89.4,
+     58.3,
+     44.9,
+     32.6,
+     26.6,
+     22.7,
+     20.7
+    ]
+   },
+   "sonnet": {
+    "pct_legal": 97.8,
+    "n_pairs": 592,
+    "pct_legal_wrong_pairs": 96.6,
+    "n_wrong_pairs": 384,
+    "pct_legal_correct_pairs": 100.0,
+    "pct_legal_by_step": [
+     100.0,
+     98.6,
+     100.0,
+     98.6,
+     94.6,
+     98.6,
+     97.3,
+     94.6
+    ],
+    "null_pct": 50.1,
+    "null_pct_by_step": [
+     100.0,
+     89.4,
+     58.3,
+     44.9,
+     32.6,
+     26.6,
+     22.7,
+     20.7
+    ]
+   },
+   "gpt": {
+    "pct_legal": 99.5,
+    "n_pairs": 424,
+    "pct_legal_wrong_pairs": 96.1,
+    "n_wrong_pairs": 51,
+    "pct_legal_correct_pairs": 100.0,
+    "pct_legal_by_step": [
+     100.0,
+     100.0,
+     100.0,
+     100.0,
+     100.0,
+     100.0,
+     98.1,
+     98.1
+    ],
+    "null_pct": 49.8,
+    "null_pct_by_step": [
+     100.0,
+     89.4,
+     58.3,
+     44.9,
+     32.6,
+     26.6,
+     22.7,
+     20.7
+    ]
+   },
+   "glm": {
+    "pct_legal": 96.9,
+    "n_pairs": 416,
+    "pct_legal_wrong_pairs": 93.3,
+    "n_wrong_pairs": 195,
+    "pct_legal_correct_pairs": 100.0,
+    "pct_legal_by_step": [
+     100.0,
+     100.0,
+     100.0,
+     98.1,
+     98.1,
+     94.2,
+     94.2,
+     90.4
+    ],
+    "null_pct": 49.8,
+    "null_pct_by_step": [
+     100.0,
+     89.4,
+     58.3,
+     44.9,
+     32.6,
+     26.6,
+     22.7,
+     20.7
+    ]
+   },
+   "qwen": {
+    "pct_legal": 95.6,
+    "n_pairs": 720,
+    "pct_legal_wrong_pairs": 50.0,
+    "n_wrong_pairs": 64,
+    "pct_legal_correct_pairs": 100.0,
+    "pct_legal_by_step": [
+     100.0,
+     100.0,
+     98.9,
+     98.9,
+     95.6,
+     94.4,
+     87.8,
+     88.9
+    ],
+    "null_pct": 49.4,
+    "null_pct_by_step": [
+     100.0,
+     89.4,
+     58.3,
+     44.9,
+     32.6,
+     26.6,
+     22.7,
+     20.7
+    ]
+   }
+  },
+  "legality_matrix": {
+   "opus": {
+    "opus": {
+     "pct_legal": 86.9,
+     "n_pairs": 776
+    },
+    "sonnet": {
+     "pct_legal": 86.1,
+     "n_pairs": 592
+    },
+    "gpt": {
+     "pct_legal": 86.1,
+     "n_pairs": 424
+    },
+    "glm": {
+     "pct_legal": 86.1,
+     "n_pairs": 416
+    },
+    "qwen": {
+     "pct_legal": 86.7,
+     "n_pairs": 720
+    }
+   },
+   "sonnet": {
+    "opus": {
+     "pct_legal": 92.5,
+     "n_pairs": 776
+    },
+    "sonnet": {
+     "pct_legal": 97.8,
+     "n_pairs": 592
+    },
+    "gpt": {
+     "pct_legal": 97.2,
+     "n_pairs": 424
+    },
+    "glm": {
+     "pct_legal": 95.0,
+     "n_pairs": 416
+    },
+    "qwen": {
+     "pct_legal": 96.0,
+     "n_pairs": 720
+    }
+   },
+   "gpt": {
+    "opus": {
+     "pct_legal": 98.3,
+     "n_pairs": 776
+    },
+    "sonnet": {
+     "pct_legal": 99.2,
+     "n_pairs": 592
+    },
+    "gpt": {
+     "pct_legal": 99.5,
+     "n_pairs": 424
+    },
+    "glm": {
+     "pct_legal": 99.5,
+     "n_pairs": 416
+    },
+    "qwen": {
+     "pct_legal": 98.9,
+     "n_pairs": 720
+    }
+   },
+   "glm": {
+    "opus": {
+     "pct_legal": 86.7,
+     "n_pairs": 776
+    },
+    "sonnet": {
+     "pct_legal": 87.2,
+     "n_pairs": 592
+    },
+    "gpt": {
+     "pct_legal": 95.3,
+     "n_pairs": 424
+    },
+    "glm": {
+     "pct_legal": 96.9,
+     "n_pairs": 416
+    },
+    "qwen": {
+     "pct_legal": 97.8,
+     "n_pairs": 720
+    }
+   },
+   "qwen": {
+    "opus": {
+     "pct_legal": 92.8,
+     "n_pairs": 776
+    },
+    "sonnet": {
+     "pct_legal": 93.2,
+     "n_pairs": 592
+    },
+    "gpt": {
+     "pct_legal": 92.5,
+     "n_pairs": 424
+    },
+    "glm": {
+     "pct_legal": 95.9,
+     "n_pairs": 416
+    },
+    "qwen": {
+     "pct_legal": 95.6,
+     "n_pairs": 720
+    }
+   }
+  }
+ },
  "predictability_horizon": {
   "opus": {
    "first_step_below_50pct": 4,

@@ -152,6 +152,97 @@ RES["error_propagation"] = {m: _propagation(m) for m in MODELS}
 
 
 # ============================================================
+# TRANSITION LEGALITY (ROUTE CONTINUITY)
+# ============================================================
+# Do consecutive predicted positions chain into a legal walk? For each maze the sequence is
+# (0,0) followed by the parsed run-0 predictions for steps 1-8; a pair is legal iff the two
+# cells are Manhattan-adjacent with no wall between them. The null for the pair spanning
+# steps k and k+1 is exact: with R_k the cells reachable from (0,0) by a walk of exactly k
+# moves, the fraction of ordered pairs in R_k x R_{k+1} that are legal, averaged over mazes
+# and then over pairs.
+
+
+def _pair_legal(mz, a, b):
+    return C.manhattan(a, b) == 1 and frozenset([a, b]) not in C.WALLS[mz]
+
+
+def _legality(pos_dict, target):
+    truth = C.TRUTH[target]
+    n_pairs = n_legal = 0
+    n_wrong = n_wrong_legal = n_corr = n_corr_legal = 0
+    by_step = [[0, 0] for _ in range(8)]  # per consecutive-step pair (k -> k+1)
+    for mz in sorted(C.CONSISTENT[target]):
+        seq = {0: (0, 0)}
+        for s in range(1, 9):
+            if (mz, s) in pos_dict:
+                seq[s] = tuple(pos_dict[(mz, s)])
+        for k in range(8):
+            if k not in seq or (k + 1) not in seq:
+                continue
+            a, b = seq[k], seq[k + 1]
+            legal = _pair_legal(mz, a, b)
+            n_pairs += 1
+            n_legal += legal
+            by_step[k][0] += legal
+            by_step[k][1] += 1
+            ok_a = a == tuple(truth[mz][k])
+            ok_b = (k + 1) < len(truth[mz]) and b == tuple(truth[mz][k + 1])
+            if ok_a and ok_b:
+                n_corr += 1
+                n_corr_legal += legal
+            else:
+                n_wrong += 1
+                n_wrong_legal += legal
+    return {
+        "pct_legal": C.pct(n_legal, n_pairs),
+        "n_pairs": n_pairs,
+        "pct_legal_wrong_pairs": C.pct(n_wrong_legal, n_wrong),
+        "n_wrong_pairs": n_wrong,
+        "pct_legal_correct_pairs": C.pct(n_corr_legal, n_corr),
+        "pct_legal_by_step": [C.pct(a2, b2) if b2 else None for a2, b2 in by_step],
+    }
+
+
+def _null_by_step(mazeset):
+    per_step = []
+    for k in range(8):
+        fracs = []
+        for mz in sorted(mazeset):
+            r_k = C.reachable_exactly(mz, k)
+            r_k1 = C.reachable_exactly(mz, k + 1)
+            legal = sum(_pair_legal(mz, a, b) for a in r_k for b in r_k1)
+            fracs.append(legal / (len(r_k) * len(r_k1)))
+        per_step.append(100.0 * sum(fracs) / len(fracs))
+    return per_step
+
+
+legality = {"per_model": {}, "legality_matrix": {}}
+# The scalar null averages over the model's own consistent set, like every accuracy in the
+# repo; the by-step vector is over all 100 mazes, where it is a pure property of the maze
+# set and identical for every model.
+null_steps_all = _null_by_step(C.WALLS)
+for m in MODELS:
+    null_steps_own = _null_by_step(C.CONSISTENT[m])
+    legality["per_model"][m] = {
+        **_legality(C.SELF_POS[m], m),
+        "null_pct": round(sum(null_steps_own) / len(null_steps_own), 1),
+        "null_pct_by_step": [round(v, 1) for v in null_steps_all],
+    }
+for p2 in MODELS:
+    legality["legality_matrix"][p2] = {}
+    for t2 in MODELS:
+        pos = C.SELF_POS[t2] if p2 == t2 else C.CROSS_POS.get((p2, t2))
+        if pos is None:
+            continue
+        stats = _legality(pos, t2)
+        legality["legality_matrix"][p2][t2] = {
+            "pct_legal": stats["pct_legal"],
+            "n_pairs": stats["n_pairs"],
+        }
+RES["transition_legality"] = legality
+
+
+# ============================================================
 # PREDICTABILITY HORIZON (first step below 50%)
 # ============================================================
 
