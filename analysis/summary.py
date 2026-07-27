@@ -251,7 +251,10 @@ if __name__ == "__main__":
     print("\n10) Self vs other-prediction skill (raw, and joint-fit predictor effects):")
     for m in MODELS:
         d = H["self_vs_other_prediction_dissociation"].get(m, {})
-        print(f"   {m:7} self {d.get('self_acc')}  raw-other {d.get('skill_predicting_others')}")
+        print(
+            f"   {m:7} self {d.get('self_acc')}  "
+            f"raw-other {d.get('mean_acc_predicting_others')}"
+        )
     pe = H.get("predictor_effects") or {}
     print(f"   joint-fit predictor effects: {pe}")
 

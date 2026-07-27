@@ -346,6 +346,12 @@ RES["developer_affinity"] = {
 # (Opus vs Sonnet differ sharply.)
 
 
+# self_advantage_adjusted subtracts the joint-fit prediction of what predictor m would score
+# on its own cells (mu + a[m] + b[m]), removing both the model's simulator skill and its own
+# predictability; predictability_adjusted is the fit's target margin (mu + b[m]), free of the
+# which-four-predictors composition that skews the raw target mean. Both are point estimates
+# from a twenty-cell fit with no uncertainty attached; the inferential weight for
+# self-advantage stays with the clustered paired tests in stats.py.
 dissociation = {}
 for m in MODELS:
     self_acc = C.acc(C.SELF[m])[0]
@@ -355,11 +361,10 @@ for m in MODELS:
     as_target = [v for v in as_target if v is not None]
     dissociation[m] = {
         "self_acc": round(self_acc, 1),
-        "skill_predicting_others": round(st.mean(as_predictor), 1) if as_predictor else None,
+        "mean_acc_predicting_others": round(st.mean(as_predictor), 1) if as_predictor else None,
         "predictability_by_others": round(st.mean(as_target), 1) if as_target else None,
-        "self_minus_other_skill": (
-            round(self_acc - st.mean(as_predictor), 1) if as_predictor else None
-        ),
+        "predictability_adjusted": round(mu + targ_effect[m], 1),
+        "self_advantage_adjusted": round(self_acc - (mu + pred_effect[m] + targ_effect[m]), 1),
     }
 RES["self_vs_other_prediction_dissociation"] = dissociation
 

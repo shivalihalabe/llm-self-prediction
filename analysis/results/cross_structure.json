@@ -402,33 +402,38 @@
  "self_vs_other_prediction_dissociation": {
   "opus": {
    "self_acc": 58.9,
-   "skill_predicting_others": 54.7,
+   "mean_acc_predicting_others": 54.7,
    "predictability_by_others": 54.7,
-   "self_minus_other_skill": 4.2
+   "predictability_adjusted": 51.7,
+   "self_advantage_adjusted": 19.1
   },
   "sonnet": {
    "self_acc": 37.0,
-   "skill_predicting_others": 72.3,
+   "mean_acc_predicting_others": 72.3,
    "predictability_by_others": 39.5,
-   "self_minus_other_skill": -35.3
+   "predictability_adjusted": 40.2,
+   "self_advantage_adjusted": -6.1
   },
   "gpt": {
    "self_acc": 88.9,
-   "skill_predicting_others": 61.5,
+   "mean_acc_predicting_others": 61.5,
    "predictability_by_others": 81.5,
-   "self_minus_other_skill": 27.4
+   "predictability_adjusted": 82.1,
+   "self_advantage_adjusted": 4.3
   },
   "glm": {
    "self_acc": 56.0,
-   "skill_predicting_others": 69.6,
+   "mean_acc_predicting_others": 69.6,
    "predictability_by_others": 53.1,
-   "self_minus_other_skill": -13.6
+   "predictability_adjusted": 54.0,
+   "self_advantage_adjusted": -1.5
   },
   "qwen": {
    "self_acc": 93.9,
-   "skill_predicting_others": 60.2,
+   "mean_acc_predicting_others": 60.2,
    "predictability_by_others": 89.4,
-   "self_minus_other_skill": 33.7
+   "predictability_adjusted": 90.2,
+   "self_advantage_adjusted": 0.6
   }
  },
  "self_projection": {
