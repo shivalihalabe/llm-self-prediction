@@ -360,15 +360,16 @@ def perm_corr_p(xs, ys, n_perm=10000, seed=20260609):
     return round(float(res.pvalue), 6)
 
 
-def fmt_p(p):
-    """Emission format for p-values: 6 decimals; a Monte Carlo zero (10,000 draws) is
-    reported as "<0.0001"; a positive value that underflows 6 decimals as "<1e-6"."""
+def fmt_p(p, n_draws):
+    """Emission format for a p-value estimated from n_draws permutation draws.
+
+    Such a test cannot resolve below one draw in n_draws, so 1/n_draws is the floor and a
+    returned zero means only that no draw reached the observed statistic. Flooring rather
+    than reporting the zero keeps every emitted p-value an upper bound on the true one.
+    """
     if p is None:
         return None
-    if p == 0.0:
-        return "<0.0001"
-    r = round(float(p), 6)
-    return "<1e-6" if r == 0.0 else r
+    return round(max(float(p), 1.0 / n_draws), 6)
 
 
 # Raw record access

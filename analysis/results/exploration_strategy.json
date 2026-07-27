@@ -813,7 +813,7 @@
     "pct": 96.2,
     "expected_on_firstlisted_null": 13.0,
     "expected_pct_null": 50.0,
-    "perm_p": "<0.0001"
+    "perm_p": 0.0001
    },
    "atypical_cells_by_option_count": {
     "two_options": 144,

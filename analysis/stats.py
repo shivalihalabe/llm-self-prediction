@@ -79,14 +79,20 @@ def _sign_flip_p(pairs):
     return float((np.abs(signs @ d) >= observed).mean())
 
 
-def mcnemar(pairs):
-    """Discordant counts plus the maze-level sign-flip permutation p-value."""
+def sign_flip_test(pairs):
+    """Discordance counts (b/c) for a paired comparison, with a maze-level sign-flip
+    permutation p-value."""
     b = sum(1 for _, x, y in pairs if x and not y)  # self right, other wrong
     c = sum(1 for _, x, y in pairs if y and not x)  # self wrong, other right
     n = b + c
     if n == 0:
         return {"b": b, "c": c, "n_discordant": 0, "p_value_cluster_perm": 1.0}
-    return {"b": b, "c": c, "n_discordant": n, "p_value_cluster_perm": C.fmt_p(_sign_flip_p(pairs))}
+    return {
+        "b": b,
+        "c": c,
+        "n_discordant": n,
+        "p_value_cluster_perm": C.fmt_p(_sign_flip_p(pairs), N_PERM),
+    }
 
 
 def boot_gap_ci(pairs):
@@ -122,7 +128,7 @@ def boot_gap_ci(pairs):
 best_other_model = C.best_other_model  # defined once in common.py
 
 
-# Self vs best-other: paired test + CI
+# Self vs best-other: sign-flip permutation + cluster bootstrap CI
 
 sib = {}
 for t in MODELS:
@@ -135,8 +141,8 @@ for t in MODELS:
     )
     sib[t] = {
         "best_other": bo,
-        "overall": {**boot_gap_ci(pairs), **mcnemar(pairs)},
-        "branch_only": {**boot_gap_ci(branch_pairs), **mcnemar(branch_pairs)},
+        "overall": {**boot_gap_ci(pairs), **sign_flip_test(pairs)},
+        "branch_only": {**boot_gap_ci(branch_pairs), **sign_flip_test(branch_pairs)},
     }
 RES["self_vs_best_other_paired"] = sib
 
@@ -326,7 +332,9 @@ for t in MODELS:
 RES["self_by_move_type_reasoning_vs_nr"] = by_move_type
 
 
-# Per-step McNemar with Holm correction (fixed and rotating opponent)
+# Per-step paired comparison with Holm correction (fixed and rotating opponent)
+# One cell per maze here, so the maze-level sign flip is a sign test on the discordant pairs,
+# which is McNemar's exact test evaluated by Monte Carlo rather than by the binomial.
 # Two versions of "is any single step significant after multiple testing": against the fixed
 # best-overall opponent, and against the per-step rotating best opponent (harsher). One cell
 # per maze at each step, so the maze-level sign-flip is the plain sign-flip here.
@@ -337,7 +345,7 @@ def _holm(raw):
     out, running = {}, 0.0
     for rank_i, k in enumerate(order):
         running = max(running, min(1.0, (len(raw) - rank_i) * raw[k]))
-        out[k] = C.fmt_p(running)
+        out[k] = C.fmt_p(running, N_PERM)
     return out
 
 
@@ -369,15 +377,15 @@ for t in MODELS:
     per_step_holm[t] = {
         "fixed_opponent": {
             "opponent": bo,
-            "raw": {s: C.fmt_p(v) for s, v in fixed_raw.items()},
+            "raw": {s: C.fmt_p(v, N_PERM) for s, v in fixed_raw.items()},
             "holm": _holm(fixed_raw),
         },
         "rotating_opponent": {
-            "raw": {s: C.fmt_p(v) for s, v in rot_raw.items()},
+            "raw": {s: C.fmt_p(v, N_PERM) for s, v in rot_raw.items()},
             "holm": _holm(rot_raw),
         },
     }
-RES["per_step_mcnemar_holm"] = per_step_holm
+RES["per_step_paired_holm"] = per_step_holm
 
 
 # No-reasoning unique information
@@ -436,7 +444,7 @@ def _advantage(t, cells):
         self_sub = 100.0 * sum(x for _, x, _ in pairs) / len(pairs) if pairs else 0.0
         raw[p] = 100.0 * sum(y for _, _, y in pairs) / len(pairs) if pairs else 0.0
         raw_p[p] = _sign_flip_p(pairs)
-        mc = mcnemar(pairs)
+        mc = sign_flip_test(pairs)
         per_pred[p] = {
             "acc": round(raw[p], 1),
             "n_correct": sum(y for _, _, y in pairs),
@@ -489,7 +497,7 @@ for t in MODELS:
         C.SELF[t], C.CROSS[(bo, t)], restrict=lambda k, tt=t: not C.is_branch(tt, k[0], k[1])
     )
     ci = boot_gap_ci(pairs)
-    det[t] = {**ci, **mcnemar(pairs), "best_other": bo}
+    det[t] = {**ci, **sign_flip_test(pairs), "best_other": bo}
 RES["self_advantage_determined"] = det
 
 
@@ -585,7 +593,7 @@ for t in MODELS:
             continue
         pairs = [(k[0], unique["self"][k], unique[p][k]) for k in keys]
         raw_ps[p] = _sign_flip_p(pairs)
-        p_vs[p] = C.fmt_p(raw_ps[p])
+        p_vs[p] = C.fmt_p(raw_ps[p], N_PERM)
     cross_counts = {p: c for p, c in counts.items() if p != "self"}
     strongest = max(cross_counts, key=cross_counts.get)
     ci_lo, ci_hi = _boot_count_diff_ci(
@@ -595,7 +603,7 @@ for t in MODELS:
         "n_cells": len(keys),
         "unique_correct": {(t if nm == "self" else nm): counts[nm] for nm in preds},
         "p_vs_each_cross": p_vs,
-        "max_p": C.fmt_p(max(raw_ps.values())),
+        "max_p": C.fmt_p(max(raw_ps.values()), N_PERM),
         "strongest_other": strongest,
         "count_diff_vs_strongest": counts["self"] - counts[strongest],
         "ci_lo": ci_lo,
@@ -625,7 +633,7 @@ for t in MODELS:
         "acc_noreasoning": C.pct(n_nr, n),
         "n_correct_noreasoning": n_nr,
         "gap": round(100.0 * (n_r - n_nr) / n, 1) if n else None,
-        "p_value_cluster_perm": C.fmt_p(_sign_flip_p(pairs)) if n else None,
+        "p_value_cluster_perm": C.fmt_p(_sign_flip_p(pairs), N_PERM) if n else None,
     }
 RES["atypical_reasoning_dependence"] = reasoning_dep
 
@@ -662,7 +670,7 @@ for m in MODELS:
         for i in range(N_PERM):
             perm = rng.permutation(flags)
             diffs[i] = abs(perm[:n_a].mean() - perm[n_a:].mean())
-        p = C.fmt_p(float((diffs >= obs - 1e-12).mean()))
+        p = C.fmt_p(float((diffs >= obs - 1e-12).mean()), N_PERM)
     consistency_mt[m] = {
         "atypical_agree_pct": C.pct(sum(atyp_agree), n_a) if n_a else None,
         "n_atypical": n_a,

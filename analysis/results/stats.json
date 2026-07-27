@@ -129,7 +129,7 @@
     "b": 4,
     "c": 29,
     "n_discordant": 33,
-    "p_value_cluster_perm": "<0.0001"
+    "p_value_cluster_perm": 0.0001
    },
    "branch_only": {
     "gap": -2.5,
@@ -1135,7 +1135,7 @@
    }
   }
  },
- "per_step_mcnemar_holm": {
+ "per_step_paired_holm": {
   "opus": {
    "fixed_opponent": {
     "opponent": "qwen",
@@ -1410,7 +1410,7 @@
       "acc": 4.7,
       "n_correct": 9,
       "gap": 16.6,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 34,
       "n": 193
      },
@@ -1418,7 +1418,7 @@
       "acc": 3.1,
       "n_correct": 6,
       "gap": 18.1,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 35,
       "n": 193
      },
@@ -1434,7 +1434,7 @@
       "acc": 6.7,
       "n_correct": 13,
       "gap": 14.5,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 36,
       "n": 193
      }
@@ -1460,7 +1460,7 @@
       "acc": 24.5,
       "n_correct": 36,
       "gap": -22.4,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 35,
       "n": 147
      },
@@ -1493,7 +1493,7 @@
      "model": "opus",
      "acc": 24.5,
      "gap_vs_best_other": -22.4,
-     "p_value_cluster_perm": "<0.0001",
+     "p_value_cluster_perm": 0.0001,
      "n_discordant": 35
     },
     "mean_other": {
@@ -1652,7 +1652,7 @@
     }
    },
    "holm_adjusted_best_other": {
-    "sonnet": "<0.0001",
+    "sonnet": 0.0001,
     "gpt": 0.1552,
     "opus": 0.1552,
     "glm": 1.0,
@@ -1769,7 +1769,7 @@
       "acc": 55.8,
       "n_correct": 101,
       "gap": 32.6,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 75,
       "n": 181
      },
@@ -1869,7 +1869,7 @@
       "acc": 63.5,
       "n_correct": 198,
       "gap": 32.4,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 111,
       "n": 312
      },
@@ -1972,7 +1972,7 @@
    "b": 1,
    "c": 18,
    "n_discordant": 19,
-   "p_value_cluster_perm": "<0.0001",
+   "p_value_cluster_perm": 0.0001,
    "best_other": "gpt"
   }
  },
@@ -1987,7 +1987,7 @@
       "acc": 5.0,
       "n_correct": 4,
       "gap": 27.5,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 24,
       "n": 80
      },
@@ -1995,7 +1995,7 @@
       "acc": 1.2,
       "n_correct": 1,
       "gap": 31.2,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 25,
       "n": 80
      },
@@ -2011,7 +2011,7 @@
       "acc": 7.5,
       "n_correct": 6,
       "gap": 25.0,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 26,
       "n": 80
      }
@@ -2089,7 +2089,7 @@
       "acc": 36.1,
       "n_correct": 22,
       "gap": -31.1,
-      "p_value_cluster_perm": "<0.0001",
+      "p_value_cluster_perm": 0.0001,
       "n_discordant": 21,
       "n": 61
      },
@@ -2122,7 +2122,7 @@
      "model": "opus",
      "acc": 36.1,
      "gap_vs_best_other": -31.1,
-     "p_value_cluster_perm": "<0.0001",
+     "p_value_cluster_perm": 0.0001,
      "n_discordant": 21
     },
     "mean_other": {
@@ -2551,7 +2551,7 @@
      "acc": 61.2,
      "n_correct": 115,
      "gap": 33.0,
-     "p_value_cluster_perm": "<0.0001",
+     "p_value_cluster_perm": 0.0001,
      "n_discordant": 64,
      "n": 188
     },
@@ -2601,7 +2601,7 @@
      "acc": 52.6,
      "n_correct": 101,
      "gap": 13.0,
-     "p_value_cluster_perm": "<0.0001",
+     "p_value_cluster_perm": 0.0001,
      "n_discordant": 29,
      "n": 192
     },
@@ -2651,7 +2651,7 @@
      "acc": 70.6,
      "n_correct": 231,
      "gap": 23.5,
-     "p_value_cluster_perm": "<0.0001",
+     "p_value_cluster_perm": 0.0001,
      "n_discordant": 87,
      "n": 327
     },
@@ -2704,8 +2704,8 @@
     "qwen": 8
    },
    "p_vs_each_cross": {
-    "sonnet": "<0.0001",
-    "gpt": "<0.0001",
+    "sonnet": 0.0001,
+    "gpt": 0.0001,
     "glm": 0.0057,
     "qwen": 0.0001
    },
@@ -2725,7 +2725,7 @@
     "qwen": 2
    },
    "p_vs_each_cross": {
-    "opus": "<0.0001",
+    "opus": 0.0001,
     "gpt": 0.4996,
     "glm": 0.4508,
     "qwen": 1.0
@@ -2808,7 +2808,7 @@
    "acc_noreasoning": 3.1,
    "n_correct_noreasoning": 6,
    "gap": 18.1,
-   "p_value_cluster_perm": "<0.0001"
+   "p_value_cluster_perm": 0.0001
   },
   "sonnet": {
    "n": 147,

@@ -32,6 +32,7 @@ OUT = os.path.join(os.path.dirname(__file__), "results")
 os.makedirs(OUT, exist_ok=True)
 MODELS = C.MODELS
 RES = {"metadata": C.metadata("exploration_strategy")}
+N_PERM = 10000  # landing-test permutation draws
 
 direction = C.direction  # geometry/stat helpers are defined once in common.py
 pearson = C.pearson
@@ -319,9 +320,9 @@ for t in MODELS:
         expected = sum(1.0 / len(cand) for _, _, cand, _ in on_alt)
         observed = sum(pred == fl for pred, fl, _, _ in records)
         rng = np.random.default_rng(20260609)
-        draws = np.zeros(10000, dtype=int)
+        draws = np.zeros(N_PERM, dtype=int)
         for pred, _, cand, _ in on_alt:
-            draws += rng.integers(0, len(cand), 10000) == cand.index(pred)
+            draws += rng.integers(0, len(cand), N_PERM) == cand.index(pred)
         return {
             "n_wrong": len(records),
             "on_firstlisted": observed,
@@ -329,7 +330,7 @@ for t in MODELS:
             "pct": C.pct(observed, len(on_alt)) if on_alt else None,
             "expected_on_firstlisted_null": round(expected, 1),
             "expected_pct_null": C.pct(expected, len(on_alt)) if on_alt else None,
-            "perm_p": C.fmt_p(float((draws >= observed).mean())) if records else None,
+            "perm_p": C.fmt_p(float((draws >= observed).mean()), N_PERM) if records else None,
         }
 
     # Only cells with three or more unvisited options are informative: at two-option cells the

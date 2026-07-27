@@ -65,7 +65,7 @@
     -5.3,
     -1.8
    ],
-   "p": "<0.0001"
+   "p": 0.0001
   }
  },
  "self_advantage_atypical": {
@@ -83,8 +83,8 @@
    "self_acc": 2.0,
    "best_other": "opus",
    "gap_vs_best_other": -22.4,
-   "p_value_cluster_perm": "<0.0001",
-   "holm_p": "<0.0001",
+   "p_value_cluster_perm": 0.0001,
+   "holm_p": 0.0001,
    "gap_vs_mean_other": -7.7
   },
   "gpt": {
