@@ -26,7 +26,8 @@ excluded here (the model answered without reasoning). Three coverage patterns, q
 trace_coverage: Opus and Sonnet never produce a trace at step 1, in self-prediction or in any
 cross cell, so their trace-based figures begin at step 2. GLM and Qwen always reason. GPT
 skips sporadically at every step, and its skipping is target-dependent rather than random
-(33 of 776 Opus cells carry a trace against 546 of 592 Sonnet cells).
+(33 of its 776 predictions of Opus carry a trace against 546 of its 592 predictions of
+Sonnet; see trace_coverage.cross_per_cell).
 
 Output: analysis/results/traces.json
 """
