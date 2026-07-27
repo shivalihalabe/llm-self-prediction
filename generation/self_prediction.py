@@ -6,8 +6,8 @@ A model predicts its OWN maze-navigation position after N steps. The model is
 shown the full maze topology (every cell and its available directions) and
 asked, in role framing, where it would be after each of steps 1..8.
 
-Edit the two CONFIG lines to choose model and mode. Output filename, model id,
-and metadata are derived from them.
+Run with --model and --mode. Output filename, model id, and metadata are derived
+from them.
 
 Modes:
   reasoning    reasoning ON,  max_tokens 8000, free-text "(row, col)" answer
@@ -31,33 +31,23 @@ Scored downstream against the model's own consistent navigation set
 Output: data/self_prediction/{MODEL}_self_{MODE}.json
 """
 
+import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 import random
-import re
 from threading import Lock
 import time
 
-try:
-    from google.colab import userdata, files
-    os.environ["OPENROUTER_API_KEY"] = userdata.get("OPENROUTER_API_KEY")
-    IS_COLAB = True
-except Exception:
-    IS_COLAB = False
-    files = None
-
 from openai import OpenAI
 
+from common import build_user_msg, parse_answer, parse_walls
+
 # ============================================================
-# CONFIG  -- edit these two lines
+# CONFIG
 # ============================================================
 
 
-MODEL = "opus"          # one of: opus, sonnet, gpt, glm, qwen
-MODE  = "reasoning"     # one of: reasoning, noreasoning
-
-ROWS, COLS = 5, 5
 PREDICT_STEPS = [1, 2, 3, 4, 5, 6, 7, 8]
 TEMPERATURE = 0
 N_PRED_RUNS_MAIN = 1
@@ -67,7 +57,7 @@ MAX_API_RETRIES = 8
 API_TIMEOUT_S = 600
 N_WORKERS = 12
 SAVE_EVERY = 20
-WORKDIR = "/content" if IS_COLAB else "."
+WORKDIR = "."
 
 MODEL_IDS = {
     "opus":   "anthropic/claude-opus-4-6",
@@ -79,7 +69,13 @@ MODEL_IDS = {
 PROVIDERS = {"opus": "anthropic", "sonnet": "anthropic", "gpt": "openai",
              "glm": "z-ai", "qwen": "alibaba"}
 
-assert MODEL in MODEL_IDS and MODE in ("reasoning", "noreasoning")
+_parser = argparse.ArgumentParser(description="Self-prediction data collection.")
+_parser.add_argument("--model", required=True, choices=sorted(MODEL_IDS))
+_parser.add_argument("--mode", required=True, choices=["reasoning", "noreasoning"])
+_args = _parser.parse_args()
+MODEL = _args.model
+MODE = _args.mode
+
 MODEL_ID = MODEL_IDS[MODEL]
 PROVIDER = PROVIDERS[MODEL]
 REASONING = (MODE == "reasoning")
@@ -116,56 +112,9 @@ SYSTEM_PROMPT = (
 )
 
 # ============================================================
-# MAZE / PROMPT
+# RUN PLAN
 # ============================================================
 
-
-def parse_walls(wl):
-    return set(frozenset([tuple(p[0]), tuple(p[1])]) for p in wl)
-
-def get_available_directions(pos, walls):
-    r, c = pos
-    out = {}
-    for d, (nr, nc) in {
-        "North": (r-1, c), "South": (r+1, c), "East": (r, c+1), "West": (r, c-1)
-    }.items():
-        if 0 <= nr < ROWS and 0 <= nc < COLS and frozenset([pos, (nr, nc)]) not in walls:
-            out[d] = (nr, nc)
-    return out
-
-def describe_maze_topology(walls):
-    lines = [f"Grid maze: {ROWS}x{COLS}. Positions (row,col), (0,0) top-left.",
-             "Directions from each position:"]
-    for r in range(ROWS):
-        for c in range(COLS):
-            dirs = get_available_directions((r, c), walls)
-            if dirs:
-                pairs = ", ".join(f"{n}->({a},{b})" for n, (a, b) in sorted(dirs.items()))
-                lines.append(f"  ({r},{c}): {pairs}")
-    return "\n".join(lines)
-
-def build_user_msg(walls, n_steps):
-    return (
-        f"{describe_maze_topology(walls)}\n\n"
-        f"Starting at (0, 0), predict the position after {n_steps} steps."
-    )
-
-def parse_answer(content):
-    if not content:
-        return None
-    if not REASONING:
-        try:
-            o = json.loads(content); r, c = int(o["row"]), int(o["col"])
-            if 0 <= r < ROWS and 0 <= c < COLS:
-                return [r, c]
-        except Exception:
-            pass
-    ms = re.findall(r"\((\d+)\s*,\s*(\d+)\)", content)
-    if ms:
-        r, c = int(ms[-1][0]), int(ms[-1][1])
-        if 0 <= r < ROWS and 0 <= c < COLS:
-            return [r, c]
-    return None
 
 def n_runs_for_bucket():
     # Unseeded: roughly VALIDATION_FRACTION of buckets get the validation run count.
@@ -178,7 +127,7 @@ def n_runs_for_bucket():
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
-    raise RuntimeError("Set OPENROUTER_API_KEY in env or Colab userdata.")
+    raise RuntimeError("Set OPENROUTER_API_KEY in the environment.")
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
 def call(user_msg, ctx=""):
@@ -203,7 +152,7 @@ def call(user_msg, ctx=""):
             if REASONING:
                 reasoning = (getattr(msg, "reasoning_details", None)
                              or getattr(msg, "reasoning", None))
-            pos = parse_answer(content)
+            pos = parse_answer(content, reasoning=REASONING)
             if pos is None:
                 raise ValueError("unparsed answer")
             return {"raw_response": content, "reasoning": reasoning, "parsed_position": pos}
@@ -296,9 +245,6 @@ def main():
                 print(f"  {done[0]}/{len(tasks)}{rate}")
     save()
     print(f"\nDONE -> {OUTPUT_PATH}")
-    if IS_COLAB and files is not None:
-        try: files.download(OUTPUT_PATH)
-        except Exception: pass
 
 if __name__ == "__main__":
     main()

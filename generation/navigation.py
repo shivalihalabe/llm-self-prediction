@@ -6,8 +6,8 @@ Generates 100 cyclic 5x5 mazes (seeded, identical set across models), then has
 the selected MODEL navigate each one. Output is a per-model JSON of trajectories
 that downstream prediction code reads.
 
-To switch model, edit the MODEL constant in the CONFIG section. Everything else
-(model id, output filename, metadata experiment field) is derived from it.
+Run with --model. Everything else (model id, output filename, metadata
+experiment field) is derived from it.
 
 Design:
   - Maze generator: DFS spanning tree + N_EXTRA_PASSAGES extra walls removed,
@@ -32,6 +32,7 @@ Reliability:
 Output: data/navigation/{MODEL}_navigation.json
 """
 
+import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
@@ -39,24 +40,15 @@ import random
 from threading import Lock
 import time
 
-try:
-    from google.colab import userdata, files
-    os.environ["OPENROUTER_API_KEY"] = userdata.get("OPENROUTER_API_KEY")
-    IS_COLAB = True
-except Exception:
-    IS_COLAB = False
-    files = None
-
 from openai import OpenAI
+
+from common import get_available_directions
 
 
 # ============================================================
 # CONFIG
 # ============================================================
 
-
-# To switch model, edit this one line:
-MODEL = "opus"   # one of: opus, sonnet, gpt, glm, qwen
 
 MODEL_IDS = {
     "opus":   "anthropic/claude-opus-4-6",
@@ -65,7 +57,10 @@ MODEL_IDS = {
     "glm":    "z-ai/glm-5.1",
     "qwen":   "qwen/qwen3.6-plus",
 }
-assert MODEL in MODEL_IDS, f"Unknown MODEL: {MODEL!r}"
+
+_parser = argparse.ArgumentParser(description="Maze navigation data collection.")
+_parser.add_argument("--model", required=True, choices=sorted(MODEL_IDS))
+MODEL = _parser.parse_args().model
 
 MODEL_KEY = MODEL
 MODEL_ID = MODEL_IDS[MODEL]
@@ -84,7 +79,7 @@ MAX_API_RETRIES = 8       # retries per individual API/parse failure
 MAX_RUN_RETRIES = 2       # if a run can't complete, restart from step 0 this many extra times
 API_TIMEOUT_S = 60        # per-call timeout to catch hangs
 
-WORKDIR     = "/content" if IS_COLAB else "."
+WORKDIR     = "."
 OUT_DIR     = os.path.join(WORKDIR, "data", "navigation")
 OUTPUT_PATH = os.path.join(OUT_DIR, f"{MODEL}_navigation.json")
 
@@ -149,22 +144,6 @@ def generate_maze(seed, rows=ROWS, cols=COLS, n_extra_passages=N_EXTRA_PASSAGES)
         walls.discard(w)
 
     return walls
-
-
-def get_available_directions(pos, walls, rows=ROWS, cols=COLS):
-    """Return dict: direction_name -> neighbor_cell for valid moves from pos."""
-    r, c = pos
-    candidates = {
-        "North": (r - 1, c),
-        "South": (r + 1, c),
-        "East":  (r, c + 1),
-        "West":  (r, c - 1),
-    }
-    out = {}
-    for d, (nr, nc) in candidates.items():
-        if 0 <= nr < rows and 0 <= nc < cols and frozenset([pos, (nr, nc)]) not in walls:
-            out[d] = (nr, nc)
-    return out
 
 
 # ============================================================
@@ -235,7 +214,7 @@ def parse_direction(text, available_dirs):
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
-    raise RuntimeError("Set OPENROUTER_API_KEY in env or Colab userdata.")
+    raise RuntimeError("Set OPENROUTER_API_KEY in the environment.")
 
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
@@ -503,13 +482,6 @@ def main():
     results["metadata"]["consistent"] = consistent
     atomic_save(results, OUTPUT_PATH)
     print(f"Output: {OUTPUT_PATH}")
-
-    # Auto-download in Colab
-    if IS_COLAB and files is not None:
-        try:
-            files.download(OUTPUT_PATH)
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":

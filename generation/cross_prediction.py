@@ -8,7 +8,7 @@ that names the target, where the target would be after each of steps 1..8. One
 file per predictor, with a cell for each of the other four targets. Each target
 is predicted on THAT target's consistent navigation set, so cell sizes differ.
 
-Edit PREDICTOR to switch. Output filename, model id, and metadata derive from it.
+Run with --predictor. Output filename, model id, and metadata derive from it.
 
 Mode note: cross-prediction is run with reasoning ON only. Without reasoning the
 task collapses to a near-constant prior, so there is no no-reasoning cross
@@ -29,32 +29,23 @@ not reproducible on a re-run by design; the data records it via run_idx.
 Output: data/cross_prediction/{PREDICTOR}_xpred_reasoning.json
 """
 
+import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 import random
-import re
 from threading import Lock
 import time
 
-try:
-    from google.colab import userdata, files
-    os.environ["OPENROUTER_API_KEY"] = userdata.get("OPENROUTER_API_KEY")
-    IS_COLAB = True
-except Exception:
-    IS_COLAB = False
-    files = None
-
 from openai import OpenAI
 
+from common import build_user_msg, parse_answer, parse_walls
+
 # ============================================================
-# CONFIG  -- edit this one line
+# CONFIG
 # ============================================================
 
 
-PREDICTOR = "opus"   # one of: opus, sonnet, gpt, glm, qwen
-
-ROWS, COLS = 5, 5
 PREDICT_STEPS = [1, 2, 3, 4, 5, 6, 7, 8]
 TEMPERATURE = 0
 MAX_TOKENS = 8000
@@ -66,7 +57,7 @@ MAX_API_RETRIES = 8
 API_TIMEOUT_S = 600
 N_WORKERS = 12
 SAVE_EVERY = 20
-WORKDIR = "/content" if IS_COLAB else "."
+WORKDIR = "."
 
 MODEL_IDS = {
     "opus":   "anthropic/claude-opus-4-6",
@@ -81,7 +72,10 @@ DISPLAY = {"opus": "Claude Opus 4.6", "sonnet": "Claude Sonnet 4.6", "gpt": "GPT
            "glm": "GLM 5.1", "qwen": "Qwen 3.6 Plus"}
 ALL_MODELS = ["opus", "sonnet", "gpt", "glm", "qwen"]
 
-assert PREDICTOR in MODEL_IDS
+_parser = argparse.ArgumentParser(description="Cross-prediction data collection.")
+_parser.add_argument("--predictor", required=True, choices=sorted(MODEL_IDS))
+PREDICTOR = _parser.parse_args().predictor
+
 MODEL_ID = MODEL_IDS[PREDICTOR]
 PROVIDER = PROVIDERS[PREDICTOR]
 TARGETS = [m for m in ALL_MODELS if m != PREDICTOR]
@@ -105,49 +99,9 @@ def system_prompt(target):
     )
 
 # ============================================================
-# MAZE / PROMPT
+# RUN PLAN
 # ============================================================
 
-
-def parse_walls(wl):
-    return set(frozenset([tuple(p[0]), tuple(p[1])]) for p in wl)
-
-def get_available_directions(pos, walls):
-    r, c = pos
-    out = {}
-    for d, (nr, nc) in {
-        "North": (r-1, c), "South": (r+1, c), "East": (r, c+1), "West": (r, c-1)
-    }.items():
-        if 0 <= nr < ROWS and 0 <= nc < COLS and frozenset([pos, (nr, nc)]) not in walls:
-            out[d] = (nr, nc)
-    return out
-
-def describe_maze_topology(walls):
-    lines = [f"Grid maze: {ROWS}x{COLS}. Positions (row,col), (0,0) top-left.",
-             "Directions from each position:"]
-    for r in range(ROWS):
-        for c in range(COLS):
-            dirs = get_available_directions((r, c), walls)
-            if dirs:
-                pairs = ", ".join(f"{n}->({a},{b})" for n, (a, b) in sorted(dirs.items()))
-                lines.append(f"  ({r},{c}): {pairs}")
-    return "\n".join(lines)
-
-def build_user_msg(walls, n_steps):
-    return (
-        f"{describe_maze_topology(walls)}\n\n"
-        f"Starting at (0, 0), predict the position after {n_steps} steps."
-    )
-
-def parse_answer(content):
-    if not content:
-        return None
-    ms = re.findall(r"\((\d+)\s*,\s*(\d+)\)", content)
-    if ms:
-        r, c = int(ms[-1][0]), int(ms[-1][1])
-        if 0 <= r < ROWS and 0 <= c < COLS:
-            return [r, c]
-    return None
 
 def n_runs_for_bucket():
     return N_PRED_RUNS_VALIDATION if random.random() < VALIDATION_FRACTION else N_PRED_RUNS_MAIN
@@ -159,7 +113,7 @@ def n_runs_for_bucket():
 
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
-    raise RuntimeError("Set OPENROUTER_API_KEY in env or Colab userdata.")
+    raise RuntimeError("Set OPENROUTER_API_KEY in the environment.")
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
 def call(sys_p, user_msg, ctx=""):
@@ -286,9 +240,6 @@ def main():
                 print(f"  {done[0]}/{len(tasks)}{rate}")
     save()
     print(f"\nDONE -> {OUTPUT_PATH}")
-    if IS_COLAB and files is not None:
-        try: files.download(OUTPUT_PATH)
-        except Exception: pass
 
 if __name__ == "__main__":
     main()
