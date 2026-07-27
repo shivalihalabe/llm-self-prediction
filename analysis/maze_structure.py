@@ -30,11 +30,10 @@ os.makedirs(OUT, exist_ok=True)
 MODELS = C.MODELS
 RES = {"metadata": C.metadata("maze_structure")}
 
+# n_walls, mean_open_degree and n_reachable are constant across all 100 mazes (10 walls,
+# degree 2.4, 25 reachable), so they stay in the per_maze dump but not in the correlations.
 FEATURES = [
-    "n_walls",
-    "n_reachable",
     "bfs_max_depth",
-    "mean_open_degree",
     "n_junctions",
     "mean_branch_steps",
 ]
@@ -134,8 +133,6 @@ RES["self_vs_cross_predictability_per_maze"] = {
     "n_mazes": len(self_cross),
     "pearson": C.pearson([x for x, _ in self_cross], [y for _, y in self_cross]),
     "perm_p": C.perm_corr_p([x for x, _ in self_cross], [y for _, y in self_cross]),
-    "note": "high => the same mazes are easy/hard whether a model predicts itself or "
-    "another model predicts it",
 }
 
 

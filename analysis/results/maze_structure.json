@@ -1130,25 +1130,13 @@
  },
  "correlations_intersection19": {
   "n": 19,
-  "n_walls": {
-   "pearson": null,
-   "perm_p": null
-  },
-  "n_reachable": {
-   "pearson": null,
-   "perm_p": null
-  },
   "bfs_max_depth": {
    "pearson": 0.638,
    "perm_p": 0.0024
   },
-  "mean_open_degree": {
-   "pearson": null,
-   "perm_p": null
-  },
   "n_junctions": {
    "pearson": 0.047,
-   "perm_p": 0.8647
+   "perm_p": 0.864714
   },
   "mean_branch_steps": {
    "pearson": -0.748,
@@ -1157,25 +1145,13 @@
  },
  "correlations_k3plus": {
   "n": 90,
-  "n_walls": {
-   "pearson": null,
-   "perm_p": null
-  },
-  "n_reachable": {
-   "pearson": null,
-   "perm_p": null
-  },
   "bfs_max_depth": {
    "pearson": 0.276,
-   "perm_p": 0.011
-  },
-  "mean_open_degree": {
-   "pearson": null,
-   "perm_p": null
+   "perm_p": 0.010999
   },
   "n_junctions": {
    "pearson": -0.079,
-   "perm_p": 0.4604
+   "perm_p": 0.460354
   },
   "mean_branch_steps": {
    "pearson": -0.467,
@@ -1185,8 +1161,7 @@
  "self_vs_cross_predictability_per_maze": {
   "n_mazes": 19,
   "pearson": 0.882,
-  "perm_p": 0.0002,
-  "note": "high => the same mazes are easy/hard whether a model predicts itself or another model predicts it"
+  "perm_p": 0.0002
  },
  "decision_point_position": {
   "opus": {

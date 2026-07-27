@@ -17,10 +17,12 @@ Output: analysis/results/cross_structure.json
 """
 
 import collections
+import itertools
 import json
 import os
 import statistics as st
 
+import numpy as np
 import pandas as pd
 
 import common as C
@@ -89,6 +91,13 @@ for t in MODELS:
     # ensemble majority vote (ties break by predictor order, as in Counter insertion)
     mv_others = wide[others].apply(lambda r: collections.Counter(r).most_common(1)[0][0], axis=1)
     mv_all = wide[names].apply(lambda r: collections.Counter(r).most_common(1)[0][0], axis=1)
+    # tie flag for the others-vote: the top count is shared by two or more positions
+    tie_others = wide[others].apply(
+        lambda r: (lambda mc: len(mc) > 1 and mc[1][1] == mc[0][1])(
+            collections.Counter(r).most_common()
+        ),
+        axis=1,
+    )
 
     struct[t] = {
         "n_shared_items": n,
@@ -105,6 +114,12 @@ for t in MODELS:
         "ensemble_all_acc": C.pct(mv_all.eq(wide["truth"]).mean()) if n else None,
         "self_matches_truth_pct": C.pct(correct["self"].mean()) if n else None,
         "self_matches_consensus_pct": C.pct(wide["self"].eq(mv_others).mean()) if n else None,
+        "consensus_n_tied": int(tie_others.sum()),
+        "self_matches_consensus_excl_ties_pct": (
+            C.pct(wide["self"][~tie_others].eq(mv_others[~tie_others]).mean())
+            if int((~tie_others).sum())
+            else None
+        ),
     }
 RES["per_target_structure"] = struct
 
@@ -112,15 +127,17 @@ RES["per_target_structure"] = struct
 # ============================================================
 # ASYMMETRY TRACKS PREDICTABILITY
 # ============================================================
-# For each unordered pair, (A->B minus B->A) should track (predictability_B minus predictability_A).
+# For each unordered pair, (A->B minus B->A) should track (predictability_B minus
+# predictability_A). Each pair's predictability difference excludes that pair's own two
+# directions: predictability[b] would otherwise contain acc(a->b), which is the y variable, so
+# x would contain exactly y/5 by construction and the correlation would be partly mechanical.
+# The ten pairs are still not independent (each model appears in four of them), the same
+# non-independence recorded against cross_acc_vs_target_self_acc below.
 
 
-predictability = {}
-for t in MODELS:
-    vals = [C.acc(C.SELF[t])[0]] + [
-        C.acc(C.CROSS[(p, t)])[0] for p in MODELS if p != t and (p, t) in C.CROSS
-    ]
-    predictability[t] = st.mean([v for v in vals if v is not None])
+def _acc_of(p2, t2):
+    return C.acc(C.SELF[t2] if p2 == t2 else C.CROSS[(p2, t2)])[0]
+
 
 acc_gaps, pred_gaps, pairs_dump = [], [], []
 for i in range(len(MODELS)):
@@ -132,22 +149,24 @@ for i in range(len(MODELS)):
         ba = C.acc(C.CROSS[(b, a)])[0]
         if ab is None or ba is None:
             continue
+        pred_b = st.mean(_acc_of(p2, b) for p2 in MODELS if p2 != a)
+        pred_a = st.mean(_acc_of(p2, a) for p2 in MODELS if p2 != b)
         acc_gaps.append(ab - ba)
-        pred_gaps.append(predictability[b] - predictability[a])
+        pred_gaps.append(pred_b - pred_a)
         pairs_dump.append(
             {
                 "pair": f"{a}|{b}",
                 "a_to_b": round(ab, 1),
                 "b_to_a": round(ba, 1),
                 "acc_gap": round(ab - ba, 1),
-                "predictability_gap_b_minus_a": round(predictability[b] - predictability[a], 1),
+                "predictability_gap_b_minus_a": round(pred_b - pred_a, 1),
             }
         )
+# perm_p is the seeded scipy two-sided convention (doubled tail), as at every perm_corr_p site.
 RES["asymmetry_vs_predictability"] = {
     "pearson": pearson(pred_gaps, acc_gaps),
     "perm_p": C.perm_corr_p(pred_gaps, acc_gaps),
     "n_pairs": len(pred_gaps),
-    "note": "positive => the direction pointing at the more predictable target is the higher one",
     "pairs": pairs_dump,
 }
 
@@ -157,21 +176,32 @@ RES["asymmetry_vs_predictability"] = {
 # ============================================================
 
 
-xs, ys = [], []
+# The x variable (target self-accuracy) takes only five distinct values, one per target, so
+# the twenty cells are not exchangeable; the permutation relabels at the target level and is
+# exhaustive over all 120 orderings. Unlike the scipy convention used elsewhere, the p-value
+# here counts |r|-exceedance directly (identity relabelling included), so its floor is 1/120.
+self_acc = {t: C.acc(C.SELF[t])[0] for t in MODELS}
+cells_by_target, ys = [], []
 for p in MODELS:
     for t in MODELS:
         if t == p or (p, t) not in C.CROSS:
             continue
         cr = C.acc(C.CROSS[(p, t)])[0]
-        sf = C.acc(C.SELF[t])[0]
-        if cr is not None and sf is not None:
-            xs.append(sf)
+        if cr is not None and self_acc[t] is not None:
+            cells_by_target.append(t)
             ys.append(cr)
+xs = [self_acc[t] for t in cells_by_target]
+r_obs = np.corrcoef(xs, ys)[0, 1]
+n_exceed = 0
+for perm in itertools.permutations(MODELS):
+    relabel = dict(zip(MODELS, perm))
+    xp = [self_acc[relabel[t]] for t in cells_by_target]
+    n_exceed += abs(np.corrcoef(xp, ys)[0, 1]) >= abs(r_obs) - 1e-12
+n_perms = 120
 RES["cross_acc_vs_target_self_acc"] = {
     "pearson": pearson(xs, ys),
-    "perm_p": C.perm_corr_p(xs, ys),
-    "note": "high => predicting a model is governed by that model's own predictability "
-    "(simulation, not self-knowledge)",
+    "perm_p": round(int(n_exceed) / n_perms, 6),
+    "n_permutations": n_perms,
     "n_cells": len(xs),
 }
 
@@ -202,7 +232,12 @@ RES["oracle_ceiling"] = oracle
 # ============================================================
 # PREDICTOR X TARGET SPECIALIZATION
 # ============================================================
-# Residual of each cross cell after an additive predictor-skill + target-predictability model.
+# Additive model acc ~ mu + a[predictor] + b[target], fit jointly by least squares over the
+# 20 cross cells with sum-to-zero constraints on both effect vectors. Subtracting marginal
+# means instead is degenerate on this diagonal-free design: the mean residual per predictor
+# reduces to the grand mean minus the mean difficulty of that predictor's target set (and the
+# per-target mirror reduces the same way), carrying no information about the predictor. Do
+# not add either marginal mean back.
 
 
 cells = {
@@ -211,27 +246,47 @@ cells = {
     for t in MODELS
     if t != p and (p, t) in C.CROSS
 }
-grand = st.mean(cells.values())
-skill = {p: st.mean([cells[(p, t)] for t in MODELS if (p, t) in cells]) for p in MODELS}
-tpred = {t: st.mean([cells[(p, t)] for p in MODELS if (p, t) in cells]) for t in MODELS}
-resid = {f"{p}->{t}": round(v - (skill[p] + tpred[t] - grand), 1) for (p, t), v in cells.items()}
+# Sum-to-zero enforced by eliminating the last effect in each vector: a[last] = -sum(rest).
+_rows, _rhs = [], []
+for (p, t), v in cells.items():
+    row = np.zeros(1 + 2 * (len(MODELS) - 1))
+    row[0] = 1.0
+    pi, ti = MODELS.index(p), MODELS.index(t)
+    if pi < len(MODELS) - 1:
+        row[1 + pi] = 1.0
+    else:
+        row[1 : len(MODELS)] = -1.0
+    if ti < len(MODELS) - 1:
+        row[len(MODELS) + ti] = 1.0
+    else:
+        row[len(MODELS) :] = -1.0
+    _rows.append(row)
+    _rhs.append(v)
+_theta = np.linalg.lstsq(np.array(_rows), np.array(_rhs), rcond=None)[0]
+mu = float(_theta[0])
+a_eff = list(_theta[1 : len(MODELS)]) + [-float(sum(_theta[1 : len(MODELS)]))]
+b_eff = list(_theta[len(MODELS) :]) + [-float(sum(_theta[len(MODELS) :]))]
+pred_effect = {m: float(v) for m, v in zip(MODELS, a_eff)}
+targ_effect = {m: float(v) for m, v in zip(MODELS, b_eff)}
+resid_raw = {
+    f"{p}->{t}": v - (mu + pred_effect[p] + targ_effect[t]) for (p, t), v in cells.items()
+}
+resid = {k: round(v, 1) for k, v in resid_raw.items()}
 RES["predictor_target_specialization"] = {
-    "grand_mean": round(grand, 1),
-    "predictor_skill": {p: round(v, 1) for p, v in skill.items()},
-    "target_predictability": {t: round(v, 1) for t, v in tpred.items()},
+    "mu": round(mu, 1),
+    "predictor_effect": {m: round(v, 1) for m, v in pred_effect.items()},
+    "target_effect": {m: round(v, 1) for m, v in targ_effect.items()},
     "residuals": resid,
-    "note": "residual = cross_acc - (predictor_skill + target_predictability - grand_mean); "
-    "+ => affinity beyond main effects",
+    "note": "joint least-squares fit acc ~ mu + a[predictor] + b[target] over the 20 cross "
+    "cells, sum-to-zero effects; residual = acc - (mu + a[predictor] + b[target])",
 }
 
 
 # ============================================================
 # DEVELOPER AFFINITY (same developer vs different)
 # ============================================================
-# Correct developers: GLM is Zhipu, Qwen is Alibaba -- DIFFERENT companies. The only same-developer
-# pair in the lineup is opus<->sonnet (Anthropic), so a same-developer affinity test is underpowered
-# and the opus<->sonnet relationship is asymmetric. The glm<->qwen pair (both open-weight, but
-# different developers) is reported separately rather than miscounted as same-developer.
+# Developers: anthropic={opus,sonnet}, openai={gpt}, zhipu={glm}, alibaba={qwen}. The only
+# same-developer pair is opus<->sonnet, so the test is underpowered at n=2.
 
 
 DEVELOPER = {
@@ -246,18 +301,13 @@ diff_dev = [k for k in resid if DEVELOPER[k.split("->")[0]] != DEVELOPER[k.split
 RES["developer_affinity"] = {
     "same_developer_pairs": {k: resid[k] for k in same_dev},
     "mean_residual_same_developer": (
-        round(st.mean([resid[k] for k in same_dev]), 2) if same_dev else None
+        round(st.mean([resid_raw[k] for k in same_dev]), 2) if same_dev else None
     ),
     "mean_residual_different_developer": (
-        round(st.mean([resid[k] for k in diff_dev]), 2) if diff_dev else None
+        round(st.mean([resid_raw[k] for k in diff_dev]), 2) if diff_dev else None
     ),
-    "open_weight_pair_glm_qwen": {
-        k: resid[k] for k in resid if set(k.split("->")) == {"glm", "qwen"}
-    },
     "note": "developers: anthropic={opus,sonnet}, openai={gpt}, zhipu={glm}, alibaba={qwen}. "
-    "Only opus<->sonnet is same-developer (n=2, asymmetric: opus->sonnet +12.5 vs "
-    "sonnet->opus -9.7) so this is underpowered. GLM and Qwen are DIFFERENT developers; "
-    "their pair is listed separately, not as same-developer.",
+    "Only opus<->sonnet is same-developer (n=2, asymmetric) so this is underpowered.",
 }
 
 
@@ -275,7 +325,6 @@ for m in MODELS:
     as_predictor = [v for v in as_predictor if v is not None]
     as_target = [C.acc(C.CROSS[(p, m)])[0] for p in MODELS if p != m and (p, m) in C.CROSS]
     as_target = [v for v in as_target if v is not None]
-    res_as_pred = [resid[f"{m}->{t}"] for t in MODELS if f"{m}->{t}" in resid]
     dissociation[m] = {
         "self_acc": round(self_acc, 1),
         "skill_predicting_others": round(st.mean(as_predictor), 1) if as_predictor else None,
@@ -283,7 +332,6 @@ for m in MODELS:
         "self_minus_other_skill": (
             round(self_acc - st.mean(as_predictor), 1) if as_predictor else None
         ),
-        "mean_residual_as_predictor": round(st.mean(res_as_pred), 2) if res_as_pred else None,
     }
 RES["self_vs_other_prediction_dissociation"] = dissociation
 
@@ -292,6 +340,8 @@ RES["self_vs_other_prediction_dissociation"] = dissociation
 # IS CROSS-PREDICTION SELF-PROJECTION?
 # ============================================================
 # Does a predictor predict a target better when the target actually behaves like the predictor?
+# traj_similarity is symmetric, so the twenty ordered pairs carry only ten distinct x values while
+# the residuals are asymmetric, and the permutation treats them as exchangeable.
 
 
 def traj_similarity(p, t):
@@ -316,7 +366,7 @@ for p in MODELS:
             continue
         sims.append(sim)
         accs.append(cr)
-        resids.append(resid[f"{p}->{t}"])
+        resids.append(resid_raw[f"{p}->{t}"])
         dump.append(
             {
                 "pair": f"{p}->{t}",
@@ -333,8 +383,6 @@ RES["self_projection"] = {
     ),  # controls for target/predictor main effects
     "perm_p_residual": C.perm_corr_p(sims, resids),
     "pairs": sorted(dump, key=lambda d: d["residual"], reverse=True),
-    "note": "positive residual correlation => predictors have genuine affinity for "
-    "behaviorally-similar targets (self-projection) beyond general predictability",
 }
 
 

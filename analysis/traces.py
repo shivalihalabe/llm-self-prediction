@@ -21,6 +21,13 @@ self-vs-cross depersonalization comparison (both raw and normalized).
 The reasoning field is a string, a list of {"text": ...} dicts, or None -- handled by
 trace_text().
 
+Not every cell has a trace; cells without one carry a valid parsed answer and are correctly
+excluded here (the model answered without reasoning). Three coverage patterns, quantified in
+trace_coverage: Opus and Sonnet never produce a trace at step 1, in self-prediction or in any
+cross cell, so their trace-based figures begin at step 2. GLM and Qwen always reason. GPT
+skips sporadically at every step, and its skipping is target-dependent rather than random
+(33 of 776 Opus cells carry a trace against 546 of 592 Sonnet cells).
+
 Output: analysis/results/traces.json
 """
 
@@ -270,9 +277,10 @@ for m in MODELS:
         "true_path_tracked_correct": _mean(sub[sub.correct].prefix_frac),
         "true_path_tracked_wrong": _mean(sub[~sub.correct].prefix_frac),
     }
+    # sort on the predictor value only, tie-broken by (maze, step) -- never by the outcome
     ld = (
-        sub[["len", "correct"]]
-        .sort_values(["len", "correct"], kind="stable")
+        sub[["len", "correct", "maze", "step"]]
+        .sort_values(["len", "maze", "step"], kind="stable")
         .reset_index(drop=True)
     )
     terc = {}
@@ -381,6 +389,9 @@ RES["atypical_cell_direction_language"] = dirlang
 # character-length split, whose gradient is a difficulty confound.
 
 
+# Dividing words by branch count sorts hard cells into the short tercile (word count grows
+# sub-linearly with branches), so the terciles differ in difficulty as well as in length;
+# mean_branches and mean_step are emitted so that composition is visible.
 wpb = {}
 for m in MODELS:
     rows = []
@@ -393,10 +404,10 @@ for m in MODELS:
         nb = sum(1 for i in range(1, s + 1) if C.is_branch(m, mz, i))
         if nb == 0:
             continue
-        rows.append(
-            (len(txt.split()) / nb, tuple(rec["parsed_position"]) == tuple(C.TRUTH[m][mz][s]))
-        )
-    rows.sort(key=lambda x: (x[0], x[1]))
+        okv = tuple(rec["parsed_position"]) == tuple(C.TRUTH[m][mz][s])
+        rows.append((len(txt.split()) / nb, okv, nb, mz, s))
+    # sort on the predictor value only, tie-broken by (maze, step) -- never by the outcome
+    rows.sort(key=lambda x: (x[0], x[3], x[4]))
     n = len(rows)
     terc = {}
     for name, seg in (
@@ -407,11 +418,58 @@ for m in MODELS:
         if seg:
             terc[name] = {
                 "n": len(seg),
-                "acc": C.pct(sum(okv for _, okv in seg), len(seg)),
+                "acc": C.pct(sum(okv for _, okv, _, _, _ in seg), len(seg)),
+                "n_correct": sum(okv for _, okv, _, _, _ in seg),
                 "ratio_range": [round(seg[0][0], 1), round(seg[-1][0], 1)],
+                "mean_branches": round(st.mean(nb for _, _, nb, _, _ in seg), 2),
+                "mean_step": round(st.mean(s2 for _, _, _, _, s2 in seg), 2),
             }
     wpb[m] = terc
 RES["words_per_branch_terciles"] = wpb
+
+
+# ============================================================
+# TRACE COVERAGE (WHEN EACH MODEL PRODUCES A TRACE)
+# ============================================================
+# Run-0 parsed records only. self_per_step counts traced/total per step; cross_per_cell counts
+# traced/total per predictor->target cell, where GPT's target-dependent skipping shows up.
+
+
+def _has_trace(rec):
+    return bool(trace_text(rec).strip())
+
+
+coverage = {"self_per_step": {}, "cross_per_cell": {}, "cross_per_step": {}}
+for m in MODELS:
+    per_step = {s: [0, 0] for s in range(1, 9)}
+    for mz, s, ri, rec in C.self_records(m, "reasoning"):
+        if ri != 0 or rec.get("parsed_position") is None or not 1 <= s <= 8:
+            continue
+        per_step[s][0] += _has_trace(rec)
+        per_step[s][1] += 1
+    coverage["self_per_step"][m] = {
+        s: {"traced": v[0], "n": v[1]} for s, v in per_step.items()
+    }
+for p2 in MODELS:
+    coverage["cross_per_cell"][p2] = {}
+    per_step = {s: [0, 0] for s in range(1, 9)}
+    for t2 in MODELS:
+        if t2 == p2 or (p2, t2) not in C.CROSS:
+            continue
+        traced = total = 0
+        for mz, s, ri, rec in C.cross_records(p2, t2):
+            if ri != 0 or rec.get("parsed_position") is None or not 1 <= s <= 8:
+                continue
+            has = _has_trace(rec)
+            traced += has
+            total += 1
+            per_step[s][0] += has
+            per_step[s][1] += 1
+        coverage["cross_per_cell"][p2][t2] = {"traced": traced, "n": total}
+    coverage["cross_per_step"][p2] = {
+        s: {"traced": v[0], "n": v[1]} for s, v in per_step.items()
+    }
+RES["trace_coverage"] = coverage
 
 
 # ============================================================

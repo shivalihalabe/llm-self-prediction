@@ -37,7 +37,7 @@ def _acc_table(df, by):
     return df.groupby(by, sort=False)["correct"].mean().mul(100.0)
 
 
-def a(scored, mazeset=None, step=None):
+def acc_or_none(scored, mazeset=None, step=None):
     """accuracy as a rounded float or None."""
     v = C.acc(scored, mazeset, step)[0]
     return round(v, 1) if v is not None else None
@@ -159,10 +159,10 @@ for a_m, b_m in itertools.combinations(MODELS, 2):
     s = C.PAIRWISE[tuple(sorted((a_m, b_m)))]
     pairwise[f"{a_m}|{b_m}"] = {
         "n_mazes": len(s),
-        f"{a_m}_self": a(C.SELF[a_m], s),
-        f"{b_m}_self": a(C.SELF[b_m], s),
-        f"{a_m}->{b_m}": a(C.CROSS[(a_m, b_m)], s) if (a_m, b_m) in C.CROSS else None,
-        f"{b_m}->{a_m}": a(C.CROSS[(b_m, a_m)], s) if (b_m, a_m) in C.CROSS else None,
+        f"{a_m}_self": acc_or_none(C.SELF[a_m], s),
+        f"{b_m}_self": acc_or_none(C.SELF[b_m], s),
+        f"{a_m}->{b_m}": acc_or_none(C.CROSS[(a_m, b_m)], s) if (a_m, b_m) in C.CROSS else None,
+        f"{b_m}->{a_m}": acc_or_none(C.CROSS[(b_m, a_m)], s) if (b_m, a_m) in C.CROSS else None,
     }
 RES["pairwise_on_intersection"] = pairwise
 
@@ -177,7 +177,7 @@ diff = {}
 for k in range(1, 6):
     strat = C.DIFFICULTY_STRATA[k]
     per_model = {
-        m: a(C.SELF[m], strat) for m in MODELS
+        m: acc_or_none(C.SELF[m], strat) for m in MODELS
     }  # None where a model has no consistent maze in stratum
     vals = [v for v in per_model.values() if v is not None]
     diff[k] = {
@@ -197,13 +197,13 @@ rvn = {}
 for m in MODELS:
     common_keys = set(C.SELF[m]) & set(C.SELF_NR[m])
     rvn[m] = {
-        "reasoning": a(C.SELF[m]),
-        "noreasoning": a(C.SELF_NR[m]),
+        "reasoning": acc_or_none(C.SELF[m]),
+        "noreasoning": acc_or_none(C.SELF_NR[m]),
         "gap": round(C.acc(C.SELF[m])[0] - C.acc(C.SELF_NR[m])[0], 1),
-        "reasoning_on_common": a({k: C.SELF[m][k] for k in common_keys}),
-        "nr_on_common": a({k: C.SELF_NR[m][k] for k in common_keys}),
-        "per_step_reasoning": [a(C.SELF[m], None, s) for s in range(1, 9)],
-        "per_step_nr": [a(C.SELF_NR[m], None, s) for s in range(1, 9)],
+        "reasoning_on_common": acc_or_none({k: C.SELF[m][k] for k in common_keys}),
+        "nr_on_common": acc_or_none({k: C.SELF_NR[m][k] for k in common_keys}),
+        "per_step_reasoning": [acc_or_none(C.SELF[m], None, s) for s in range(1, 9)],
+        "per_step_nr": [acc_or_none(C.SELF_NR[m], None, s) for s in range(1, 9)],
     }
 RES["reasoning_vs_nr_self"] = rvn
 

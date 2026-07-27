@@ -15,6 +15,8 @@ import json
 import os
 
 R = os.path.join(os.path.dirname(__file__), "results")
+# Deliberately does not import common: this is a pure aggregation over the results files and
+# should not load the dataset. Keep the roster local.
 MODELS = ["opus", "sonnet", "gpt", "glm", "qwen"]
 
 
@@ -34,7 +36,7 @@ eg = load("error_geometry.json")
 ps = load("per_step.json")
 H = {
     "metadata": {
-        **outcomes["metadata"],
+        **outcomes.get("metadata", {}),
         "experiment": "HEADLINES",
         "produced_by": "analysis/summary.py",
     }
@@ -45,34 +47,25 @@ H["self_vs_best_other"] = {
     t: {
         "gap": d["overall"]["gap"],
         "ci": [d["overall"]["ci_lo"], d["overall"]["ci_hi"]],
-        "p": d["overall"]["p_value"],
+        "p": d["overall"]["p_value_cluster_perm"],
     }
     for t, d in stats.get("self_vs_best_other_paired", {}).items()
 }
 
 # 2) where the self-advantage lives (atypical vs default decision points, first-unvisited taxonomy)
+_atyp = stats.get("self_advantage_by_move_type", {}).get("atypical", {})
 H["self_advantage_atypical"] = {
     t: {
         "n": d["n"],
         "self_acc": d["self_acc"],
         "best_other": d["best_other"]["model"],
         "gap_vs_best_other": d["best_other"]["gap_vs_best_other"],
-        "p_value": d["best_other"]["p_value"],
-        "holm_p": stats["self_advantage_by_move_type"]["atypical"]["holm_adjusted_best_other"][t],
+        "p_value_cluster_perm": d["best_other"]["p_value_cluster_perm"],
+        "holm_p": _atyp.get("holm_adjusted_best_other", {}).get(t),
         "gap_vs_mean_other": d["mean_other"]["gap_vs_mean_other"],
     }
-    for t, d in stats["self_advantage_by_move_type"]["atypical"].items()
+    for t, d in _atyp.items()
     if t != "holm_adjusted_best_other"
-}
-
-# 2b) the Opus mid-horizon per-step advantage (significant where the CI excludes 0)
-_ps = stats.get("self_vs_best_other_per_step", {}).get("opus", {})
-H["opus_midhorizon_per_step"] = {
-    "best_other": _ps.get("best_other"),
-    "by_step": [
-        {"step": r["step"], "gap": r["gap"], "ci": [r["ci_lo"], r["ci_hi"]], "sig": r["sig"]}
-        for r in _ps.get("by_step", [])
-    ],
 }
 
 # 3) oracle: items only self gets right
@@ -124,8 +117,7 @@ H["validation_self_consistency"] = {
     m: d["frac_all_runs_agree"] for m, d in stats.get("validation_self_consistency", {}).items()
 }
 
-# 9) developer affinity (corrected: only opus<->sonnet is same-developer; glm/qwen are
-#    different developers)
+# 9) developer affinity (only opus<->sonnet is same-developer; underpowered at n=2)
 H["developer_affinity"] = {
     "same_developer_pairs": xs.get("developer_affinity", {}).get("same_developer_pairs"),
     "mean_residual_same_developer": xs.get("developer_affinity", {}).get(
@@ -134,11 +126,12 @@ H["developer_affinity"] = {
     "mean_residual_different_developer": xs.get("developer_affinity", {}).get(
         "mean_residual_different_developer"
     ),
-    "open_weight_pair_glm_qwen": xs.get("developer_affinity", {}).get("open_weight_pair_glm_qwen"),
 }
 
-# 10) self vs OTHER prediction dissociation (Opus introspector vs Sonnet simulator)
+# 10) self vs OTHER prediction dissociation (Opus introspector vs Sonnet simulator), with the
+#     joint-fit predictor effects as the difficulty-controlled simulator-skill measure
 H["self_vs_other_prediction_dissociation"] = xs.get("self_vs_other_prediction_dissociation", {})
+H["predictor_effects"] = xs.get("predictor_target_specialization", {}).get("predictor_effect")
 
 # 11) predictability decay shape per step (where each target cliffs)
 H["target_predictability_per_step"] = outcomes.get("target_predictability_per_step", {})
@@ -158,15 +151,6 @@ H["cross_model_agreement_by_step"] = {
     "nr": prior.get("cross_model_agreement", {}).get("by_step_nr"),
     "reasoning": prior.get("cross_model_agreement", {}).get("by_step_reasoning"),
 }
-H["opus_step8_lift_vs_modal_baseline"] = next(
-    (
-        r["lift_vs_modal"]
-        for r in stats.get("baseline_sensitivity", {}).get("opus", [])
-        if r["step"] == 8
-    ),
-    None,
-)
-
 # 14) error propagation, predictability horizon, hedging calibration, self-projection,
 #     maze-difficulty-is-shared
 H["error_propagation"] = ps.get("error_propagation", {})
@@ -185,10 +169,6 @@ H["self_projection"] = {
 H["self_vs_cross_predictability_per_maze"] = mz.get(
     "self_vs_cross_predictability_per_maze", {}
 ).get("pearson")
-H["reasoned_consensus_vs_truth_vs_prior_opus"] = prior.get(
-    "reasoned_consensus_vs_truth_vs_prior", {}
-).get("opus")
-
 with open(os.path.join(R, "HEADLINES.json"), "w") as f:
     json.dump(H, f, indent=1)
 
@@ -208,29 +188,20 @@ if __name__ == "__main__":
                 f"   {t:7} gap {d['gap']:+5.1f}  "
                 f"CI[{d['ci'][0]:+.1f},{d['ci'][1]:+.1f}]  p={d['p']}"
             )
-    print("   => only Opus is positive (and borderline); others tie or lose.")
+    print("   => no model's aggregate gap is significantly positive under maze-level")
+    print("      clustering; Qwen's is significantly negative.")
 
     print("\n2) Where the advantage lives (atypical decision points, first-unvisited taxonomy):")
     for t in MODELS:
         d = H["self_advantage_atypical"][t]
         print(
             f"   {t:7} n={d['n']:3}  self {d['self_acc']:5}  vs best({d['best_other']}) "
-            f"gap {d['gap_vs_best_other']:+.1f}  p={d['p_value']}  holm={d['holm_p']}"
+            f"gap {d['gap_vs_best_other']:+.1f}  p={d['p_value_cluster_perm']}  "
+            f"holm={d['holm_p']}"
         )
     print(
         "   => Opus beats every predictor individually on its atypical cells; "
         "Sonnet/GPT are worse there."
-    )
-
-    print("\n2b) Opus mid-horizon per-step advantage (self vs best-other, by step):")
-    for r in H["opus_midhorizon_per_step"]["by_step"]:
-        flag = "  <== CI excludes 0" if r["sig"] else ""
-        print(
-            f"   step {r['step']}: {r['gap']:+5.1f}  CI[{r['ci'][0]:+.1f},{r['ci'][1]:+.1f}]{flag}"
-        )
-    print(
-        "   => Opus is the only model with a positive mid-horizon spike (peak step 5 +11.3); "
-        "others flat-to-negative."
     )
 
     print("\n3) Oracle: % of items only self predicts correctly:")
@@ -291,35 +262,23 @@ if __name__ == "__main__":
         f"(mean {da['mean_residual_same_developer']})"
     )
     print(
-        f"   glm<->qwen are DIFFERENT developers (Zhipu vs Alibaba), shown separately: "
-        f"{da['open_weight_pair_glm_qwen']}"
-    )
-    print(
-        "   => no clean same-developer affinity with this lineup; opus->sonnet (+12.5) is a "
-        "one-directional specialization."
+        "   => no clean same-developer affinity with this lineup (n=2, wildly asymmetric); "
+        "opus->sonnet is a one-directional specialization."
     )
 
     print(
         "\n10) Self vs OTHER prediction (raw other-skill is target-difficulty-confounded; "
-        "residual controls for it):"
+        "the joint-fit predictor effects control for it):"
     )
     for m in MODELS:
         d = H["self_vs_other_prediction_dissociation"].get(m, {})
-        rp = d.get("mean_residual_as_predictor")
-        rpt = f"{rp:+.2f}" if rp is not None else "NA"
-        print(
-            f"   {m:7} self {d.get('self_acc')}  raw-other {d.get('skill_predicting_others')}  "
-            f"residual-as-predictor {rpt}"
-        )
+        print(f"   {m:7} self {d.get('self_acc')}  raw-other {d.get('skill_predicting_others')}")
+    pe = H.get("predictor_effects") or {}
+    print(f"   joint-fit predictor effects: {pe}")
     print(
-        "   => Opus: ~average simulator (resid -2.2) but the ONLY privileged self-access "
-        "-> introspector."
+        "   => Opus sits well below the other four as a simulator, but has the only "
+        "privileged self-access; the other four are within a point of each other."
     )
-    print(
-        "      Qwen/GPT: best simulators (resid +6.4/+4.5). Sonnet: weakest at BOTH self and "
-        "simulation (its high"
-    )
-    print("      raw-other 72.3 is just an artifact of predicting the easy targets gpt/qwen).")
 
     print("\n11) Predictability decay by step (mean over predictors) - note Opus cliff at step 4:")
     for t in MODELS:
@@ -343,10 +302,6 @@ if __name__ == "__main__":
     print("\n13) Per-step cross-model convergence (NR prior vs reasoned):")
     print(f"   NR : {H['cross_model_agreement_by_step']['nr']}")
     print(f"   R  : {H['cross_model_agreement_by_step']['reasoning']}")
-    print(
-        f"   caveat: at step 8 Opus self-prediction falls BELOW the modal baseline "
-        f"(lift {H['opus_step8_lift_vs_modal_baseline']})."
-    )
 
     print(
         "\n14) Error propagation P(next correct | this correct vs wrong) - errors are sticky "

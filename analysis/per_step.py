@@ -6,7 +6,7 @@ Horizon-resolved analyses (the per-step lens)
 Consolidates and extends step-by-step views that don't belong to a single thematic script:
 - self_consistency_by_step: where over the horizon do a model's runs stop agreeing (is Opus's
   temp-0 instability concentrated mid-horizon, exactly where its self-advantage lives?).
-- forced_vs_branch_by_step: self-accuracy on forced vs branch steps, per step.
+- determined_vs_branch_by_step: self-accuracy on determined vs branch steps, per step.
 - self_matches_consensus_by_step: does self track the consensus-of-others more as the horizon grows?
 - error_propagation: P(correct at k+1 | correct at k) vs P(correct at k+1 | wrong at k) -- are
   steps independent or does getting one right carry forward.
@@ -58,11 +58,13 @@ RES["self_consistency_by_step"] = {m: _consistency(m) for m in MODELS}
 
 
 # ============================================================
-# FORCED VS BRANCH ACCURACY BY STEP
+# DETERMINED VS BRANCH ACCURACY BY STEP
 # ============================================================
+# Determined = two or more legal moves with exactly one unvisited (a forced step, by contrast,
+# has a single legal move and is executed without an API call).
 
 
-def _forced_vs_branch(m):
+def _determined_vs_branch(m):
     df = pd.DataFrame(
         [(mz, s, c, len(C.unvisited_moves(m, mz, s))) for (mz, s), c in C.SELF[m].items()],
         columns=["maze", "step", "correct", "n_unvisited"],
@@ -74,8 +76,8 @@ def _forced_vs_branch(m):
         rows.append(
             {
                 "step": s,
-                "forced_acc": C.pct(f.mean()) if len(f) else None,
-                "n_forced": int(len(f)),
+                "determined_acc": C.pct(f.mean()) if len(f) else None,
+                "n_determined": int(len(f)),
                 "branch_acc": C.pct(b.mean()) if len(b) else None,
                 "n_branch": int(len(b)),
             }
@@ -83,7 +85,7 @@ def _forced_vs_branch(m):
     return rows
 
 
-RES["forced_vs_branch_by_step"] = {m: _forced_vs_branch(m) for m in MODELS}
+RES["determined_vs_branch_by_step"] = {m: _determined_vs_branch(m) for m in MODELS}
 
 
 # ============================================================

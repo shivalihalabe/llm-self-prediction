@@ -18,8 +18,8 @@ Core objects
 ------------
 RECORDS : tidy DataFrame, one row per scored run-0 prediction
           [kind, predictor, target, maze, step, pred, truth, correct]
-SELF[m], SELF_NR[m], CROSS[(p, t)], PILOT[(m, fr)]  -> {(maze, step): correct}
-SELF_POS / CROSS_POS / ...                          -> {(maze, step): [r, c]}
+SELF[m], SELF_NR[m], CROSS[(p, t)]  -> {(maze, step): correct}
+SELF_POS / CROSS_POS / ...          -> {(maze, step): [r, c]}
 CONSISTENT[m], INTERSECTION, PAIRWISE[(a, b)], MAZE_DIFFICULTY, DIFFICULTY_STRATA
 TRUTH[m][maze] -> trajectory; WALLS[maze] -> set of blocked frozensets
 
@@ -59,6 +59,13 @@ WALLS = {
     mz["id"]: {frozenset([tuple(a), tuple(b)]) for a, b in mz["walls"]}
     for mz in _nav(MODELS[0])["mazes"]
 }
+for _m in MODELS[1:]:
+    _w = {
+        mz["id"]: {frozenset([tuple(a), tuple(b)]) for a, b in mz["walls"]}
+        for mz in _nav(_m)["mazes"]
+    }
+    assert _w == WALLS, f"maze definitions in {_m}'s navigation file differ from {MODELS[0]}'s"
+del _w
 
 
 # ============================================================
@@ -66,12 +73,8 @@ WALLS = {
 # ============================================================
 
 
-def _iter_scored(node, target, listed):
-    """Yield (maze, step, pred_tuple, correct) for run-0 parsed records under a prediction node.
-
-    listed distinguishes the two on-disk shapes: reasoning/no-reasoning store a list of
-    runs per (maze, step); the pilot stores a single record.
-    """
+def _iter_scored(node, target):
+    """Yield (maze, step, pred_tuple, correct) for run-0 parsed records under a prediction node."""
     truth = TRUTH[target]
     for mz, steps in node.items():
         if mz not in truth:
@@ -80,7 +83,7 @@ def _iter_scored(node, target, listed):
             si = int(stp.split("_")[1])
             if si >= len(truth[mz]):
                 continue
-            rec = next((r for r in payload if r.get("run_idx") == 0), None) if listed else payload
+            rec = next((r for r in payload if r.get("run_idx") == 0), None)
             if not rec or rec.get("parsed_position") is None:
                 continue
             pred = tuple(rec["parsed_position"])
@@ -98,7 +101,7 @@ def _records():
             node = _load_predictions(
                 os.path.join(DATA, "self_prediction", f"{m}_self_{mode}.json")
             )[f"{m}_self_{mode}"]
-            for mz, si, pred, ok in _iter_scored(node, m, listed=True):
+            for mz, si, pred, ok in _iter_scored(node, m):
                 rows.append((kind, m, m, mz, si, pred, ok))
     for p in MODELS:
         xp = _load_predictions(os.path.join(DATA, "cross_prediction", f"{p}_xpred_reasoning.json"))
@@ -106,13 +109,8 @@ def _records():
             cell = f"{p}_xpred_{t}_reasoning"
             if cell not in xp:
                 continue
-            for mz, si, pred, ok in _iter_scored(xp[cell], t, listed=True):
+            for mz, si, pred, ok in _iter_scored(xp[cell], t):
                 rows.append(("cross", p, t, mz, si, pred, ok))
-    pilot = _load_predictions(os.path.join(DATA, "self_framing_pilot.json"))
-    for m in MODELS:
-        for fr, node in pilot[m].items():
-            for mz, si, pred, ok in _iter_scored(node, m, listed=False):
-                rows.append((f"pilot:{fr}", m, m, mz, si, pred, ok))
     df = pd.DataFrame(
         rows, columns=["kind", "predictor", "target", "maze", "step", "pred", "correct"]
     )
@@ -154,14 +152,6 @@ for _row in (
     ]
     CROSS[(_row.predictor, _row.target)], CROSS_POS[(_row.predictor, _row.target)] = _as_dicts(_sub)
 
-PILOT, PILOT_POS = {}, {}
-for _kind in RECORDS[RECORDS.kind.str.startswith("pilot:")].kind.unique():
-    _fr = _kind.split(":", 1)[1]
-    for _m in MODELS:
-        _sub = RECORDS[(RECORDS.kind == _kind) & (RECORDS.target == _m)]
-        if len(_sub):
-            PILOT[(_m, _fr)], PILOT_POS[(_m, _fr)] = _as_dicts(_sub)
-
 
 # ============================================================
 # MAZE SETS
@@ -171,6 +161,18 @@ for _kind in RECORDS[RECORDS.kind.str.startswith("pilot:")].kind.unique():
 CONSISTENT = {
     m: set(RECORDS[(RECORDS.kind == "self") & (RECORDS.target == m)].maze.unique()) for m in MODELS
 }
+# The consistent set is inferred from which mazes appear in the self-prediction records; check
+# it against the navigation data (three runs, identical trajectories) and require the full
+# eight scored steps per maze, so a cell silently dropped at generation would surface here.
+for _m in MODELS:
+    _runs_by_maze = _nav(_m)["navigation"][_m]
+    for _mz in CONSISTENT[_m]:
+        _runs = [r["trajectory"] for r in _runs_by_maze[_mz]["runs"]]
+        assert len(_runs) == 3 and _runs[0] == _runs[1] == _runs[2], (
+            f"{_m}/{_mz}: consistent maze lacks three identical navigation runs"
+        )
+        _n_scored = sum((_mz, _s) in SELF[_m] for _s in range(1, 9))
+        assert _n_scored == 8, f"{_m}/{_mz}: {_n_scored} scored steps, expected 8"
 INTERSECTION = set.intersection(*(CONSISTENT[m] for m in MODELS))
 PAIRWISE = {
     tuple(sorted((a, b))): CONSISTENT[a] & CONSISTENT[b]
@@ -313,26 +315,18 @@ def direction(a, b):
     return _DIR.get((b[0] - a[0], b[1] - a[1]))
 
 
-def chose_first_listed(target, maze, step):
-    """True if the actual move at step was the alphabetically-first legal direction."""
-    traj = TRUTH[target][maze]
-    if step < 1 or step >= len(traj):
-        return None
-    a = tuple(traj[step - 1])
-    legal = sorted(direction(a, nb) for nb in legal_moves(target, maze, step))
-    if not legal:
-        return None
-    return direction(a, tuple(traj[step])) == legal[0]
-
-
 def chose_first_unvisited(target, maze, step):
     """True if the actual move was the alphabetically-first UNVISITED legal direction.
 
-    The labeling predicate for the default/atypical taxonomy: across 3,578 opportunities
+    The canonical predicate defining the default/atypical split: across 3,578 opportunities
     no model ever took a visited direction when an unvisited one was available, so the
-    effective choice set at a decision point is the unvisited directions.
+    effective choice set at a decision point is the unvisited directions. A superseded
+    definition (first-listed among all legal directions) was removed rather than kept as
+    a comparator.
     """
     traj = [tuple(p) for p in TRUTH[target][maze]]
+    if step < 1 or step >= len(traj):
+        return None
     pos = traj[step - 1]
     unv = sorted(direction(pos, tuple(nb)) for nb in unvisited_moves(target, maze, step))
     return direction(pos, traj[step]) == unv[0]
@@ -362,6 +356,13 @@ def pearson(xs, ys):
     return None if np.isnan(r) else round(float(r), 3)
 
 
+def best_other_model(t, mazeset=None):
+    """The external model with the highest cross-accuracy on target t (optional maze set)."""
+    cand = {p: acc(CROSS[(p, t)], mazeset)[0] for p in MODELS if p != t and (p, t) in CROSS}
+    cand = {p: v for p, v in cand.items() if v is not None}
+    return max(cand, key=cand.get) if cand else None
+
+
 def perm_corr_p(xs, ys, n_perm=10000, seed=20260609):
     """Two-sided permutation p-value for the Pearson correlation (robust at small n)."""
     if pearson(xs, ys) is None:
@@ -375,7 +376,18 @@ def perm_corr_p(xs, ys, n_perm=10000, seed=20260609):
         n_resamples=n_perm,
         rng=np.random.default_rng(seed),
     )
-    return round(float(res.pvalue), 4)
+    return round(float(res.pvalue), 6)
+
+
+def fmt_p(p):
+    """Emission format for p-values: 6 decimals; a Monte Carlo zero (10,000 draws) is
+    reported as "<0.0001"; a positive value that underflows 6 decimals as "<1e-6"."""
+    if p is None:
+        return None
+    if p == 0.0:
+        return "<0.0001"
+    r = round(float(p), 6)
+    return "<1e-6" if r == 0.0 else r
 
 
 # ============================================================

@@ -198,61 +198,61 @@
    }
   }
  },
- "forced_vs_branch_by_step": {
+ "determined_vs_branch_by_step": {
   "opus": [
    {
     "step": 1,
-    "forced_acc": 100.0,
-    "n_forced": 64,
+    "determined_acc": 100.0,
+    "n_determined": 64,
     "branch_acc": 100.0,
     "n_branch": 33
    },
    {
     "step": 2,
-    "forced_acc": 100.0,
-    "n_forced": 56,
+    "determined_acc": 100.0,
+    "n_determined": 56,
     "branch_acc": 82.9,
     "n_branch": 41
    },
    {
     "step": 3,
-    "forced_acc": 100.0,
-    "n_forced": 45,
+    "determined_acc": 100.0,
+    "n_determined": 45,
     "branch_acc": 69.2,
     "n_branch": 52
    },
    {
     "step": 4,
-    "forced_acc": 80.0,
-    "n_forced": 40,
+    "determined_acc": 80.0,
+    "n_determined": 40,
     "branch_acc": 33.3,
     "n_branch": 57
    },
    {
     "step": 5,
-    "forced_acc": 62.5,
-    "n_forced": 48,
+    "determined_acc": 62.5,
+    "n_determined": 48,
     "branch_acc": 39.6,
     "n_branch": 48
    },
    {
     "step": 6,
-    "forced_acc": 55.6,
-    "n_forced": 36,
+    "determined_acc": 55.6,
+    "n_determined": 36,
     "branch_acc": 22.0,
     "n_branch": 59
    },
    {
     "step": 7,
-    "forced_acc": 38.2,
-    "n_forced": 34,
+    "determined_acc": 38.2,
+    "n_determined": 34,
     "branch_acc": 29.3,
     "n_branch": 58
    },
    {
     "step": 8,
-    "forced_acc": 26.1,
-    "n_forced": 46,
+    "determined_acc": 26.1,
+    "n_determined": 46,
     "branch_acc": 28.0,
     "n_branch": 50
    }
@@ -260,57 +260,57 @@
   "sonnet": [
    {
     "step": 1,
-    "forced_acc": 100.0,
-    "n_forced": 49,
+    "determined_acc": 100.0,
+    "n_determined": 49,
     "branch_acc": 4.0,
     "n_branch": 25
    },
    {
     "step": 2,
-    "forced_acc": 68.0,
-    "n_forced": 50,
+    "determined_acc": 68.0,
+    "n_determined": 50,
     "branch_acc": 29.2,
     "n_branch": 24
    },
    {
     "step": 3,
-    "forced_acc": 50.0,
-    "n_forced": 36,
+    "determined_acc": 50.0,
+    "n_determined": 36,
     "branch_acc": 37.8,
     "n_branch": 37
    },
    {
     "step": 4,
-    "forced_acc": 43.6,
-    "n_forced": 39,
+    "determined_acc": 43.6,
+    "n_determined": 39,
     "branch_acc": 25.7,
     "n_branch": 35
    },
    {
     "step": 5,
-    "forced_acc": 34.3,
-    "n_forced": 35,
+    "determined_acc": 34.3,
+    "n_determined": 35,
     "branch_acc": 17.9,
     "n_branch": 39
    },
    {
     "step": 6,
-    "forced_acc": 30.4,
-    "n_forced": 23,
+    "determined_acc": 30.4,
+    "n_determined": 23,
     "branch_acc": 16.0,
     "n_branch": 50
    },
    {
     "step": 7,
-    "forced_acc": 16.7,
-    "n_forced": 30,
+    "determined_acc": 16.7,
+    "n_determined": 30,
     "branch_acc": 18.9,
     "n_branch": 37
    },
    {
     "step": 8,
-    "forced_acc": 38.9,
-    "n_forced": 36,
+    "determined_acc": 38.9,
+    "n_determined": 36,
     "branch_acc": 20.6,
     "n_branch": 34
    }
@@ -318,57 +318,57 @@
   "gpt": [
    {
     "step": 1,
-    "forced_acc": 100.0,
-    "n_forced": 36,
+    "determined_acc": 100.0,
+    "n_determined": 36,
     "branch_acc": 100.0,
     "n_branch": 17
    },
    {
     "step": 2,
-    "forced_acc": 100.0,
-    "n_forced": 30,
+    "determined_acc": 100.0,
+    "n_determined": 30,
     "branch_acc": 100.0,
     "n_branch": 23
    },
    {
     "step": 3,
-    "forced_acc": 100.0,
-    "n_forced": 33,
+    "determined_acc": 100.0,
+    "n_determined": 33,
     "branch_acc": 85.0,
     "n_branch": 20
    },
    {
     "step": 4,
-    "forced_acc": 95.8,
-    "n_forced": 24,
+    "determined_acc": 95.8,
+    "n_determined": 24,
     "branch_acc": 89.7,
     "n_branch": 29
    },
    {
     "step": 5,
-    "forced_acc": 96.2,
-    "n_forced": 26,
+    "determined_acc": 96.2,
+    "n_determined": 26,
     "branch_acc": 85.2,
     "n_branch": 27
    },
    {
     "step": 6,
-    "forced_acc": 95.2,
-    "n_forced": 21,
+    "determined_acc": 95.2,
+    "n_determined": 21,
     "branch_acc": 64.5,
     "n_branch": 31
    },
    {
     "step": 7,
-    "forced_acc": 81.5,
-    "n_forced": 27,
+    "determined_acc": 81.5,
+    "n_determined": 27,
     "branch_acc": 75.0,
     "n_branch": 24
    },
    {
     "step": 8,
-    "forced_acc": 88.9,
-    "n_forced": 27,
+    "determined_acc": 88.9,
+    "n_determined": 27,
     "branch_acc": 68.0,
     "n_branch": 25
    }
@@ -376,57 +376,57 @@
   "glm": [
    {
     "step": 1,
-    "forced_acc": 100.0,
-    "n_forced": 37,
+    "determined_acc": 100.0,
+    "n_determined": 37,
     "branch_acc": 100.0,
     "n_branch": 15
    },
    {
     "step": 2,
-    "forced_acc": 100.0,
-    "n_forced": 32,
+    "determined_acc": 100.0,
+    "n_determined": 32,
     "branch_acc": 45.0,
     "n_branch": 20
    },
    {
     "step": 3,
-    "forced_acc": 87.5,
-    "n_forced": 24,
+    "determined_acc": 87.5,
+    "n_determined": 24,
     "branch_acc": 48.1,
     "n_branch": 27
    },
    {
     "step": 4,
-    "forced_acc": 65.2,
-    "n_forced": 23,
+    "determined_acc": 65.2,
+    "n_determined": 23,
     "branch_acc": 51.7,
     "n_branch": 29
    },
    {
     "step": 5,
-    "forced_acc": 62.1,
-    "n_forced": 29,
+    "determined_acc": 62.1,
+    "n_determined": 29,
     "branch_acc": 17.4,
     "n_branch": 23
    },
    {
     "step": 6,
-    "forced_acc": 50.0,
-    "n_forced": 26,
+    "determined_acc": 50.0,
+    "n_determined": 26,
     "branch_acc": 20.0,
     "n_branch": 20
    },
    {
     "step": 7,
-    "forced_acc": 54.5,
-    "n_forced": 33,
+    "determined_acc": 54.5,
+    "n_determined": 33,
     "branch_acc": 21.4,
     "n_branch": 14
    },
    {
     "step": 8,
-    "forced_acc": 36.0,
-    "n_forced": 25,
+    "determined_acc": 36.0,
+    "n_determined": 25,
     "branch_acc": 20.0,
     "n_branch": 25
    }
@@ -434,57 +434,57 @@
   "qwen": [
    {
     "step": 1,
-    "forced_acc": 100.0,
-    "n_forced": 59,
+    "determined_acc": 100.0,
+    "n_determined": 59,
     "branch_acc": 100.0,
     "n_branch": 31
    },
    {
     "step": 2,
-    "forced_acc": 100.0,
-    "n_forced": 51,
+    "determined_acc": 100.0,
+    "n_determined": 51,
     "branch_acc": 94.9,
     "n_branch": 39
    },
    {
     "step": 3,
-    "forced_acc": 100.0,
-    "n_forced": 42,
+    "determined_acc": 100.0,
+    "n_determined": 42,
     "branch_acc": 100.0,
     "n_branch": 48
    },
    {
     "step": 4,
-    "forced_acc": 100.0,
-    "n_forced": 44,
+    "determined_acc": 100.0,
+    "n_determined": 44,
     "branch_acc": 95.7,
     "n_branch": 46
    },
    {
     "step": 5,
-    "forced_acc": 98.1,
-    "n_forced": 52,
+    "determined_acc": 98.1,
+    "n_determined": 52,
     "branch_acc": 88.9,
     "n_branch": 36
    },
    {
     "step": 6,
-    "forced_acc": 90.9,
-    "n_forced": 44,
+    "determined_acc": 90.9,
+    "n_determined": 44,
     "branch_acc": 97.7,
     "n_branch": 44
    },
    {
     "step": 7,
-    "forced_acc": 81.0,
-    "n_forced": 42,
+    "determined_acc": 81.0,
+    "n_determined": 42,
     "branch_acc": 89.7,
     "n_branch": 39
    },
    {
     "step": 8,
-    "forced_acc": 88.5,
-    "n_forced": 52,
+    "determined_acc": 88.5,
+    "n_determined": 52,
     "branch_acc": 87.9,
     "n_branch": 33
    }

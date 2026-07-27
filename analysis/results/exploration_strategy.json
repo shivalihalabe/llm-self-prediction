@@ -26,39 +26,49 @@
    "default_move": "alphabetically first UNVISITED legal direction (E < N < S < W)"
   }
  },
- "forced_vs_branch_self": {
+ "determined_vs_branch_self": {
   "opus": {
-   "forced_self_acc": 73.7,
-   "n_forced": 369,
+   "determined_self_acc": 73.7,
+   "n_determined_correct": 272,
+   "n_determined": 369,
    "branch_self_acc": 46.5,
+   "n_branch_correct": 185,
    "n_branch": 398,
    "drop_at_branches": 27.2
   },
   "sonnet": {
-   "forced_self_acc": 52.3,
-   "n_forced": 298,
+   "determined_self_acc": 52.3,
+   "n_determined_correct": 156,
+   "n_determined": 298,
    "branch_self_acc": 21.4,
+   "n_branch_correct": 60,
    "n_branch": 281,
    "drop_at_branches": 31.0
   },
   "gpt": {
-   "forced_self_acc": 95.1,
-   "n_forced": 224,
+   "determined_self_acc": 95.1,
+   "n_determined_correct": 213,
+   "n_determined": 224,
    "branch_self_acc": 82.1,
+   "n_branch_correct": 161,
    "n_branch": 196,
    "drop_at_branches": 12.9
   },
   "glm": {
-   "forced_self_acc": 71.2,
-   "n_forced": 229,
+   "determined_self_acc": 71.2,
+   "n_determined_correct": 163,
+   "n_determined": 229,
    "branch_self_acc": 39.3,
+   "n_branch_correct": 68,
    "n_branch": 173,
    "drop_at_branches": 31.9
   },
   "qwen": {
-   "forced_self_acc": 95.1,
-   "n_forced": 386,
+   "determined_self_acc": 95.1,
+   "n_determined_correct": 367,
+   "n_determined": 386,
    "branch_self_acc": 94.6,
+   "n_branch_correct": 299,
    "n_branch": 316,
    "drop_at_branches": 0.5
   }
@@ -67,7 +77,6 @@
   "opus": {
    "n_branch_decisions": 398,
    "direction_entropy": 1.461,
-   "first_listed_rate": 36.2,
    "backtrack_rate_at_branches": 0.0,
    "direction_distribution": {
     "East": 144,
@@ -79,7 +88,6 @@
   "sonnet": {
    "n_branch_decisions": 281,
    "direction_entropy": 1.495,
-   "first_listed_rate": 35.2,
    "backtrack_rate_at_branches": 0.0,
    "direction_distribution": {
     "South": 153,
@@ -91,7 +99,6 @@
   "gpt": {
    "n_branch_decisions": 196,
    "direction_entropy": 1.256,
-   "first_listed_rate": 68.9,
    "backtrack_rate_at_branches": 0.0,
    "direction_distribution": {
     "East": 119,
@@ -102,7 +109,6 @@
   "glm": {
    "n_branch_decisions": 173,
    "direction_entropy": 1.774,
-   "first_listed_rate": 45.1,
    "backtrack_rate_at_branches": 0.0,
    "direction_distribution": {
     "South": 60,
@@ -114,7 +120,6 @@
   "qwen": {
    "n_branch_decisions": 316,
    "direction_entropy": 1.286,
-   "first_listed_rate": 81.0,
    "backtrack_rate_at_branches": 0.0,
    "direction_distribution": {
     "East": 205,
@@ -132,11 +137,11 @@
  },
  "regularity_vs_predictability": {
   "pearson_default_rate_vs_predictability": 0.974,
-  "perm_p_default_rate_vs_predictability": 0.031,
+  "perm_p_default_rate_vs_predictability": 0.030997,
   "pearson_entropy_vs_predictability": -0.704,
-  "perm_p_entropy_vs_predictability": 0.104,
+  "perm_p_entropy_vs_predictability": 0.10399,
   "n_models": 5,
-  "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; positive default-rate correlation / negative entropy correlation => more rule-like models are more predictable; perm p is the seeded scipy two-sided convention used throughout (exact two-sided by |r| exceedance at n=5: 2/120 = 0.0167)"
+  "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; positive default-rate correlation / negative entropy correlation => more rule-like models are more predictable"
  },
  "first_move": {
   "opus": {
@@ -496,8 +501,11 @@
      "branch_rate": 51.5
     }
    ],
+   "n_steps": 8,
    "corr_gap_vs_branch_rate": 0.38,
-   "corr_gap_vs_prior_nr": -0.598
+   "perm_p_gap_vs_branch_rate": 0.343166,
+   "corr_gap_vs_prior_nr": -0.598,
+   "perm_p_gap_vs_prior_nr": 0.09779
   },
   "sonnet": {
    "best_other": "opus",
@@ -567,8 +575,11 @@
      "branch_rate": 45.9
     }
    ],
+   "n_steps": 8,
    "corr_gap_vs_branch_rate": -0.41,
-   "corr_gap_vs_prior_nr": 0.727
+   "perm_p_gap_vs_branch_rate": 0.307569,
+   "corr_gap_vs_prior_nr": 0.727,
+   "perm_p_gap_vs_prior_nr": 0.043396
   },
   "gpt": {
    "best_other": "qwen",
@@ -638,8 +649,11 @@
      "branch_rate": 47.2
     }
    ],
+   "n_steps": 8,
    "corr_gap_vs_branch_rate": -0.236,
-   "corr_gap_vs_prior_nr": 0.518
+   "perm_p_gap_vs_branch_rate": 0.570943,
+   "corr_gap_vs_prior_nr": 0.518,
+   "perm_p_gap_vs_prior_nr": 0.20098
   },
   "glm": {
    "best_other": "gpt",
@@ -709,8 +723,11 @@
      "branch_rate": 48.1
     }
    ],
+   "n_steps": 8,
    "corr_gap_vs_branch_rate": -0.355,
-   "corr_gap_vs_prior_nr": 0.249
+   "perm_p_gap_vs_branch_rate": 0.484752,
+   "corr_gap_vs_prior_nr": 0.249,
+   "perm_p_gap_vs_prior_nr": 0.718128
   },
   "qwen": {
    "best_other": "gpt",
@@ -780,29 +797,23 @@
      "branch_rate": 36.7
     }
    ],
+   "n_steps": 8,
    "corr_gap_vs_branch_rate": 0.347,
-   "corr_gap_vs_prior_nr": 0.602
+   "perm_p_gap_vs_branch_rate": 0.39996,
+   "corr_gap_vs_prior_nr": 0.602,
+   "perm_p_gap_vs_prior_nr": 0.066593
   }
  },
  "self_model_mismatch": {
   "opus": {
-   "firstlisted_landing_test_pooled": {
-    "n_wrong": 152,
-    "on_firstlisted": 86,
-    "pct": 56.6,
-    "landed_on_unvisited_nonchosen": 87,
-    "expected_on_firstlisted_null": 74.0,
-    "expected_pct_null": 48.7,
-    "perm_p": 0.0
-   },
    "firstlisted_landing_test_3plus": {
     "n_wrong": 41,
     "on_firstlisted": 25,
-    "pct": 61.0,
     "landed_on_unvisited_nonchosen": 26,
+    "pct": 96.2,
     "expected_on_firstlisted_null": 13.0,
-    "expected_pct_null": 31.7,
-    "perm_p": 0.0
+    "expected_pct_null": 50.0,
+    "perm_p": "<0.0001"
    },
    "atypical_cells_by_option_count": {
     "two_options": 144,
@@ -818,30 +829,16 @@
     "East": 147,
     "North": 45,
     "South": 1
-   },
-   "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 152,
-    "on_firstlisted": 86,
-    "pct": 56.6
    }
   },
   "sonnet": {
-   "firstlisted_landing_test_pooled": {
-    "n_wrong": 144,
-    "on_firstlisted": 68,
-    "pct": 47.2,
-    "landed_on_unvisited_nonchosen": 68,
-    "expected_on_firstlisted_null": 62.0,
-    "expected_pct_null": 43.1,
-    "perm_p": 0.0005
-   },
    "firstlisted_landing_test_3plus": {
     "n_wrong": 29,
     "on_firstlisted": 12,
-    "pct": 41.4,
     "landed_on_unvisited_nonchosen": 12,
+    "pct": 100.0,
     "expected_on_firstlisted_null": 6.0,
-    "expected_pct_null": 20.7,
+    "expected_pct_null": 50.0,
     "perm_p": 0.0005
    },
    "atypical_cells_by_option_count": {
@@ -857,28 +854,14 @@
    "firstlisted_direction_distribution": {
     "East": 128,
     "North": 19
-   },
-   "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 144,
-    "on_firstlisted": 68,
-    "pct": 47.2
    }
   },
   "gpt": {
-   "firstlisted_landing_test_pooled": {
-    "n_wrong": 14,
-    "on_firstlisted": 14,
-    "pct": 100.0,
-    "landed_on_unvisited_nonchosen": 14,
-    "expected_on_firstlisted_null": 14.0,
-    "expected_pct_null": 100.0,
-    "perm_p": 1.0
-   },
    "firstlisted_landing_test_3plus": {
     "n_wrong": 0,
     "on_firstlisted": 0,
-    "pct": null,
     "landed_on_unvisited_nonchosen": 0,
+    "pct": null,
     "expected_on_firstlisted_null": 0,
     "expected_pct_null": null,
     "perm_p": null
@@ -894,30 +877,16 @@
    "firstlisted_direction_distribution": {
     "East": 3,
     "North": 12
-   },
-   "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 14,
-    "on_firstlisted": 14,
-    "pct": 100.0
    }
   },
   "glm": {
-   "firstlisted_landing_test_pooled": {
-    "n_wrong": 66,
-    "on_firstlisted": 41,
-    "pct": 62.1,
-    "landed_on_unvisited_nonchosen": 41,
-    "expected_on_firstlisted_null": 37.0,
-    "expected_pct_null": 56.1,
-    "perm_p": 0.004
-   },
    "firstlisted_landing_test_3plus": {
     "n_wrong": 11,
     "on_firstlisted": 8,
-    "pct": 72.7,
     "landed_on_unvisited_nonchosen": 8,
+    "pct": 100.0,
     "expected_on_firstlisted_null": 4.0,
-    "expected_pct_null": 36.4,
+    "expected_pct_null": 50.0,
     "perm_p": 0.004
    },
    "atypical_cells_by_option_count": {
@@ -932,28 +901,14 @@
    },
    "firstlisted_direction_distribution": {
     "East": 68
-   },
-   "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 66,
-    "on_firstlisted": 41,
-    "pct": 62.1
    }
   },
   "qwen": {
-   "firstlisted_landing_test_pooled": {
-    "n_wrong": 4,
-    "on_firstlisted": 4,
-    "pct": 100.0,
-    "landed_on_unvisited_nonchosen": 4,
-    "expected_on_firstlisted_null": 3.0,
-    "expected_pct_null": 75.0,
-    "perm_p": 0.2502
-   },
    "firstlisted_landing_test_3plus": {
     "n_wrong": 2,
     "on_firstlisted": 2,
-    "pct": 100.0,
     "landed_on_unvisited_nonchosen": 2,
+    "pct": 100.0,
     "expected_on_firstlisted_null": 1.0,
     "expected_pct_null": 50.0,
     "perm_p": 0.2502
@@ -970,11 +925,6 @@
    "firstlisted_direction_distribution": {
     "North": 1,
     "East": 3
-   },
-   "wrong_self_pred_on_firstlisted_cell": {
-    "n_wrong": 4,
-    "on_firstlisted": 4,
-    "pct": 100.0
    }
   }
  },

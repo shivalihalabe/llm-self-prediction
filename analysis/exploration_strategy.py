@@ -5,8 +5,8 @@ Navigation-side mechanism
 What each model's exploration looks like, and why some
 models are more predictable than others.
 
-Covers forced vs branch self-accuracy, branch-choice regularity
-(direction entropy + first-listed rate) correlated with target predictability, the
+Covers determined vs branch self-accuracy, branch-choice regularity
+(direction entropy + default rate) correlated with target predictability, the
 first-move puzzle, trajectory shape, and a determinism diagnosis (where the 3 nav runs
 diverge for non-consistent mazes).
 
@@ -43,9 +43,8 @@ def _r3(x):
 # ============================================================
 # BRANCH DECISION TABLE
 # ============================================================
-# One row per genuine choice (>=2 unvisited moves) in a run-0 trajectory: what was chosen,
-# whether it was the first-listed legal direction, whether it backtracked. Everything
-# regularity-related aggregates off this frame.
+# One row per genuine choice (>=2 unvisited moves) in a run-0 trajectory: what was chosen and
+# whether it backtracked. Everything regularity-related aggregates off this frame.
 
 
 def _branch_rows():
@@ -58,36 +57,36 @@ def _branch_rows():
                 if len(uvm) < 2:
                     continue
                 a, b = tuple(traj[s - 1]), tuple(traj[s])
-                ch = direction(a, b)
-                legal_sorted = sorted(direction(a, nb) for nb in C.legal_moves(t, mz, s))
-                rows.append((t, mz, s, ch, ch == legal_sorted[0], b not in [tuple(x) for x in uvm]))
-    return pd.DataFrame(
-        rows, columns=["target", "maze", "step", "chosen", "first_listed", "backtrack"]
-    )
+                rows.append((t, mz, s, direction(a, b), b not in [tuple(x) for x in uvm]))
+    return pd.DataFrame(rows, columns=["target", "maze", "step", "chosen", "backtrack"])
 
 
 BRANCHES = _branch_rows()
 
 
 # ============================================================
-# FORCED VS BRANCH SELF-ACCURACY
+# DETERMINED VS BRANCH SELF-ACCURACY
 # ============================================================
+# Determined = two or more legal moves with exactly one unvisited (a forced step, by contrast,
+# has a single legal move and is executed without an API call).
 
 
-forced_branch = {}
+det_branch = {}
 for t in MODELS:
     f = [c for (mz, s), c in C.SELF[t].items() if len(C.unvisited_moves(t, mz, s)) == 1]
     b = [c for (mz, s), c in C.SELF[t].items() if len(C.unvisited_moves(t, mz, s)) >= 2]
-    forced_branch[t] = {
-        "forced_self_acc": C.pct(sum(f), len(f)) if f else None,
-        "n_forced": len(f),
+    det_branch[t] = {
+        "determined_self_acc": C.pct(sum(f), len(f)) if f else None,
+        "n_determined_correct": sum(f),
+        "n_determined": len(f),
         "branch_self_acc": C.pct(sum(b), len(b)) if b else None,
+        "n_branch_correct": sum(b),
         "n_branch": len(b),
         "drop_at_branches": (
             round(100.0 * sum(f) / len(f) - 100.0 * sum(b) / len(b), 1) if f and b else None
         ),
     }
-RES["forced_vs_branch_self"] = forced_branch
+RES["determined_vs_branch_self"] = det_branch
 
 
 # ============================================================
@@ -104,7 +103,6 @@ for t in MODELS:
     regularity[t] = {
         "n_branch_decisions": n_branch,
         "direction_entropy": _r3(entropy(chosen_dirs)),  # lower => more rule-like
-        "first_listed_rate": C.pct(g.first_listed.mean()) if n_branch else None,
         "backtrack_rate_at_branches": C.pct(g.backtrack.mean()) if n_branch else None,
         "direction_distribution": dict(chosen_dirs),
     }
@@ -119,12 +117,10 @@ RES["target_predictability"] = predictability
 # correlation across the 5 models: does branch regularity predict predictability?
 ms = [m for m in MODELS if regularity[m]["direction_entropy"] is not None]
 _ent = [regularity[m]["direction_entropy"] for m in ms]
-_fl = [regularity[m]["first_listed_rate"] for m in ms]
 _pr = [predictability[m] for m in ms]
-# Rule-likeness under the corrected taxonomy: the default rate (share of decision points where
-# the model took the alphabetically-first unvisited direction). The retired first-listed rate
-# compressed the spread (35-81 vs 47.7-98.7) because refusals to backtrack counted as
-# deviations.
+# Rule-likeness is the default rate: the share of decision points where the model took the
+# alphabetically-first unvisited direction. It replaced a first-listed-among-all-legal rate
+# that counted refusals to backtrack as deviations.
 _dr = []
 for m in MODELS:
     dps = [
@@ -134,6 +130,8 @@ for m in MODELS:
         if C.is_branch(m, mz, s2)
     ]
     _dr.append(C.pct(sum(C.chose_first_unvisited(m, mz, s2) for mz, s2 in dps), len(dps)))
+# perm p here is the seeded scipy two-sided convention (doubled tail), unlike the exhaustive
+# |r|-exceedance count used for cross_acc_vs_target_self_acc in cross_structure.py.
 RES["regularity_vs_predictability"] = {
     "pearson_default_rate_vs_predictability": pearson(_dr, _pr),
     "perm_p_default_rate_vs_predictability": C.perm_corr_p(_dr, _pr),
@@ -142,8 +140,7 @@ RES["regularity_vs_predictability"] = {
     "n_models": len(ms),
     "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; "
     "positive default-rate correlation / negative entropy correlation => more rule-like "
-    "models are more predictable; perm p is the seeded scipy two-sided convention used "
-    "throughout (exact two-sided by |r| exceedance at n=5: 2/120 = 0.0167)",
+    "models are more predictable",
 }
 
 
@@ -251,15 +248,9 @@ for m in MODELS:
 RES["branch_rate_by_step"] = branch_rate_by_step
 
 
-def _best_other(t):
-    c = {p: C.acc(C.CROSS[(p, t)])[0] for p in MODELS if p != t and (p, t) in C.CROSS}
-    c = {p: v for p, v in c.items() if v is not None}
-    return max(c, key=c.get) if c else None
-
-
 midh = {}
 for t in MODELS:
-    bo = _best_other(t)
+    bo = C.best_other_model(t)
     if bo is None:
         continue
     rows, gaps, brs = [], [], []
@@ -288,8 +279,15 @@ for t in MODELS:
     midh[t] = {
         "best_other": bo,
         "by_step": rows,
+        "n_steps": len(rows),
         "corr_gap_vs_branch_rate": C.pearson(brs, gaps) if len(brs) == len(gaps) else None,
+        "perm_p_gap_vs_branch_rate": (
+            C.perm_corr_p(brs, gaps) if len(brs) == len(gaps) else None
+        ),
         "corr_gap_vs_prior_nr": C.pearson(priors, gaps_p) if len(priors) >= 2 else None,
+        "perm_p_gap_vs_prior_nr": (
+            C.perm_corr_p(priors, gaps_p) if len(priors) >= 2 else None
+        ),
     }
 RES["self_advantage_vs_branch_rate"] = midh
 
@@ -310,17 +308,12 @@ for t in MODELS:
         if C.is_branch(t, mz, s) and not C.chose_first_unvisited(t, mz, s)
     ]
     chosen, firstlisted = collections.Counter(), collections.Counter()
-    n_wrong = on_fl = 0
     for mz, s in cells:
         traj = [tuple(p) for p in C.TRUTH[t][mz]]
         a = traj[s - 1]
         chosen[direction(a, traj[s])] += 1
         unv = {direction(a, tuple(nb)): tuple(nb) for nb in C.unvisited_moves(t, mz, s)}
-        fl = sorted(unv)[0]
-        firstlisted[fl] += 1
-        if C.SELF[t].get((mz, s)) is False:
-            n_wrong += 1
-            on_fl += tuple(C.SELF_POS[t][(mz, s)]) == unv[fl]
+        firstlisted[sorted(unv)[0]] += 1
     # Permutation baseline for the first-listed landing rate: under the null, a wrong prediction
     # that lands on a legal non-chosen move is equally likely to land on any of them, so the
     # designated "first-listed" cell is no more likely than a random alternative. (The analogous
@@ -339,33 +332,32 @@ for t in MODELS:
     def _landing(records):
         """Landing test over the given wrong-prediction records: observed hits on the
         first-unvisited cell vs a null where a prediction landing on an unvisited
-        non-chosen alternative is uniform over the alternatives."""
+        non-chosen alternative is uniform over the alternatives. Percentages are over
+        the predictions that landed on some unvisited alternative, the set the null is
+        built from; n_wrong is the full wrong-prediction count."""
         on_alt = [w for w in records if w[0] in w[2]]
         expected = sum(1.0 / len(cand) for _, _, cand, _ in on_alt)
         observed = sum(pred == fl for pred, fl, _, _ in records)
         rng = np.random.default_rng(20260609)
         draws = np.zeros(10000, dtype=int)
         for pred, _, cand, _ in on_alt:
-            draws += rng.integers(0, len(cand), 10000) == cand.index(pred) if pred in cand else 0
+            draws += rng.integers(0, len(cand), 10000) == cand.index(pred)
         return {
             "n_wrong": len(records),
             "on_firstlisted": observed,
-            "pct": C.pct(observed, len(records)) if records else None,
             "landed_on_unvisited_nonchosen": len(on_alt),
+            "pct": C.pct(observed, len(on_alt)) if on_alt else None,
             "expected_on_firstlisted_null": round(expected, 1),
-            "expected_pct_null": C.pct(expected, len(records)) if records else None,
-            "perm_p": round(float((draws >= observed).mean()), 4) if records else None,
+            "expected_pct_null": C.pct(expected, len(on_alt)) if on_alt else None,
+            "perm_p": C.fmt_p(float((draws >= observed).mean())) if records else None,
         }
 
-    # Pooled version kept for reference, labelled: at two-option cells the only alternative a
-    # wrong prediction can land on IS the first-listed one, so observed and null are both ~100%
-    # and those cells carry no information; pooling them understates the effect. The 3+ test is
-    # the discriminating one: the tidy-rule hypothesis predicts one specific cell while random
+    # Only cells with three or more unvisited options are informative: at two-option cells the
+    # single alternative a wrong prediction can land on IS the first-listed one, so observed
+    # and null are both ~100%. The tidy-rule hypothesis predicts one specific cell while random
     # error would spread across several.
-    test_pooled = _landing(wrong)
     test_3plus = _landing([w for w in wrong if w[3] >= 3])
     mismatch[t] = {
-        "firstlisted_landing_test_pooled": test_pooled,
         "firstlisted_landing_test_3plus": test_3plus,
         "atypical_cells_by_option_count": {
             "two_options": sum(1 for mz, s in cells if len(C.unvisited_moves(t, mz, s)) == 2),
@@ -376,11 +368,6 @@ for t in MODELS:
         "n_atypical_cells": len(cells),
         "chosen_direction_distribution": dict(chosen),
         "firstlisted_direction_distribution": dict(firstlisted),
-        "wrong_self_pred_on_firstlisted_cell": {
-            "n_wrong": n_wrong,
-            "on_firstlisted": on_fl,
-            "pct": C.pct(on_fl, n_wrong),
-        },
     }
 RES["self_model_mismatch"] = mismatch
 

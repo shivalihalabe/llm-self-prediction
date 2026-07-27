@@ -58,17 +58,17 @@ from openai import OpenAI
 # To switch model, edit this one line:
 MODEL = "opus"   # one of: opus, sonnet, gpt, glm, qwen
 
-_MODEL_IDS = {
+MODEL_IDS = {
     "opus":   "anthropic/claude-opus-4-6",
     "sonnet": "anthropic/claude-sonnet-4-6",
     "gpt":    "openai/gpt-5.4",
     "glm":    "z-ai/glm-5.1",
     "qwen":   "qwen/qwen3.6-plus",
 }
-assert MODEL in _MODEL_IDS, f"Unknown MODEL: {MODEL!r}"
+assert MODEL in MODEL_IDS, f"Unknown MODEL: {MODEL!r}"
 
 MODEL_KEY = MODEL
-MODEL_ID = _MODEL_IDS[MODEL]
+MODEL_ID = MODEL_IDS[MODEL]
 
 N_MAZES = 100
 N_NAV_RUNS = 3

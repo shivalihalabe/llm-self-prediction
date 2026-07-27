@@ -120,8 +120,6 @@ r_pct, r_by_step, r_n = _cross_model_agreement(C.SELF_POS)
 RES["cross_model_agreement"] = {
     "nr_pairwise_agreement_pct": nr_pct,
     "reasoning_pairwise_agreement_pct": r_pct,
-    "interpretation": "if NR agreement > reasoning agreement, reasoning individuates "
-    "models (each tracks its own path)",
     "by_step_nr": nr_by_step,
     "by_step_reasoning": r_by_step,
     "n_pairs_nr": nr_n,
@@ -166,14 +164,16 @@ RES["reasoning_correction"] = correction
 # DOES THE REASONED CONSENSUS TRACK TRUTH OR PRIOR?
 # ============================================================
 # For each target, the modal reasoned prediction (self + all cross-predictors) at each (maze,step),
-# compared to the target's truth and to its no-reasoning prior, by step.
+# compared to the target's truth and to its no-reasoning prior, by step. The self-prediction is
+# first in the vote list and Counter.most_common preserves first-seen order, so a tied vote would
+# resolve in favour of self; tied cells are excluded from both counts and reported as n_tied.
 
 
 cons_track = {}
 for t in MODELS:
     rows = []
     for s in range(1, 9):
-        mt = mp = n = 0
+        mt = mp = n = n_tied = 0
         for mz in C.CONSISTENT[t]:
             if (mz, s) not in C.SELF_POS[t] or (mz, s) not in C.SELF_NR_POS[t]:
                 continue
@@ -184,14 +184,19 @@ for t in MODELS:
             ]
             if len(preds) < 2:
                 continue
+            counts = collections.Counter(preds).most_common()
+            if len(counts) > 1 and counts[1][1] == counts[0][1]:
+                n_tied += 1
+                continue
             n += 1
-            modal_r = collections.Counter(preds).most_common(1)[0][0]
+            modal_r = counts[0][0]
             mt += modal_r == tuple(C.TRUTH[t][mz][s])
             mp += modal_r == tuple(C.SELF_NR_POS[t][(mz, s)])
         rows.append(
             {
                 "step": s,
                 "n": n,
+                "n_tied": n_tied,
                 "consensus_matches_truth_pct": C.pct(mt, n) if n else None,
                 "consensus_matches_prior_pct": C.pct(mp, n) if n else None,
             }
