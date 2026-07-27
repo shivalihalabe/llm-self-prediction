@@ -3,7 +3,7 @@
 Reasoning-trace analysis
 ========================
 
-Processes the `reasoning` field of each run-0 prediction, correlating trace features with
+Processes the reasoning field of each run-0 prediction, correlating trace features with
 correctness per model. Lexical markers are reported BOTH raw (absolute count per trace) and
 length-normalized (per 100 words), because raw counts track trace length: a model whose wrong
 traces are simply longer will show more of every marker. The per-100-word rate isolates whether
@@ -18,8 +18,9 @@ arrow density, digit/letter ratio, unique grid positions referenced) are reporte
 Also: chronology of the truth in wrong traces, lock-in point, trace-answer coherence, and a
 self-vs-cross depersonalization comparison (both raw and normalized).
 
-The `reasoning` field is a string, a list of {"text": ...} dicts, or None -- handled by
+The reasoning field is a string, a list of {"text": ...} dicts, or None -- handled by
 trace_text().
+
 Output: analysis/results/traces.json
 """
 
@@ -98,7 +99,7 @@ def _rate_per_100w(count, words):
 
 
 # ============================================================
-# FEATURIZE EVERY RUN-0 SELF TRACE ONCE
+# FEATURIZE THE RUN-0 SELF TRACES
 # ============================================================
 
 

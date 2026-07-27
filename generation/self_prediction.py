@@ -26,7 +26,7 @@ selects a different subset by design -- the data file records what was actually
 run via run_idx; it is not expected to match a re-run.
 
 Scored downstream against the model's own consistent navigation set
-(data/navigation/{model}_navigation.json, field `consistent`).
+(data/navigation/{model}_navigation.json, field consistent).
 
 Output: data/self_prediction/{MODEL}_self_{MODE}.json
 """
@@ -152,8 +152,7 @@ def parse_answer(content):
     return None
 
 def n_runs_for_bucket():
-    # Stochastic, unseeded: ~VALIDATION_FRACTION of buckets get the validation
-    # run count, the rest get the main count. Not reproducible by design.
+    # Unseeded: roughly VALIDATION_FRACTION of buckets get the validation run count.
     return N_PRED_RUNS_VALIDATION if random.random() < VALIDATION_FRACTION else N_PRED_RUNS_MAIN
 
 # ============================================================

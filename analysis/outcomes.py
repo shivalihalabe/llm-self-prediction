@@ -9,6 +9,7 @@ per-step horizon decay, target-predictability vs predictor-skill, pairwise compa
 self-accuracy by maze difficulty, and the reasoning vs no-reasoning self contrast.
 
 All accuracy is the shared scoring contract from common.py (run_idx 0, exact match).
+
 Output: analysis/results/outcomes.json
 """
 

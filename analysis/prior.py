@@ -3,7 +3,7 @@
 The no-reasoning prior
 ======================
 
-The no-reasoning predictions are each model's *prior*: where it guesses the navigator ends up
+The no-reasoning predictions are each model's prior: where it guesses the navigator ends up
 without working through the maze. This script characterizes that prior and how reasoning relates
 to it:
 
@@ -17,6 +17,7 @@ to it:
   did it stay trapped on the prior's cell.
 
 Uses the no-reasoning scored/position dicts and reasoning dicts from common.py.
+
 Output: analysis/results/prior.json
 """
 

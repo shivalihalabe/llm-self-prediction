@@ -8,6 +8,7 @@ sensitivity, and the conditional self-advantage at branch steps -- the inferenti
 for the self-vs-other and Opus mid-horizon claims.
 
 McNemar uses statsmodels' exact test; gap CIs use scipy's paired bootstrap.
+
 Output: analysis/results/stats.json
 """
 

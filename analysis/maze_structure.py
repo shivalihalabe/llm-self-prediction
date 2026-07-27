@@ -5,7 +5,7 @@ Maze-structural drivers of predictability (the maze-side complement)
 
 The model-side analysis showed predictability is largely a model property (rule-like branch
 choices). This asks the complementary question: net of which model is navigating, what makes a
-*maze* easy or hard to predict?
+maze easy or hard to predict?
 
 Predictability per maze is the model-CENTERED self-accuracy: each model's per-maze accuracy
 minus its own overall self-accuracy, averaged over the models consistent on that maze. Centering
@@ -183,13 +183,8 @@ RES["per_maze_self_vs_cross"] = [
 # ============================================================
 
 # Whether models differ in the structural difficulty of the mazes they navigate consistently.
-# Uses purely structural measures computed from walls alone: n_junctions (cells with three or
-# more openings, the structural analogue of how many choices a maze offers) and BFS depth.
-# mean_branch_steps is deliberately not used here -- it counts decision points along the routes
-# models actually took, so it is run-dependent; it remains in per_maze for the difficulty
-# correlations, where that is appropriate. maze_effect is likewise excluded (centred per
-# navigator, so circular). The all-mazes row is the baseline: a consistent set harder or
-# easier than it reflects selection.
+# Structural measures only, computed from walls. Route-dependent features (mean_branch_steps)
+# and navigator-centred ones (maze_effect) are excluded here; both remain in per_maze.
 cons_diff = {}
 for m in MODELS:
     mzs = sorted(C.CONSISTENT[m])

@@ -12,7 +12,7 @@ Edit PREDICTOR to switch. Output filename, model id, and metadata derive from it
 
 Mode note: cross-prediction is run with reasoning ON only. Without reasoning the
 task collapses to a near-constant prior, so there is no no-reasoning cross
-matrix; the no-reasoning baseline is self-prediction only. (The `_reasoning`
+matrix; the no-reasoning baseline is self-prediction only. (The _reasoning
 suffix is kept on the file and cells so they read in parallel with the self
 files, not because a noreasoning counterpart exists.)
 

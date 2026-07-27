@@ -12,6 +12,7 @@ diverge for non-consistent mazes).
 
 Operates on the run-0 navigation trajectories (common.TRUTH) plus the raw nav files for
 the multi-run determinism check.
+
 Output: analysis/results/exploration_strategy.json
 """
 
@@ -379,10 +380,7 @@ RES["self_model_mismatch"] = mismatch
 # PREDICTOR ACCURACY ON DEFAULT VS ATYPICAL CELLS (POOLED CROSS)
 # ============================================================
 
-# For each predictor, cross-prediction accuracy pooled across its four targets, restricted to
-# the target's decision points and split by whether the target took the alphabetically-first
-# move. Cross-only by design: the confound argument is about predicting others, and the
-# self-diagonal versions live in self_model_mismatch and the stats splits.
+# Cross-prediction only: accuracy on the target's default vs atypical cells.
 pooled = {}
 for p in MODELS:
     buckets = {"default": [], "atypical": []}

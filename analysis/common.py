@@ -3,8 +3,8 @@
 Shared foundation for all maze self-prediction analyses
 =======================================================
 
-Locks the scoring contract in ONE place. Everything downstream reads the tidy record
-table (`RECORDS`) and the derived views built here, so "correct", "predicted position",
+Locks the scoring contract in one place. Everything downstream reads the tidy record
+table (RECORDS) and the derived views built here, so "correct", "predicted position",
 and "which mazes" mean the same thing in every script.
 
 Scoring contract
@@ -23,7 +23,7 @@ SELF_POS / CROSS_POS / ...                          -> {(maze, step): [r, c]}
 CONSISTENT[m], INTERSECTION, PAIRWISE[(a, b)], MAZE_DIFFICULTY, DIFFICULTY_STRATA
 TRUTH[m][maze] -> trajectory; WALLS[maze] -> set of blocked frozensets
 
-Run scripts from the repo root; data/ is resolved relative to this file.
+Paths are resolved relative to this file, so scripts can be run from anywhere.
 """
 
 import os
@@ -69,7 +69,7 @@ WALLS = {
 def _iter_scored(node, target, listed):
     """Yield (maze, step, pred_tuple, correct) for run-0 parsed records under a prediction node.
 
-    `listed` distinguishes the two on-disk shapes: reasoning/no-reasoning store a list of
+    listed distinguishes the two on-disk shapes: reasoning/no-reasoning store a list of
     runs per (maze, step); the pilot stores a single record.
     """
     truth = TRUTH[target]
@@ -124,7 +124,7 @@ RECORDS = _records()
 
 
 # ============================================================
-# DICT VIEWS (stable API)
+# DICT VIEWS
 # ============================================================
 
 
@@ -241,7 +241,7 @@ def accuracy_matrix(kinds=("self", "cross"), mazeset=None):
 
 
 # ============================================================
-# MAZE GEOMETRY (problem-specific)
+# MAZE GEOMETRY
 # ============================================================
 
 
@@ -282,7 +282,7 @@ def reachable_exactly(maze_id, n):
 
 
 def legal_moves(target, maze, step):
-    """Wall-respecting neighbor cells at the pre-move position of `step`."""
+    """Wall-respecting neighbor cells at the pre-move position of step."""
     traj = TRUTH[target][maze]
     if step < 1 or step >= len(traj):
         return []
@@ -291,7 +291,7 @@ def legal_moves(target, maze, step):
 
 
 def unvisited_moves(target, maze, step):
-    """Legal moves at `step` that lead to a not-yet-visited cell."""
+    """Legal moves at step that lead to a not-yet-visited cell."""
     traj = TRUTH[target][maze]
     if step < 1 or step >= len(traj):
         return []
@@ -313,7 +313,7 @@ def direction(a, b):
 
 
 def chose_first_listed(target, maze, step):
-    """True if the actual move at `step` was the alphabetically-first legal direction."""
+    """True if the actual move at step was the alphabetically-first legal direction."""
     traj = TRUTH[target][maze]
     if step < 1 or step >= len(traj):
         return None
@@ -338,7 +338,7 @@ def chose_first_unvisited(target, maze, step):
 
 
 # ============================================================
-# STATISTICS (library-backed)
+# STATISTICS
 # ============================================================
 
 
@@ -378,7 +378,7 @@ def perm_corr_p(xs, ys, n_perm=10000, seed=20260609):
 
 
 # ============================================================
-# RAW RECORD ACCESS (for traces)
+# RAW RECORD ACCESS
 # ============================================================
 
 

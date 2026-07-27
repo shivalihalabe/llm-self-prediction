@@ -5,13 +5,14 @@ Cross-prediction structure
 Relationships between predictors.
 
 For each target: how tightly all five predictors (incl. self) converge in accuracy, whether
-they agree on the same *coordinate* (not just both-right), whether a majority-vote ensemble
+they agree on the same coordinate (not just both-right), whether a majority-vote ensemble
 beats the best single predictor, whether wrong predictors share the same wrong answer, and
 whether self's prediction looks more like the truth or like the consensus of others. Plus two
 aggregate relationships: the A->B vs B->A asymmetry tracking target predictability, and
 cross-accuracy tracking the target's own self-accuracy.
 
 Uses the predicted-coordinate dicts (common.SELF_POS / CROSS_POS).
+
 Output: analysis/results/cross_structure.json
 """
 

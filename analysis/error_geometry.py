@@ -2,7 +2,7 @@
 """
 Error geometry
 ==============
-When a self-prediction is wrong, *how* is it wrong.
+When a self-prediction is wrong, how it is wrong.
 
 Goes beyond binary exact-match using the predicted coordinate
 (common.SELF_POS) vs the true trajectory: Manhattan distance, off-by-k-step errors

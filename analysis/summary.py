@@ -7,6 +7,7 @@ Reads every results/*.json the analysis scripts wrote and pulls the headline num
 artifact (results/HEADLINES.json) plus a readable console digest. Pure aggregation: it computes
 nothing new, so it always reflects whatever the analysis scripts last produced. run_all.py runs
 this last.
+
 Output: analysis/results/HEADLINES.json
 """
 
