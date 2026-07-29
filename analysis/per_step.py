@@ -10,6 +10,7 @@ Measures:
 - determined_vs_branch_by_step: self-accuracy on determined against branch steps, per step
 - self_matches_consensus_by_step: how far self tracks the consensus-of-others by step
 - error_propagation: P(correct at k+1 | correct at k) against P(correct at k+1 | wrong at k)
+- error_clustering_runs_test: whether correct and wrong steps cluster along a maze's row
 - transition_legality: whether consecutive predicted positions form a legal walk
 - predictability_horizon: the first step at which each target drops below 50%
 
@@ -20,6 +21,7 @@ import collections
 import json
 import os
 
+import numpy as np
 import pandas as pd
 
 import common as C
@@ -27,6 +29,10 @@ import common as C
 OUT = os.path.join(os.path.dirname(__file__), "results")
 os.makedirs(OUT, exist_ok=True)
 MODELS = C.MODELS
+N_DRAWS = 2000  # checkerboard draws for the error-clustering null
+BURN_IN_SPANS = 10  # burn-in, in multiples of the matrix size
+THIN_SPANS = 5  # draw interval, in multiples of the matrix size
+SEED = 20260609
 RES = {"metadata": C.metadata("per_step")}
 
 
@@ -142,6 +148,104 @@ def _propagation(m):
 
 
 RES["error_propagation"] = {m: _propagation(m) for m in MODELS}
+
+
+# Error clustering: adjacent agreement under a fixed-margin null
+# Within a maze, do correct and wrong steps run together beyond what the maze's own
+# difficulty and the horizon gradient already imply? Shuffling within each maze isn't enough
+# on its own: accuracy falls with step, so a pure step gradient produces adjacent agreement
+# by itself and would be scored as clustering. Holding both margins fixed, each maze's
+# number of correct steps and each step's number of correct mazes, removes the maze effect
+# and the gradient together and leaves only the run structure. Mixing was checked by doubling
+# the draw interval, which moved the null mean by 0.16 points.
+
+def _outcome_matrix(m):
+    """Maze x step matrix, 1 where the run-0 self-prediction matched the trajectory."""
+    mazes = sorted(C.CONSISTENT[m])
+    grid = [[int(bool(C.SELF[m].get((mz, s)))) for s in range(1, 9)] for mz in mazes]
+    return len(mazes), np.array(grid, dtype=np.int8)
+
+
+def _adjacent_agreement(mat):
+    """(matching adjacent step pairs, total adjacent step pairs) over a maze x step matrix."""
+    same = mat[:, :-1] == mat[:, 1:]
+    return int(same.sum()), int(same.size)
+
+
+def _checkerboard_swaps(flat, n_cols, rows, cols, n):
+    """Attempt n checkerboard swaps in place, which leaves both margins unchanged.
+
+    Each attempt picks two rows and two columns; the 2x2 they span is swapped only when it
+    reads [[1,0],[0,1]] or [[0,1],[1,0]], so every row and column sum is preserved.
+    """
+    for t in range(n):
+        i, j = rows[2 * t], rows[2 * t + 1]
+        if i == j:
+            continue
+        k, dst = cols[2 * t], cols[2 * t + 1]
+        if k == dst:
+            continue
+        ik, il = i * n_cols + k, i * n_cols + dst
+        jk, jl = j * n_cols + k, j * n_cols + dst
+        v_ik, v_il = flat[ik], flat[il]
+        if v_ik != v_il and v_ik == flat[jl] and v_il == flat[jk]:
+            flat[ik], flat[il] = v_il, v_ik
+            flat[jk], flat[jl] = v_ik, v_il
+
+
+def _null_agreement_draws(mat):
+    """Adjacent-agreement counts from a checkerboard chain started at the observed matrix."""
+    n_rows, n_cols = mat.shape
+    span = n_rows * n_cols
+    flat = mat.flatten().tolist()
+    rng = np.random.default_rng(SEED)
+
+    def attempt(n):
+        rows = rng.integers(0, n_rows, size=2 * n).tolist()
+        cols = rng.integers(0, n_cols, size=2 * n).tolist()
+        _checkerboard_swaps(flat, n_cols, rows, cols, n)
+
+    attempt(BURN_IN_SPANS * span)
+    draws = np.empty(N_DRAWS, dtype=np.int64)
+    for d in range(N_DRAWS):
+        attempt(THIN_SPANS * span)
+        drawn = np.array(flat, dtype=np.int8).reshape(n_rows, n_cols)
+        draws[d] = int((drawn[:, :-1] == drawn[:, 1:]).sum())
+    return draws
+
+
+def _clustering_row(observed, denom, draws, n_mazes):
+    """One emitted row: the observed rate, the null it is measured against, and the p-value.
+
+    The p-value adds one to both counts, so it cannot be zero; its floor is 1/(N_DRAWS + 1).
+    """
+    null = 100.0 * draws / denom
+    return {
+        "observed_pct": C.pct(observed, denom),
+        "null_mean_pct": round(float(null.mean()), 1),
+        "null_sd_pct": round(float(null.std(ddof=1)), 2),
+        "p_value_fixed_margins": round(
+            (int((draws >= observed).sum()) + 1) / (N_DRAWS + 1), 6
+        ),
+        "n_mazes": n_mazes,
+        "n_pairs": denom,
+    }
+
+
+clustering = {}
+pooled_obs = pooled_pairs = pooled_mazes = 0
+pooled_draws = np.zeros(N_DRAWS, dtype=np.int64)
+for m in MODELS:
+    n_mazes, mat = _outcome_matrix(m)
+    observed, denom = _adjacent_agreement(mat)
+    draws = _null_agreement_draws(mat)
+    clustering[m] = _clustering_row(observed, denom, draws, n_mazes)
+    pooled_obs += observed
+    pooled_pairs += denom
+    pooled_mazes += n_mazes
+    pooled_draws += draws
+clustering["pooled"] = _clustering_row(pooled_obs, pooled_pairs, pooled_draws, pooled_mazes)
+RES["error_clustering_runs_test"] = clustering
 
 
 # Transition legality (route continuity)
