@@ -11,7 +11,7 @@ Measures:
 - branch-choice regularity, by direction entropy and default rate, against predictability
 - the first move, and overall trajectory shape
 - a determinism diagnosis of where the three navigation runs diverge
-- the no-backtracking census that justifies the default/atypical taxonomy
+- the no-backtracking census, and the step-category census over two maze sets
 - where wrong self-predictions land at atypical cells
 - pooled cross-accuracy on default against atypical cells
 
@@ -371,11 +371,14 @@ for p in MODELS:
 RES["predictor_default_vs_atypical_pooled"] = pooled
 
 
-# No-backtracking unanimity and step-category census (all 100 mazes)
-# The empirical justification for the default/atypical taxonomy: at decision points no model
-# ever took a visited direction, and with exactly one unvisited move every model took it --
-# 3,578 opportunities, zero exceptions. The census gives the four-way breakdown of all 800
-# run-0 steps per model, over all 100 mazes.
+# No-backtracking unanimity and step-category census
+# The empirical justification for the default/atypical taxonomy: at decision points no model ever
+# took a visited direction, and with exactly one unvisited move every model took it, over 3,578
+# opportunities with zero exceptions. The census gives the four-way breakdown of every run-0 step,
+# in two variants. step_category_census covers all 800 steps per model over all 100 mazes;
+# step_category_census_consistent covers the model's consistent set, the population every other
+# analysis in the repo scores. no_backtracking stays all-maze, since its unanimity claim is about
+# every step the models took, not only the reproducible ones.
 
 def _cell(t, mz, step):
     """(legal, unvisited, chosen) at one step, keyed by compass direction."""
@@ -387,12 +390,17 @@ def _cell(t, mz, step):
     return legal, unv, direction(pos, traj[step])
 
 
-census = {}
-backtrack = {}
-for t in MODELS:
+def _census(t, mazeset=None):
+    """Step-category counts for one model, over all mazes or a subset of them.
+
+    Carries the three unanimity tallies alongside the counts, since they come from the same
+    pass over the steps.
+    """
     counts = {"forced": 0, "zero_unvisited": 0, "one_unvisited": 0, "decision_points": 0}
     zero_took_first = dp_took_visited = one_took_unvisited = 0
     for mz in C.TRUTH[t]:
+        if mazeset is not None and mz not in mazeset:
+            continue
         for step in range(1, len(C.TRUTH[t][mz])):
             legal, unv, ch = _cell(t, mz, step)
             if len(legal) == 1:
@@ -406,10 +414,54 @@ for t in MODELS:
             else:
                 counts["decision_points"] += 1
                 dp_took_visited += ch not in unv
-    census[t] = {**counts, "zero_unvisited_took_first_listed": zero_took_first}
+    return {
+        "counts": counts,
+        "zero_took_first": zero_took_first,
+        "dp_took_visited": dp_took_visited,
+        "one_took_unvisited": one_took_unvisited,
+    }
+
+
+def _zero_unvisited_rows(t):
+    """One row per zero-unvisited step in the model's consistent set."""
+    rows = []
+    for mz in sorted(C.CONSISTENT[t]):
+        for step in range(1, len(C.TRUTH[t][mz])):
+            legal, unv, ch = _cell(t, mz, step)
+            if len(legal) > 1 and len(unv) == 0:
+                rows.append(
+                    {
+                        "maze": mz,
+                        "step": step,
+                        "chosen_direction": ch,
+                        "took_first_listed": ch == sorted(legal)[0],
+                        "n_legal": len(legal),
+                    }
+                )
+    return rows
+
+
+census = {}
+census_consistent = {}
+backtrack = {}
+for t in MODELS:
+    allm = _census(t)
+    counts = allm["counts"]
+    census[t] = {**counts, "zero_unvisited_took_first_listed": allm["zero_took_first"]}
+    cons = _census(t, C.CONSISTENT[t])
+    census_consistent[t] = {
+        **cons["counts"],
+        "zero_unvisited_took_first_listed": cons["zero_took_first"],
+    }
     backtrack[t] = {
-        "dp_took_visited_direction": {"count": dp_took_visited, "n": counts["decision_points"]},
-        "one_unvisited_took_it": {"count": one_took_unvisited, "n": counts["one_unvisited"]},
+        "dp_took_visited_direction": {
+            "count": allm["dp_took_visited"],
+            "n": counts["decision_points"],
+        },
+        "one_unvisited_took_it": {
+            "count": allm["one_took_unvisited"],
+            "n": counts["one_unvisited"],
+        },
     }
 backtrack["total"] = {
     k: {
@@ -419,7 +471,25 @@ backtrack["total"] = {
     for k in ("dp_took_visited_direction", "one_unvisited_took_it")
 }
 RES["step_category_census"] = census
+RES["step_category_census_consistent"] = census_consistent
 RES["no_backtracking"] = backtrack
+
+zero_detail = {}
+all_dirs = collections.Counter()
+for t in MODELS:
+    rows = _zero_unvisited_rows(t)
+    dirs = collections.Counter(r["chosen_direction"] for r in rows)
+    all_dirs.update(dirs)
+    zero_detail[t] = {
+        "n": len(rows),
+        "chosen_direction_counts": dict(dirs),
+        "steps": rows,
+    }
+zero_detail["total"] = {
+    "n": sum(zero_detail[t]["n"] for t in MODELS),
+    "chosen_direction_counts": dict(all_dirs),
+}
+RES["zero_unvisited_detail"] = zero_detail
 
 
 # Deviation profile and rule-likeness vs predictability

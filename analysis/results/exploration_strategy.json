@@ -1017,6 +1017,43 @@
    "zero_unvisited_took_first_listed": 3
   }
  },
+ "step_category_census_consistent": {
+  "opus": {
+   "forced": 69,
+   "zero_unvisited": 4,
+   "one_unvisited": 305,
+   "decision_points": 398,
+   "zero_unvisited_took_first_listed": 1
+  },
+  "sonnet": {
+   "forced": 56,
+   "zero_unvisited": 6,
+   "one_unvisited": 249,
+   "decision_points": 281,
+   "zero_unvisited_took_first_listed": 0
+  },
+  "gpt": {
+   "forced": 38,
+   "zero_unvisited": 2,
+   "one_unvisited": 188,
+   "decision_points": 196,
+   "zero_unvisited_took_first_listed": 0
+  },
+  "glm": {
+   "forced": 45,
+   "zero_unvisited": 6,
+   "one_unvisited": 192,
+   "decision_points": 173,
+   "zero_unvisited_took_first_listed": 3
+  },
+  "qwen": {
+   "forced": 72,
+   "zero_unvisited": 5,
+   "one_unvisited": 327,
+   "decision_points": 316,
+   "zero_unvisited_took_first_listed": 3
+  }
+ },
  "no_backtracking": {
   "opus": {
    "dp_took_visited_direction": {
@@ -1076,6 +1113,227 @@
    "one_unvisited_took_it": {
     "count": 1646,
     "n": 1646
+   }
+  }
+ },
+ "zero_unvisited_detail": {
+  "opus": {
+   "n": 4,
+   "chosen_direction_counts": {
+    "North": 3,
+    "East": 1
+   },
+   "steps": [
+    {
+     "maze": "maze_23",
+     "step": 7,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_37",
+     "step": 5,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_37",
+     "step": 6,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 3
+    },
+    {
+     "maze": "maze_37",
+     "step": 8,
+     "chosen_direction": "East",
+     "took_first_listed": true,
+     "n_legal": 3
+    }
+   ]
+  },
+  "sonnet": {
+   "n": 6,
+   "chosen_direction_counts": {
+    "North": 5,
+    "West": 1
+   },
+   "steps": [
+    {
+     "maze": "maze_23",
+     "step": 7,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_52",
+     "step": 7,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_52",
+     "step": 8,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 3
+    },
+    {
+     "maze": "maze_55",
+     "step": 8,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_89",
+     "step": 7,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_89",
+     "step": 8,
+     "chosen_direction": "North",
+     "took_first_listed": false,
+     "n_legal": 3
+    }
+   ]
+  },
+  "gpt": {
+   "n": 2,
+   "chosen_direction_counts": {
+    "West": 1,
+    "South": 1
+   },
+   "steps": [
+    {
+     "maze": "maze_55",
+     "step": 7,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_64",
+     "step": 8,
+     "chosen_direction": "South",
+     "took_first_listed": false,
+     "n_legal": 2
+    }
+   ]
+  },
+  "glm": {
+   "n": 6,
+   "chosen_direction_counts": {
+    "West": 3,
+    "North": 1,
+    "East": 1,
+    "South": 1
+   },
+   "steps": [
+    {
+     "maze": "maze_100",
+     "step": 7,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_100",
+     "step": 8,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 3
+    },
+    {
+     "maze": "maze_26",
+     "step": 6,
+     "chosen_direction": "North",
+     "took_first_listed": true,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_26",
+     "step": 7,
+     "chosen_direction": "East",
+     "took_first_listed": true,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_26",
+     "step": 8,
+     "chosen_direction": "South",
+     "took_first_listed": true,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_55",
+     "step": 7,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 2
+    }
+   ]
+  },
+  "qwen": {
+   "n": 5,
+   "chosen_direction_counts": {
+    "North": 1,
+    "East": 1,
+    "South": 1,
+    "West": 2
+   },
+   "steps": [
+    {
+     "maze": "maze_26",
+     "step": 6,
+     "chosen_direction": "North",
+     "took_first_listed": true,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_26",
+     "step": 7,
+     "chosen_direction": "East",
+     "took_first_listed": true,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_26",
+     "step": 8,
+     "chosen_direction": "South",
+     "took_first_listed": true,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_55",
+     "step": 7,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 2
+    },
+    {
+     "maze": "maze_64",
+     "step": 8,
+     "chosen_direction": "West",
+     "took_first_listed": false,
+     "n_legal": 2
+    }
+   ]
+  },
+  "total": {
+   "n": 23,
+   "chosen_direction_counts": {
+    "North": 10,
+    "East": 3,
+    "West": 7,
+    "South": 3
    }
   }
  },
