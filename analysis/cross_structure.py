@@ -18,6 +18,9 @@ Measures:
 - self-projection: whether a predictor does better on targets that behave like it
 - asymmetry: the A->B minus B->A gap against target predictability
 - target tracking: cross-accuracy against the target's own self-accuracy
+- predictor invariance: whether one predictor's answer changes with the target named
+- the generic answer: whether a predictor's answer about itself is just its modal
+  answer about the others, and whether departing from it helps
 
 Output: analysis/results/cross_structure.json
 """
@@ -457,6 +460,96 @@ for t in MODELS:
         "atypical_share_pct": C.pct(kinds["atypical"], tot) if tot else None,
     }
 RES["oracle_composition_by_move_type"] = composition
+
+
+# Predictor invariance across targets
+# Every measure above compares different predictors of one target. This asks the reverse:
+# when a predictor is asked about several targets on the same maze and step, does its answer
+# change? An answer that never changes is one simulation of the maze wearing whichever name
+# the prompt supplied, the predictor's own included. A cell's rows are the targets whose
+# consistent set holds that maze, so a cell with one row says nothing about invariance and
+# is dropped rather than counted as invariant.
+
+def _predictor_cells(rows):
+    """Group prediction rows into {(predictor, maze, step): [row, ...]}."""
+    out = collections.defaultdict(list)
+    for r in rows.itertuples(index=False):
+        out[(r.predictor, r.maze, r.step)].append(r)
+    return out
+
+
+def _invariance(grouped):
+    """Per predictor and pooled: cells holding two or more targets, and the share of those
+    where every target drew the same predicted position."""
+    out = {}
+    pooled_n = pooled_inv = 0
+    for p in MODELS:
+        multi = [v for k, v in grouped.items() if k[0] == p and len(v) >= 2]
+        inv = sum(1 for v in multi if len({r.pred for r in v}) == 1)
+        out[p] = {
+            "n_cells": len(multi),
+            "n_invariant": inv,
+            "invariant_pct": C.pct(inv, len(multi)),
+        }
+        pooled_n += len(multi)
+        pooled_inv += inv
+    out["pooled"] = {
+        "n_cells": pooled_n,
+        "n_invariant": pooled_inv,
+        "invariant_pct": C.pct(pooled_inv, pooled_n),
+    }
+    return out
+
+
+scored_rows = C.RECORDS[C.RECORDS.kind.isin(("self", "cross"))]
+# branch status belongs to the target's own route, so rows are filtered before they are
+# grouped; filtering afterwards would keep rows whose target never faced a choice there
+branch_rows = scored_rows[
+    [C.is_branch(r.target, r.maze, r.step) for r in scored_rows.itertuples(index=False)]
+]
+invariance = {
+    "all_steps": _invariance(_predictor_cells(scored_rows)),
+    "decision_points": _invariance(_predictor_cells(branch_rows)),
+}
+# a cell's row count is the number of models consistent on that maze, which doesn't depend on
+# the predictor, so every predictor must see the same number of cells; a mismatch means the
+# scoping is wrong
+for variant in invariance.values():
+    sizes = {v["n_cells"] for k, v in variant.items() if k != "pooled"}
+    assert len(sizes) == 1, f"predictors see different cell counts: {sizes}"
+RES["predictor_invariance"] = invariance
+
+
+# The generic answer, and what departing from it costs
+# The generic answer is the modal position a predictor gave about the other targets in a
+# cell. Comparing the predictor's answer about itself against it separates a genuine
+# self-model from one route relabelled. Where the two differ, both are scored against the
+# predictor's own trajectory, so the accuracies are directly comparable; stats.py tests that
+# gap.
+
+same_as_generic = {}
+payoff = {}
+for p in MODELS:
+    cells = C.generic_answer_cells(p)
+    matched = sum(1 for _, _, self_pred, generic, _, _ in cells if self_pred == generic)
+    same_as_generic[p] = {
+        "n_cells": len(cells),
+        "n_equal": matched,
+        "self_equals_generic_pct": C.pct(matched, len(cells)),
+    }
+    departures = [(sc, gc) for _, _, self_pred, generic, sc, gc in cells if self_pred != generic]
+    n_self = sum(1 for sc, _ in departures if sc)
+    n_generic = sum(1 for _, gc in departures if gc)
+    payoff[p] = {
+        "n_departures": len(departures),
+        "n_self_correct": n_self,
+        "self_correct_pct": C.pct(n_self, len(departures)),
+        "n_generic_correct": n_generic,
+        "generic_correct_pct": C.pct(n_generic, len(departures)),
+        "net_cells_gained": n_self - n_generic,
+    }
+RES["self_vs_own_generic"] = same_as_generic
+RES["departure_payoff"] = payoff
 
 
 # Write

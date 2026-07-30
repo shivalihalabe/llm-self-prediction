@@ -337,6 +337,32 @@ def pearson(xs, ys):
     return None if np.isnan(r) else round(float(r), 3)
 
 
+def generic_answer_cells(predictor):
+    """Cells where a predictor answered about itself and about at least two other targets.
+
+    Returns (maze, step, self_pred, generic_pred, self_correct, generic_correct) per cell.
+    The generic answer is the modal position the predictor gave about the other targets on
+    that maze and step, and both answers are scored against the predictor's own run-0
+    trajectory, so the two are comparable. Ties in the mode break by count descending then
+    position ascending, so the result doesn't depend on row order.
+    """
+    sub = RECORDS[RECORDS.kind.isin(("self", "cross")) & (RECORDS.predictor == predictor)]
+    cells = {}
+    for r in sub.itertuples(index=False):
+        cells.setdefault((r.maze, r.step), []).append(r)
+    out = []
+    for (mz, step), rows in sorted(cells.items()):
+        own = [r for r in rows if r.target == predictor]
+        others = [r for r in rows if r.target != predictor]
+        if len(own) != 1 or len(others) < 2:
+            continue
+        counts = collections.Counter(r.pred for r in others)
+        generic = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        row = own[0]
+        out.append((mz, step, row.pred, generic, bool(row.correct), generic == row.truth))
+    return out
+
+
 def best_other_model(t, mazeset=None):
     """The external model with the highest cross-accuracy on target t (optional maze set)."""
     cand = {p: acc(CROSS[(p, t)], mazeset)[0] for p in MODELS if p != t and (p, t) in CROSS}

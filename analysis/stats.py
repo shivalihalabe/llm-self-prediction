@@ -19,6 +19,7 @@ Measures:
 - chance baselines under three definitions
 - self-advantage by move type, and on determined and one-unvisited cells
 - unique information, reasoning dependence, and run-to-run consistency by move type
+- whether departing from a predictor's own generic answer helps or hurts
 
 Output: analysis/results/stats.json
 """
@@ -681,6 +682,31 @@ for m in MODELS:
         "p_value_label_perm": p,
     }
 RES["consistency_by_move_type"] = consistency_mt
+
+
+# Departing from a predictor's own generic answer
+# The same paired contest as self_vs_best_other_paired, with the opponent replaced by the
+# predictor's own modal answer about the other targets on the same cell. Both answers are
+# scored against the predictor's own trajectory, so the gap is a like-for-like comparison and
+# the existing clustered test applies unchanged. The cell tables themselves are in
+# cross_structure.py; only the test lives here, because the analysis modules write on import
+# and must not import one another.
+
+MIN_DEPARTURES = 10  # below this neither the interval nor the p-value carries information
+
+
+departures = {}
+for t in MODELS:
+    pairs = [
+        (mz, self_ok, generic_ok)
+        for mz, _, self_pred, generic, self_ok, generic_ok in C.generic_answer_cells(t)
+        if self_pred != generic
+    ]
+    row = {**boot_gap_ci(pairs), **sign_flip_test(pairs)}
+    if len(pairs) < MIN_DEPARTURES:
+        row["ci_lo"] = row["ci_hi"] = row["p_value_cluster_perm"] = None
+    departures[t] = row
+RES["departure_payoff_test"] = departures
 
 
 # Write
