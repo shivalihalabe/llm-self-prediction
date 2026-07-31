@@ -337,6 +337,16 @@ def pearson(xs, ys):
     return None if np.isnan(r) else round(float(r), 3)
 
 
+def modal_position(positions):
+    """The most common position, ties broken by count descending then position ascending.
+
+    Counter.most_common resolves ties by insertion order, so it depends on row order; this
+    doesn't.
+    """
+    counts = collections.Counter(positions)
+    return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+
+
 def generic_answer_cells(predictor):
     """Cells where a predictor answered about itself and about at least two other targets.
 
@@ -356,8 +366,7 @@ def generic_answer_cells(predictor):
         others = [r for r in rows if r.target != predictor]
         if len(own) != 1 or len(others) < 2:
             continue
-        counts = collections.Counter(r.pred for r in others)
-        generic = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        generic = modal_position(r.pred for r in others)
         row = own[0]
         out.append((mz, step, row.pred, generic, bool(row.correct), generic == row.truth))
     return out

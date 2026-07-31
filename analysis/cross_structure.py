@@ -10,7 +10,8 @@ Measures:
 - convergence: the spread of the five predictor accuracies on one target
 - position agreement: whether predictors pick the same coordinate, not just both-right
 - ensemble: whether a majority vote beats the best single predictor
-- wrong-answer agreement: whether jointly wrong predictors share the same wrong cell
+- wrong-answer agreement: whether jointly wrong predictors name the same wrong cell,
+  against the rate two independent wrong guesses would coincide at
 - self against consensus: whether self's prediction resembles the truth or the others' vote
 - predictor ranges: the row spread, and the spread with each predictor left out
 - specialization: a joint additive fit over the twenty cross cells, and its residuals
@@ -18,9 +19,12 @@ Measures:
 - self-projection: whether a predictor does better on targets that behave like it
 - asymmetry: the A->B minus B->A gap against target predictability
 - target tracking: cross-accuracy against the target's own self-accuracy
-- predictor invariance: whether one predictor's answer changes with the target named
+- predictor invariance: whether one predictor's answer changes with the target named,
+  against the rate independent answers would coincide at
 - the generic answer: whether a predictor's answer about itself is just its modal
   answer about the others, and whether departing from it helps
+- held-out agreement: whether an answer about itself sits closer to the rest of its cell
+  than an answer about another model does
 
 Output: analysis/results/cross_structure.json
 """
@@ -82,8 +86,22 @@ for t in MODELS:
         "range": round(max(accs) - min(accs), 1) if accs else None,
     }
 
+    # Chance baseline for the jointly-wrong agreement below. Two wrong answers drawn
+    # independently and uniformly from the positions a walk of exactly s steps can reach,
+    # minus the true one, coincide with probability 1/k, so the null needs no simulation. It
+    # is accumulated per cell rather than per target, because k changes with the step and the
+    # jointly-wrong cells aren't spread evenly across steps. Where only the true position is
+    # reachable there is no pool; every predictor names it, so no jointly-wrong pair falls in
+    # such a cell and the observed rate and the baseline share one denominator.
+    pool = pd.Series(
+        [len(C.reachable_exactly(mz, s) - {tr}) for (mz, s), tr in zip(wide.index, wide.truth)],
+        index=wide.index,
+    )
+    coincide = pool.map(lambda k: 1.0 / k if k else 0.0)
+
     # inter-predictor position agreement (all pairs) + agreement among the jointly-wrong
     pair_agree = pair_total = wrong_pair_agree = wrong_pair_total = 0
+    wrong_pair_chance = 0.0
     for i in range(len(names)):
         for j in range(i + 1, len(names)):
             a, b = names[i], names[j]
@@ -93,6 +111,7 @@ for t in MODELS:
             both_wrong = ~correct[a] & ~correct[b]
             wrong_pair_agree += int((same & both_wrong).sum())
             wrong_pair_total += int(both_wrong.sum())
+            wrong_pair_chance += float(coincide[both_wrong].sum())
 
     # ensemble majority vote (ties break by predictor order, as in Counter insertion)
     mv_others = wide[others].apply(lambda r: collections.Counter(r).most_common(1)[0][0], axis=1)
@@ -115,6 +134,11 @@ for t in MODELS:
         "wrong_predictor_agreement_pct": (
             C.pct(wrong_pair_agree, wrong_pair_total) if wrong_pair_total else None
         ),
+        "n_wrong_pairs": wrong_pair_total,
+        "wrong_pair_chance_pct": (
+            C.pct(wrong_pair_chance, wrong_pair_total) if wrong_pair_total else None
+        ),
+        "n_cells_single_endpoint": int((pool == 0).sum()),
         "best_single_acc": max(accs) if accs else None,
         "ensemble_others_acc": C.pct(mv_others.eq(wide["truth"]).mean()) if n else None,
         "ensemble_all_acc": C.pct(mv_all.eq(wide["truth"]).mean()) if n else None,
@@ -498,6 +522,20 @@ def _invariance(grouped):
         "n_invariant": pooled_inv,
         "invariant_pct": C.pct(pooled_inv, pooled_n),
     }
+    # Chance floor for the rates above. If the m answers in a cell were independent uniform
+    # draws from the k positions a walk of exactly that many steps can reach, all m coincide
+    # with probability k ** (1 - m), so the floor is closed-form and nothing is simulated. It
+    # is emitted once per variant, not per predictor: every predictor sees the same cells, so
+    # five copies of one number would invite a comparison that isn't there. Unlike
+    # wrong_pair_chance_pct in the per-target block, the true position stays in the pool,
+    # since this asks how often the answers agree rather than how often two wrong ones do.
+    # It is a mark to read the bars against, not a null anyone is testing.
+    floors = [
+        len(C.reachable_exactly(mz, step)) ** (1 - len(rows))
+        for (owner, mz, step), rows in grouped.items()
+        if owner == MODELS[0] and len(rows) >= 2
+    ]
+    out["chance_invariant_pct"] = C.pct(sum(floors), len(floors))
     return out
 
 
@@ -507,15 +545,16 @@ scored_rows = C.RECORDS[C.RECORDS.kind.isin(("self", "cross"))]
 branch_rows = scored_rows[
     [C.is_branch(r.target, r.maze, r.step) for r in scored_rows.itertuples(index=False)]
 ]
+all_cells = _predictor_cells(scored_rows)
 invariance = {
-    "all_steps": _invariance(_predictor_cells(scored_rows)),
+    "all_steps": _invariance(all_cells),
     "decision_points": _invariance(_predictor_cells(branch_rows)),
 }
 # a cell's row count is the number of models consistent on that maze, which doesn't depend on
 # the predictor, so every predictor must see the same number of cells; a mismatch means the
 # scoping is wrong
 for variant in invariance.values():
-    sizes = {v["n_cells"] for k, v in variant.items() if k != "pooled"}
+    sizes = {v["n_cells"] for k, v in variant.items() if k in MODELS}
     assert len(sizes) == 1, f"predictors see different cell counts: {sizes}"
 RES["predictor_invariance"] = invariance
 
@@ -550,6 +589,42 @@ for p in MODELS:
     }
 RES["self_vs_own_generic"] = same_as_generic
 RES["departure_payoff"] = payoff
+
+
+# Is an answer about itself distinctive?
+# self_vs_own_generic can't be read alone, since nothing says whether 75% is high. Holding
+# each answer in a cell out in turn and comparing it against the majority of the rest scores
+# a self-prediction and a cross-prediction by one rule, so the two are directly comparable.
+# A cell needs four rows: one is held out, and a majority over fewer than three isn't the
+# quantity self_vs_own_generic uses. Cells hold four or five rows, so the other-row count
+# isn't four times the cell count and is emitted rather than derived. Matching rates mean the
+# name in the prompt doesn't change the answer, and the self case isn't a special case.
+
+held_out = {}
+for p in MODELS:
+    n_self = self_hit = n_other = other_hit = 0
+    for (owner, _mz, _step), rows in all_cells.items():
+        if owner != p or len(rows) < 4:
+            continue
+        if sum(1 for r in rows if r.target == p) != 1:
+            continue
+        for i, held in enumerate(rows):
+            rest = C.modal_position(r.pred for j, r in enumerate(rows) if j != i)
+            if held.target == p:
+                n_self += 1
+                self_hit += held.pred == rest
+            else:
+                n_other += 1
+                other_hit += held.pred == rest
+    held_out[p] = {
+        "n_cells": n_self,
+        "n_self_matching": self_hit,
+        "self_matches_rest_pct": C.pct(self_hit, n_self),
+        "n_other_rows": n_other,
+        "n_other_matching": other_hit,
+        "other_matches_rest_pct": C.pct(other_hit, n_other),
+    }
+RES["held_out_agreement"] = held_out
 
 
 # Write
