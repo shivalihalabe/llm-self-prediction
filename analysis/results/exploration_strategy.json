@@ -135,6 +135,13 @@
   "glm": 53.7,
   "qwen": 90.3
  },
+ "target_predictability_cross": {
+  "opus": 54.7,
+  "sonnet": 39.5,
+  "gpt": 81.5,
+  "glm": 53.1,
+  "qwen": 89.4
+ },
  "regularity_vs_predictability": {
   "pearson_default_rate_vs_predictability": 0.974,
   "perm_p_default_rate_vs_predictability": 0.030997,
@@ -142,6 +149,10 @@
   "perm_p_entropy_vs_predictability": 0.10399,
   "n_models": 5,
   "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; positive default-rate correlation / negative entropy correlation => more rule-like models are more predictable"
+ },
+ "rule_likeness_vs_predictability_cross": {
+  "pearson": 0.976,
+  "perm_p": 0.030997
  },
  "first_move": {
   "opus": {

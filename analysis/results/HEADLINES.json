@@ -126,6 +126,10 @@
   "pearson": 0.974,
   "perm_p": 0.030997
  },
+ "rule_likeness_vs_predictability_cross": {
+  "pearson": 0.976,
+  "perm_p": 0.030997
+ },
  "maze_branch_steps_vs_predictability_intersection": {
   "pearson": -0.748,
   "perm_p": 0.0002

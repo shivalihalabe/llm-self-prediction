@@ -89,6 +89,9 @@ H["rule_likeness_vs_predictability"] = {
         "perm_p_default_rate_vs_predictability"
     ),
 }
+H["rule_likeness_vs_predictability_cross"] = expl.get(
+    "rule_likeness_vs_predictability_cross", {}
+)
 H["maze_branch_steps_vs_predictability_intersection"] = mz.get(
     "correlations_intersection19", {}
 ).get("mean_branch_steps")

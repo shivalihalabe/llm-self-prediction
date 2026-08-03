@@ -8,7 +8,8 @@ model is. Reads the run-0 trajectories, common.TRUTH, plus the raw navigation fi
 
 Measures:
 - determined against branch self-accuracy
-- branch-choice regularity, by direction entropy and default rate, against predictability
+- branch-choice regularity, by direction entropy and default rate, against predictability,
+  where predictability is measured both over all five predictors and over the four cross ones
 - the first move, and overall trajectory shape
 - a determinism diagnosis of where the three navigation runs diverge
 - the no-backtracking census, and the step-category census over two maze sets
@@ -110,6 +111,16 @@ RES["branch_choice_regularity"] = regularity
 RES["target_predictability"] = predictability
 
 
+# The same quantity over the four cross-predictors only, leaving out the target's own
+# self-prediction. Both are legitimate readings of "how predictable is this model": the
+# all-five version above includes the target predicting itself, this one does not.
+predictability_cross = {}
+for t in MODELS:
+    xs = [C.acc(C.CROSS[(p, t)])[0] for p in MODELS if p != t and (p, t) in C.CROSS]
+    predictability_cross[t] = round(st.mean([v for v in xs if v is not None]), 1)
+RES["target_predictability_cross"] = predictability_cross
+
+
 # correlation across the 5 models: does branch regularity predict predictability?
 ms = [m for m in MODELS if regularity[m]["direction_entropy"] is not None]
 _ent = [regularity[m]["direction_entropy"] for m in ms]
@@ -137,6 +148,11 @@ RES["regularity_vs_predictability"] = {
     "note": "default rate = 100 - atypical rate under the first-unvisited taxonomy; "
     "positive default-rate correlation / negative entropy correlation => more rule-like "
     "models are more predictable",
+}
+_pr_cross = [predictability_cross[m] for m in ms]
+RES["rule_likeness_vs_predictability_cross"] = {
+    "pearson": pearson(_dr, _pr_cross),
+    "perm_p": C.perm_corr_p(_dr, _pr_cross),
 }
 
 

@@ -18,6 +18,8 @@ Measures:
 - the validation-run noise floor, and whether run-stability predicts correctness
 - chance baselines under three definitions
 - self-advantage by move type, and on determined and one-unvisited cells
+- cross-predictor against cross-predictor on atypical cells, and the default-move ranking
+- the atypical self-advantage recomputed from the alternate self-prediction runs
 - unique information, reasoning dependence, and run-to-run consistency by move type
 - whether departing from a predictor's own generic answer helps or hurts
 
@@ -487,6 +489,57 @@ for kind in ("atypical", "default"):
 RES["self_advantage_by_move_type"] = adv
 
 
+# Cross-predictor against cross-predictor on atypical cells
+# The key above pits a target's own self-prediction against each cross-predictor. This pits
+# the cross-predictors against each other on the identical cells, which the self-versus-other
+# framing never reaches. Pairs run in MODELS order, so the sign of the gap is fixed: it is the
+# first-named predictor's rate minus the second's.
+
+atypical_pairs = {}
+for t in MODELS:
+    cells = _split_cells(t)["atypical"]
+    others = [p for p in MODELS if p != t and (p, t) in C.CROSS]
+    rows = {}
+    for i, a in enumerate(others):
+        for b in others[i + 1:]:
+            pr = [(mz, C.CROSS[(a, t)][(mz, s)], C.CROSS[(b, t)][(mz, s)]) for mz, s in cells]
+            n_a = sum(x for _, x, _ in pr)
+            n_b = sum(y for _, _, y in pr)
+            flip = sign_flip_test(pr)
+            rows[f"{a}|{b}"] = {
+                "acc_a": C.pct(n_a, len(pr)),
+                "acc_b": C.pct(n_b, len(pr)),
+                **boot_gap_ci(pr),
+                "n_discordant": flip["n_discordant"],
+                "p_value_cluster_perm": flip["p_value_cluster_perm"],
+            }
+    atypical_pairs[t] = rows
+RES["atypical_cross_vs_cross"] = atypical_pairs
+
+
+# Default-move predictor ranking
+# Derived from the default-cell accuracies above, with the target's own self-prediction ranked
+# alongside the four cross-predictors. Rank 1 is the lowest accuracy, so the ranking reads as
+# "who is worst at this target's rule-following moves".
+
+default_rank = {}
+for t in MODELS:
+    cells = _split_cells(t)["default"]
+    acc = {t: C.pct(sum(C.SELF[t][k] for k in cells), len(cells))}
+    for p in MODELS:
+        if p != t and (p, t) in C.CROSS:
+            acc[p] = C.pct(sum(C.CROSS[(p, t)][k] for k in cells), len(cells))
+    order = sorted(acc, key=acc.get)
+    default_rank[t] = {
+        "n_cells": len(cells),
+        "accuracy": acc,
+        "rank": {m: order.index(m) + 1 for m in acc},
+        "lowest": order[0],
+        "gap_lowest_to_next": round(acc[order[1]] - acc[order[0]], 1),
+    }
+RES["default_move_predictor_rank"] = default_rank
+
+
 # Determined-cell self-advantage
 # Completes the move-type split: the paired self-vs-best-other gap on determined (non-branch)
 # cells, same methodology as the prior-aligned / idiosyncratic split above.
@@ -682,6 +735,56 @@ for m in MODELS:
         "p_value_label_perm": p,
     }
 RES["consistency_by_move_type"] = consistency_mt
+
+
+# Atypical self-advantage on the alternate self-prediction runs
+# Runs 1 and 2 are otherwise used only for the run-agreement noise floor; here all three runs
+# are scored against the trajectory on the atypical cells that carry more than one run. That
+# subset is a sample of the atypical cells rather than all of them, so its run-0 rate differs
+# from the headline atypical rate, and both are emitted.
+
+validation_runs = {}
+for t in MODELS:
+    cells = {}
+    for mz, s, ri, rec in C.self_records(t, "reasoning"):
+        if rec.get("parsed_position") is None:
+            continue
+        cells.setdefault((mz, s), {})[ri] = tuple(rec["parsed_position"])
+    multi = {k: v for k, v in cells.items() if len(v) >= 2}
+    atypical_cells = _split_cells(t)["atypical"]
+    keys = [k for k in atypical_cells if k in multi]
+    truth = {k: tuple(C.TRUTH[t][k[0]][k[1]]) for k in keys}
+    cross_acc = {
+        p: C.pct(sum(C.CROSS[(p, t)][k] for k in keys), len(keys)) if keys else None
+        for p in MODELS
+        if p != t and (p, t) in C.CROSS
+    }
+    self_acc, gaps = {}, {}
+    for run in (0, 1, 2):
+        scored = [k for k in keys if run in multi[k]]
+        self_acc[run] = {
+            "acc": C.pct(sum(multi[k][run] == truth[k] for k in scored), len(scored))
+            if scored
+            else None,
+            "n": len(scored),
+        }
+        gaps[run] = {}
+        for p in cross_acc:
+            pr = [(k[0], multi[k][run] == truth[k], C.CROSS[(p, t)][k]) for k in scored]
+            flip = sign_flip_test(pr)
+            gaps[run][p] = {
+                **boot_gap_ci(pr),
+                "n_discordant": flip["n_discordant"],
+                "p_value_cluster_perm": flip["p_value_cluster_perm"],
+            }
+    validation_runs[t] = {
+        "n_cells": len(keys),
+        "n_atypical_total": len(atypical_cells),
+        "self_acc_by_run": self_acc,
+        "cross_acc": cross_acc,
+        "gap_by_run": gaps,
+    }
+RES["atypical_validation_runs"] = validation_runs
 
 
 # Departing from a predictor's own generic answer
