@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "traces",
   "produced_by": "analysis/traces.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",

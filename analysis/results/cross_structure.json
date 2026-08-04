@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "cross_structure",
   "produced_by": "analysis/cross_structure.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",

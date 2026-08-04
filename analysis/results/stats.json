@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "stats",
   "produced_by": "analysis/stats.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",

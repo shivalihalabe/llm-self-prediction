@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "prior",
   "produced_by": "analysis/prior.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",

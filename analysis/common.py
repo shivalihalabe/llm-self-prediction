@@ -65,6 +65,31 @@ del _w
 
 # Build the record table
 
+
+# RUN_PREF selects which prediction run supplies the scored position. It exists for the
+# run-substitution check in validate_substitution.py and is 0, the committed behaviour, unless
+# the environment sets it. A cell without a parsed record for the preferred run falls back to
+# run 0, so the scored set is the same size under every setting and the variants stay
+# like-for-like; only about a fifth of cells carry an alternate run at all.
+RUN_PREF = int(os.environ.get("RUN_PREF", "0"))
+
+
+def _preferred_run(payload):
+    """The record for the preferred run, falling back to run 0 when it has no parsed answer."""
+    if RUN_PREF:
+        rec = next(
+            (
+                r
+                for r in payload
+                if r.get("run_idx") == RUN_PREF and r.get("parsed_position") is not None
+            ),
+            None,
+        )
+        if rec is not None:
+            return rec
+    return next((r for r in payload if r.get("run_idx") == 0), None)
+
+
 def _iter_scored(node, target):
     """Yield (maze, step, pred_tuple, correct) for run-0 parsed records under a prediction node."""
     truth = TRUTH[target]
@@ -75,7 +100,7 @@ def _iter_scored(node, target):
             si = int(stp.split("_")[1])
             if si >= len(truth[mz]):
                 continue
-            rec = next((r for r in payload if r.get("run_idx") == 0), None)
+            rec = _preferred_run(payload)
             if not rec or rec.get("parsed_position") is None:
                 continue
             pred = tuple(rec["parsed_position"])
@@ -196,6 +221,7 @@ def metadata(experiment):
     return {
         "experiment": experiment,
         "produced_by": f"analysis/{experiment}.py",
+        "run_pref": RUN_PREF,
         "models": MODELS,
         "n_mazes_total": 100,
         "n_consistent": {m: len(CONSISTENT[m]) for m in MODELS},

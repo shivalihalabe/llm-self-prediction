@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "error_geometry",
   "produced_by": "analysis/error_geometry.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",

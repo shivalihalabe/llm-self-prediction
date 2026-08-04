@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "exploration_strategy",
   "produced_by": "analysis/exploration_strategy.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",

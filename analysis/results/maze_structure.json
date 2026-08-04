@@ -2,6 +2,7 @@
  "metadata": {
   "experiment": "maze_structure",
   "produced_by": "analysis/maze_structure.py",
+  "run_pref": 0,
   "models": [
    "opus",
    "sonnet",
