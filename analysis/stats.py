@@ -392,22 +392,34 @@ RES["per_step_paired_holm"] = per_step_holm
 
 
 # No-reasoning unique information
-# Cells where the no-reasoning self-prediction is correct while all four (reasoning)
-# cross-predictors are wrong. No-reasoning cross-predictions were not collected, so the
-# reasoning cross-predictors are the only available comparator.
+# The five candidates in a cell are the target's own no-reasoning self-prediction and the four
+# (reasoning) cross-predictions; a candidate scores when it is correct and the other four are
+# wrong. No-reasoning cross-predictions were not collected, so the reasoning cross-predictors
+# are the only available comparator. only and pct report the target's own count, unique_correct
+# all five, keyed as in unique_information so the no-reasoning count reads against what each
+# cross-predictor manages on the same cells. Cells with two correct answers or none have no
+# unique winner, so the five counts don't sum to n.
 
 nr_unique = {}
 for t in MODELS:
-    n = only = 0
+    n = 0
+    counts = {t: 0, **{p: 0 for p in MODELS if p != t}}
     for (mz, step), okv in C.SELF_NR[t].items():
-        others = [C.CROSS[(p, t)].get((mz, step)) for p in MODELS if p != t]
-        others = [x for x in others if x is not None]
-        if len(others) < 4:
+        cand = {p: C.CROSS[(p, t)].get((mz, step)) for p in MODELS if p != t}
+        cand = {p: x for p, x in cand.items() if x is not None}
+        if len(cand) < 4:
             continue
         n += 1
-        if okv and not any(others):
-            only += 1
-    nr_unique[t] = {"only": only, "n": n, "pct": C.pct(only, n)}
+        cand[t] = okv
+        for nm, ok in cand.items():
+            if ok and not any(v for o, v in cand.items() if o != nm):
+                counts[nm] += 1
+    nr_unique[t] = {
+        "only": counts[t],
+        "n": n,
+        "pct": C.pct(counts[t], n),
+        "unique_correct": counts,
+    }
 RES["nr_unique_info"] = nr_unique
 
 

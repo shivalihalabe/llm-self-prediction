@@ -749,6 +749,252 @@
    "chance_invariant_pct": 7.2
   }
  },
+ "predictor_invariance_by_run": {
+  "by_run": {
+   "0": {
+    "all_steps": {
+     "opus": {
+      "n_cells": 792,
+      "n_invariant": 481,
+      "invariant_pct": 60.7
+     },
+     "sonnet": {
+      "n_cells": 792,
+      "n_invariant": 698,
+      "invariant_pct": 88.1
+     },
+     "gpt": {
+      "n_cells": 792,
+      "n_invariant": 771,
+      "invariant_pct": 97.3
+     },
+     "glm": {
+      "n_cells": 792,
+      "n_invariant": 595,
+      "invariant_pct": 75.1
+     },
+     "qwen": {
+      "n_cells": 792,
+      "n_invariant": 668,
+      "invariant_pct": 84.3
+     },
+     "pooled": {
+      "n_cells": 3960,
+      "n_invariant": 3213,
+      "invariant_pct": 81.1
+     },
+     "chance_invariant_pct": 12.4
+    },
+    "decision_points": {
+     "opus": {
+      "n_cells": 394,
+      "n_invariant": 245,
+      "invariant_pct": 62.2
+     },
+     "sonnet": {
+      "n_cells": 394,
+      "n_invariant": 343,
+      "invariant_pct": 87.1
+     },
+     "gpt": {
+      "n_cells": 394,
+      "n_invariant": 383,
+      "invariant_pct": 97.2
+     },
+     "glm": {
+      "n_cells": 394,
+      "n_invariant": 289,
+      "invariant_pct": 73.4
+     },
+     "qwen": {
+      "n_cells": 394,
+      "n_invariant": 328,
+      "invariant_pct": 83.2
+     },
+     "pooled": {
+      "n_cells": 1970,
+      "n_invariant": 1588,
+      "invariant_pct": 80.6
+     },
+     "chance_invariant_pct": 7.2
+    },
+    "decision_point_movement_pct": {
+     "opus": 1.5,
+     "sonnet": -1.0,
+     "gpt": -0.1,
+     "glm": -1.7,
+     "qwen": -1.1
+    },
+    "largest_movement": {
+     "predictor": "glm",
+     "abs_pct": 1.7
+    }
+   },
+   "1": {
+    "all_steps": {
+     "opus": {
+      "n_cells": 792,
+      "n_invariant": 486,
+      "invariant_pct": 61.4
+     },
+     "sonnet": {
+      "n_cells": 792,
+      "n_invariant": 690,
+      "invariant_pct": 87.1
+     },
+     "gpt": {
+      "n_cells": 792,
+      "n_invariant": 770,
+      "invariant_pct": 97.2
+     },
+     "glm": {
+      "n_cells": 792,
+      "n_invariant": 604,
+      "invariant_pct": 76.3
+     },
+     "qwen": {
+      "n_cells": 792,
+      "n_invariant": 657,
+      "invariant_pct": 83.0
+     },
+     "pooled": {
+      "n_cells": 3960,
+      "n_invariant": 3207,
+      "invariant_pct": 81.0
+     },
+     "chance_invariant_pct": 12.4
+    },
+    "decision_points": {
+     "opus": {
+      "n_cells": 394,
+      "n_invariant": 243,
+      "invariant_pct": 61.7
+     },
+     "sonnet": {
+      "n_cells": 394,
+      "n_invariant": 340,
+      "invariant_pct": 86.3
+     },
+     "gpt": {
+      "n_cells": 394,
+      "n_invariant": 383,
+      "invariant_pct": 97.2
+     },
+     "glm": {
+      "n_cells": 394,
+      "n_invariant": 293,
+      "invariant_pct": 74.4
+     },
+     "qwen": {
+      "n_cells": 394,
+      "n_invariant": 325,
+      "invariant_pct": 82.5
+     },
+     "pooled": {
+      "n_cells": 1970,
+      "n_invariant": 1584,
+      "invariant_pct": 80.4
+     },
+     "chance_invariant_pct": 7.2
+    },
+    "decision_point_movement_pct": {
+     "opus": 0.3,
+     "sonnet": -0.8,
+     "gpt": 0.0,
+     "glm": -1.9,
+     "qwen": -0.5
+    },
+    "largest_movement": {
+     "predictor": "glm",
+     "abs_pct": 1.9
+    }
+   },
+   "2": {
+    "all_steps": {
+     "opus": {
+      "n_cells": 792,
+      "n_invariant": 496,
+      "invariant_pct": 62.6
+     },
+     "sonnet": {
+      "n_cells": 792,
+      "n_invariant": 691,
+      "invariant_pct": 87.2
+     },
+     "gpt": {
+      "n_cells": 792,
+      "n_invariant": 769,
+      "invariant_pct": 97.1
+     },
+     "glm": {
+      "n_cells": 792,
+      "n_invariant": 596,
+      "invariant_pct": 75.3
+     },
+     "qwen": {
+      "n_cells": 792,
+      "n_invariant": 662,
+      "invariant_pct": 83.6
+     },
+     "pooled": {
+      "n_cells": 3960,
+      "n_invariant": 3214,
+      "invariant_pct": 81.2
+     },
+     "chance_invariant_pct": 12.4
+    },
+    "decision_points": {
+     "opus": {
+      "n_cells": 394,
+      "n_invariant": 246,
+      "invariant_pct": 62.4
+     },
+     "sonnet": {
+      "n_cells": 394,
+      "n_invariant": 341,
+      "invariant_pct": 86.5
+     },
+     "gpt": {
+      "n_cells": 394,
+      "n_invariant": 381,
+      "invariant_pct": 96.7
+     },
+     "glm": {
+      "n_cells": 394,
+      "n_invariant": 287,
+      "invariant_pct": 72.8
+     },
+     "qwen": {
+      "n_cells": 394,
+      "n_invariant": 326,
+      "invariant_pct": 82.7
+     },
+     "pooled": {
+      "n_cells": 1970,
+      "n_invariant": 1581,
+      "invariant_pct": 80.3
+     },
+     "chance_invariant_pct": 7.2
+    },
+    "decision_point_movement_pct": {
+     "opus": -0.2,
+     "sonnet": -0.7,
+     "gpt": -0.4,
+     "glm": -2.5,
+     "qwen": -0.9
+    },
+    "largest_movement": {
+     "predictor": "glm",
+     "abs_pct": 2.5
+    }
+   }
+  },
+  "max_decision_point_movement": {
+   "run": 2,
+   "predictor": "glm",
+   "abs_pct": 2.5
+  }
+ },
  "self_vs_own_generic": {
   "opus": {
    "n_cells": 712,

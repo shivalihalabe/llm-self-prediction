@@ -20,7 +20,8 @@ Measures:
 - asymmetry: the A->B minus B->A gap against target predictability
 - target tracking: cross-accuracy against the target's own self-accuracy
 - predictor invariance: whether one predictor's answer changes with the target named,
-  against the rate independent answers would coincide at
+  against the rate independent answers would coincide at, on each of the three prediction
+  sets the alternate runs allow
 - the generic answer: whether a predictor's answer about itself is just its modal
   answer about the others, and whether departing from it helps
 - held-out agreement: whether an answer about itself sits closer to the rest of its cell
@@ -539,24 +540,92 @@ def _invariance(grouped):
     return out
 
 
+def _invariance_both(rows):
+    """Invariance over all steps and over decision points, for one set of prediction rows."""
+    # branch status belongs to the target's own route, so rows are filtered before they are
+    # grouped; filtering afterwards would keep rows whose target never faced a choice there
+    branch_rows = rows[
+        [C.is_branch(r.target, r.maze, r.step) for r in rows.itertuples(index=False)]
+    ]
+    out = {
+        "all_steps": _invariance(_predictor_cells(rows)),
+        "decision_points": _invariance(_predictor_cells(branch_rows)),
+    }
+    # a cell's row count is the number of models consistent on that maze, which doesn't depend
+    # on the predictor, so every predictor must see the same number of cells; a mismatch means
+    # the scoping is wrong
+    for variant in out.values():
+        sizes = {v["n_cells"] for k, v in variant.items() if k in MODELS}
+        assert len(sizes) == 1, f"predictors see different cell counts: {sizes}"
+    return out
+
+
 scored_rows = C.RECORDS[C.RECORDS.kind.isin(("self", "cross"))]
-# branch status belongs to the target's own route, so rows are filtered before they are
-# grouped; filtering afterwards would keep rows whose target never faced a choice there
-branch_rows = scored_rows[
-    [C.is_branch(r.target, r.maze, r.step) for r in scored_rows.itertuples(index=False)]
-]
-all_cells = _predictor_cells(scored_rows)
-invariance = {
-    "all_steps": _invariance(all_cells),
-    "decision_points": _invariance(_predictor_cells(branch_rows)),
+all_cells = _predictor_cells(scored_rows)  # the held-out block below reads these too
+RES["predictor_invariance"] = _invariance_both(scored_rows)
+
+
+# Predictor invariance under the alternate prediction sets
+# The measure above, recomputed on three full prediction sets: run 0 everywhere, then run 0 with
+# every cell that carries a run-1 record replaced by it, and the same for run 2. Alternate runs
+# were collected for the validation subsample only, covering both self and cross predictions, so
+# scoring run 1 on its own would rest on a few dozen cells per predictor; substituting instead
+# leaves all of them, and the emitted cell counts show that the three sets cover the same ones.
+# The movement quoted alongside the rates is the change from all steps to decision points,
+# taken from the rounded rates each set emits.
+
+def _cell_runs():
+    """{(predictor, target, maze, step): {run_idx: position}} over the scored prediction cells."""
+    streams = [(t, t, C.self_records(t)) for t in MODELS]
+    streams += [(p, t, C.cross_records(p, t)) for p in MODELS for t in MODELS if p != t]
+    out = {}
+    for predictor, target, stream in streams:
+        truth = C.TRUTH[target]
+        for mz, step, run, rec in stream:
+            if mz not in truth or step >= len(truth[mz]) or rec.get("parsed_position") is None:
+                continue
+            out.setdefault((predictor, target, mz, step), {})[run] = tuple(rec["parsed_position"])
+    return out
+
+
+def _rows_for_run(cells, pref):
+    """Prediction rows taking each cell's run-`pref` position, falling back to its run-0 one.
+
+    The fallback is the rule common.py applies under RUN_PREF, and it is what keeps the three
+    sets over the same cells rather than over whatever the validation subsample happens to hold.
+    """
+    rows = []
+    for (predictor, target, mz, step), runs in sorted(cells.items()):
+        pos = runs.get(pref, runs.get(0))
+        if pos is not None:
+            rows.append((predictor, target, mz, step, pos))
+    return pd.DataFrame(rows, columns=["predictor", "target", "maze", "step", "pred"])
+
+
+cell_runs = _cell_runs()
+invariance_by_run = {}
+for pref in (0, 1, 2):
+    block = _invariance_both(_rows_for_run(cell_runs, pref))
+    moved = {
+        p: round(
+            block["decision_points"][p]["invariant_pct"] - block["all_steps"][p]["invariant_pct"], 1
+        )
+        for p in MODELS
+    }
+    widest = max(moved, key=lambda p: abs(moved[p]))
+    invariance_by_run[pref] = {
+        **block,
+        "decision_point_movement_pct": moved,
+        "largest_movement": {"predictor": widest, "abs_pct": abs(moved[widest])},
+    }
+worst = max(invariance_by_run, key=lambda r: invariance_by_run[r]["largest_movement"]["abs_pct"])
+RES["predictor_invariance_by_run"] = {
+    "by_run": invariance_by_run,
+    "max_decision_point_movement": {
+        "run": worst,
+        **invariance_by_run[worst]["largest_movement"],
+    },
 }
-# a cell's row count is the number of models consistent on that maze, which doesn't depend on
-# the predictor, so every predictor must see the same number of cells; a mismatch means the
-# scoping is wrong
-for variant in invariance.values():
-    sizes = {v["n_cells"] for k, v in variant.items() if k in MODELS}
-    assert len(sizes) == 1, f"predictors see different cell counts: {sizes}"
-RES["predictor_invariance"] = invariance
 
 
 # The generic answer, and what departing from it costs
