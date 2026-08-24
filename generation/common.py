@@ -5,11 +5,7 @@ Shared maze and prompt helpers for the generation scripts
 
 Defines the maze-topology description, the prediction user message and the answer parser
 once, so every generation script builds byte-identical prompts and parses answers the same
-way.
-
-Notes:
-- these helpers are part of the experimental protocol, not conveniences
-- test_helpers.py pins their outputs against fixtures captured from the collected data
+way. They are part of the experimental protocol, not conveniences.
 """
 
 import json

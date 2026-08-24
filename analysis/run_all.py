@@ -33,7 +33,6 @@ FINAL = "summary.py"
 
 
 def main():
-    # sanity-check the foundation first
     """Run each analysis script in order, stopping at the first failure."""
     print("=" * 70 + "\ncommon.py (foundation)\n" + "=" * 70)
     if subprocess.run([sys.executable, os.path.join(HERE, "common.py")]).returncode != 0:
